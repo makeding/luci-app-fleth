@@ -1,0 +1,5 @@
+#!/bin/sh
+
+chmod +x /usr/sbin/fleth /etc/hotplug.d/iface/25-fleth-ipprefix
+
+exit 0

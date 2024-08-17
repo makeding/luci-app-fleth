@@ -1,0 +1,13 @@
+{
+	"admin/network/fleth": {
+		"title": "Flet'h Configuration",
+		"order": 90,
+		"action": {
+			"type": "view",
+			"path": "fleth"
+		},
+		"depends": {
+			"acl": [ "luci-app-fleth" ]
+		}
+	}
+}

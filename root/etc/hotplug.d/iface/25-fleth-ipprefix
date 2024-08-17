@@ -1,0 +1,41 @@
+#!/bin/ash
+# author: huggy<fleth@huggy.moe>
+
+h_ENABLED=$(uci get fleth.global.enabled)
+h_IP6PREFIX_ENABLED=$(uci get fleth.global.ip6prefix_enabled)
+h_UPLINK_INTERFACE=$(uci get fleth.global.interface6)
+
+if [ -z "$h_ENABLED" ] || [ -z "$h_IP6PREFIX_ENABLED" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
+    echo "Failed to retrieve one or more configuration values"
+    exit 1
+fi
+
+TRIES=0
+MAX_TRIES=30
+
+[ "$h_IP6PREFIX_ENABLED" -eq 1 ] && (([ "$ACTION" = "ifup" ] && [ "$INTERFACE" = "$h_UPLINK_INTERFACE" ]) || [ "$1" = "manual" ]) && {
+    current_prefix=$(uci get network.${h_UPLINK_INTERFACE}.ip6prefix) > /dev/null
+    while [ $TRIES -lt $MAX_TRIES ]; do
+        ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | grep '"address"' | awk -F '"' '{print $4}' | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
+        if [ -n "$ipv6_address" ]; then
+            prefix=$(echo $ipv6_address | cut -d'/' -f1)
+            pd_prefix=$(echo $prefix | sed 's/:[^:]*:[^:]*$//')/64
+            if [ "$pd_prefix" != "$current_prefix" ]; then
+                logger -t fleth "Got new PD with ${h_UPLINK_INTERFACE}=${pd_prefix}"
+                uci set network.${h_UPLINK_INTERFACE}.ip6prefix=${pd_prefix}
+                uci commit
+                if [ "$h_ENABLED" -eq 1 ]; then
+                    sleep 10
+                    /usr/sbin/fleth auto
+                fi
+            fi
+            break
+        fi
+        sleep 1
+        TRIES=$((TRIES + 1))
+    done
+}
+
+if [ $TRIES -ge $MAX_TRIES ]; then
+    logger -t fleth "Failed to obtain a valid IPv6 address after $MAX_TRIES attempts."
+fi

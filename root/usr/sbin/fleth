@@ -1,0 +1,143 @@
+#!/bin/sh
+# author: huggy<fleth@huggy.moe>
+
+DNS_E=2404:1a8:7f01:a::3
+DNS_W=2001:a7ff:5f01::a
+
+h_ENABLED=$(uci get fleth.global.enabled)
+h_TYPE=$(uci get fleth.global.type)
+h_TUNNEL_INTERFACE=$(uci get fleth.global.interface)
+h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu)
+h_UPLINK_INTERFACE=$(uci get fleth.global.interface6)
+
+if [ -z "$h_ENABLED" ] || [ -z "$h_TYPE" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
+    echo "Failed to retrieve one or more configuration values"
+    exit 1
+fi
+
+# real type
+r_TYPE=""
+r_AFTR=""
+r_AFTR_DOMAIN=""
+e_AREA="UNKNOWN"
+
+
+get_area(){
+    # east or west
+    wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        e_AREA="EAST"
+        DNS=$DNS_E
+    # I dont have west test url
+    else
+        e_AREA="WEST"
+        DNS=$DNS_W
+    fi
+    # else
+    #     e_AREA="UNKNOWN"
+    # fi
+    echo $e_AREA
+}
+
+get_AAAA_record() {
+    local domain=$1
+    result=$(nslookup -type=AAAA $domain $DNS | grep "Address:")
+    if [ -n "$result" ]; then
+        # get line=2
+        echo "$result" | awk 'NR==2' | awk '{print $2}'
+    else
+        echo ""
+    fi
+}
+
+check_ipv6_reachability() {
+    local ip=$1
+    if ping6 -c 1 "$ip" > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
+get_dslite_provider(){
+    # check type with DS-LITE
+    # 1. transix can't be resolved outside
+    t_TRANSIX=$(get_AAAA_record "gw.transix.jp")
+    if [ -n "$t_TRANSIX" ]; then
+        r_TYPE="ds-lite"
+        r_AFTR=$t_TRANSIX
+        r_AFTR_DOMAIN="gw.transix.jp"
+    else
+        # 2. xpass
+        t_XPASS=$(get_AAAA_record "dgw.xpass.jp")
+        check_ipv6_reachability $t_XPASS
+        if [ $? -eq 0 ]; then
+            r_TYPE="ds-lite"
+            r_AFTR=$t_XPASS
+            r_AFTR_DOMAIN="dgw.xpass.jp"
+        else
+            t_ASAHI=$(get_AAAA_record "dslite.v6connect.net")
+            if [ -n "$t_ASAHI" ]; then
+                r_TYPE="ds-lite"
+                r_AFTR=$t_ASAHI
+                r_AFTR_DOMAIN="dslite.v6connect.net"
+            fi
+        fi
+    fi
+    echo $r_AFTR
+}
+
+set_interface() {
+    local current_peeraddr
+    local current_tunlink
+    local current_proto
+    local current_mtu
+
+    current_proto=$(uci get network.${h_TUNNEL_INTERFACE}.proto)
+    current_peeraddr=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddr)
+    current_tunlink=$(uci get network.${h_UPLINK_INTERFACE}.tunlink)
+    current_mtu=$(uci get network.${h_TUNNEL_INTERFACE}.mtu)
+
+    if [ "$r_TYPE" = 'ds-lite' ]; then
+        if [ "$current_peeraddr" != "$r_AFTR" ] ||
+           [ "$current_tunlink" != "$h_TUNNEL_INTERFACE" ] ||
+           [ "$current_proto" != 'dslite' ] ||
+           [ "$current_mtu" != "$h_TUNNEL_INTERFACE_MTU" ]; then
+            uci batch <<EOF
+set network.${h_TUNNEL_INTERFACE}=interface
+set network.${h_TUNNEL_INTERFACE}.proto='dslite'
+set network.${h_TUNNEL_INTERFACE}.peeraddr='${r_AFTR}'
+set network.${h_TUNNEL_INTERFACE}.tunlink='${h_UPLINK_INTERFACE}'
+set network.${h_TUNNEL_INTERFACE}.mtu='${h_TUNNEL_INTERFACE_MTU}'
+set network.${h_TUNNEL_INTERFACE}.encaplimit='ignore'
+EOF
+            uci delete network.${h_TUNNEL_INTERFACE}.device > /dev/null
+            uci commit
+            ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
+            logger -t fleth "New configuratin commited ${h_TUNNEL_INTERFACE}=${r_AFTR}"
+        fi
+    fi
+}
+
+if [ "$1" = "auto" ]; then
+    if [ "$h_ENABLED" == "1" ]; then
+        get_area
+        get_dslite_provider
+        # if [ -z "$r_AFTR" ]; then
+        #     # get_mape_provider
+        # fi
+        set_interface
+    fi
+elif [ "$1" = "status" ]; then
+    get_area
+    get_dslite_provider > /dev/null
+    echo $r_AFTR_DOMAIN
+elif [ "$1" = "get_area" ]; then
+    get_area > /dev/null
+    echo $e_AREA
+elif [ "$1" = "get_dslite_provider" ]; then
+    get_area > /dev/null
+    get_dslite_provider > /dev/null
+    echo $r_AFTR_DOMAIN
+fi

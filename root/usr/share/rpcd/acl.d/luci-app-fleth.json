@@ -1,0 +1,15 @@
+{
+	"luci-app-fleth": {
+		"description": "Grant access to fleth executables",
+		"read": {
+			"uci": [ "fleth", "network"]
+		},
+		"write": {
+			"file": {
+				"/usr/sbin/fleth": [ "exec" ],
+				"/etc/hotplug.d/iface/25-fleth-ipprefix": [ "exec" ]
+			},
+            "uci": [ "fleth", "network" ]
+		}
+	}
+}
