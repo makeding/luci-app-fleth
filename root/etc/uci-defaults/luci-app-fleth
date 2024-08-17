@@ -2,4 +2,17 @@
 
 chmod +x /usr/sbin/fleth /etc/hotplug.d/iface/25-fleth-ipprefix
 
+if [ ! -f /etc/config/fleth ]; then
+    cat <<EOF > /etc/config/fleth
+config fleth 'global'
+	option enabled '0'
+	option type	'auto'
+	option interface 'wan'
+	option interface6 'wan6'
+	option mtu '1460'
+	option ip6prefix_enabled '0'
+	option ip6prefix ''
+EOF
+fi
+
 exit 0

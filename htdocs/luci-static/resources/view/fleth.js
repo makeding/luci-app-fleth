@@ -81,14 +81,13 @@ return view.extend({
 		// o.inputtitle = _('Link Start');
 		// o.inputstyle = 'apply';
 		// o.onclick = L.bind(this.handleLinkStart, this, m);
-
         return m.render();
         
         
 	},
     handleSaveApply: async function(ev) {
         // await this.super('handleSaveApply', [ev])
-        await this.handleSave(ev);
+        await this.__base__.handleSaveApply(ev);
         // console.log('triggered save & apply button');
         try {
             await fs.exec("/etc/hotplug.d/iface/25-fleth-ipprefix",['manual']);
@@ -100,8 +99,5 @@ return view.extend({
         } catch (error) {
             console.warn(error);
         }
-        setTimeout(() => {
-            L.ui.changes.apply(true);
-        }, 3000);
     }
 });

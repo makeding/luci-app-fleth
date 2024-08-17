@@ -33,7 +33,7 @@ MAP-E:
 ![configuration-1](./screenshots/luci-configuration-1.png)
 
 # コンパイル
-ビルドSDKを用意してください。
+ビルドSDKを自分で用意してください。
 
 ```
 git clone https://github.com/makeding/luci-app-fleth package/huggy/luci-app-fleth

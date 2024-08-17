@@ -18,8 +18,7 @@ MAX_TRIES=30
     while [ $TRIES -lt $MAX_TRIES ]; do
         ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | grep '"address"' | awk -F '"' '{print $4}' | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
         if [ -n "$ipv6_address" ]; then
-            prefix=$(echo $ipv6_address | cut -d'/' -f1)
-            pd_prefix=$(echo $prefix | sed 's/:[^:]*:[^:]*$//')/64
+            pd_prefix=$(echo $ipv6_address | cut -d ':' -f 1-4)::/64
             if [ "$pd_prefix" != "$current_prefix" ]; then
                 logger -t fleth "Got new PD with ${h_UPLINK_INTERFACE}=${pd_prefix}"
                 uci set network.${h_UPLINK_INTERFACE}.ip6prefix=${pd_prefix}
