@@ -15,7 +15,7 @@ if [ -z "$h_ENABLED" ] || [ -z "$h_TYPE" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ 
     exit 1
 fi
 
-# real type
+# real xxxx
 r_TYPE=""
 r_AFTR=""
 r_AFTR_DOMAIN=""
@@ -28,14 +28,13 @@ get_area(){
     if [ $? -eq 0 ]; then
         e_AREA="EAST"
         DNS=$DNS_E
-    # I dont have west test url
     else
-        e_AREA="WEST"
-        DNS=$DNS_W
+        wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            e_AREA="WEST"
+            DNS=$DNS_W
+        fi
     fi
-    # else
-    #     e_AREA="UNKNOWN"
-    # fi
     echo $e_AREA
 }
 
@@ -69,7 +68,8 @@ get_dslite_provider(){
         r_AFTR=$t_TRANSIX
         r_AFTR_DOMAIN="gw.transix.jp"
     else
-        # 2. xpass
+        # 2. xpass can be resolved outside but can't ping
+        # http://checkv6.xpass.jp/check_address.php
         t_XPASS=$(get_AAAA_record "dgw.xpass.jp")
         check_ipv6_reachability $t_XPASS
         if [ $? -eq 0 ]; then
@@ -77,6 +77,8 @@ get_dslite_provider(){
             r_AFTR=$t_XPASS
             r_AFTR_DOMAIN="dgw.xpass.jp"
         else
+            # 3. v6connect can't be resolved outside
+            # curl http://route6.asahi-net.jp/v1/address
             t_ASAHI=$(get_AAAA_record "dslite.v6connect.net")
             if [ -n "$t_ASAHI" ]; then
                 r_TYPE="ds-lite"
