@@ -17,19 +17,6 @@ return view.extend({
             mape_status: ((await fs.exec("/usr/sbin/fleth",['mape_status'])).stdout || []).split('\n'),
         }
     },
-    // handleLinkStart:async function(m , ev) {
-    //     try {
-    //         await fs.exec("/etc/hotplug.d/iface/25-fleth-ipprefix",['manual']);
-    //     } catch (error) {
-    //         console.warn(error);
-    //     }
-    //     try {
-    //         await fs.exec("/usr/sbin/fleth",['auto']);
-    //     } catch (error) {
-    //         console.warn(error);
-    //     }
-    //     L.bind(m.render, m);
-	// },
 	render: async function (data) {
 		let m, s, o;
 
@@ -127,12 +114,12 @@ return view.extend({
         await this.__base__.handleSaveApply(ev);
         // console.log('triggered save & apply button');
         try {
-            await fs.exec("/etc/hotplug.d/iface/25-fleth-ipprefix",['manual']);
+            await fs.exec("/usr/sbin/fleth", ['ip6prefix']);
         } catch (error) {
             console.warn(error);
         }
         try {
-            await fs.exec("/usr/sbin/fleth",['auto']);
+            await fs.exec("/usr/sbin/fleth", ['auto']);
         } catch (error) {
             console.warn(error);
         }

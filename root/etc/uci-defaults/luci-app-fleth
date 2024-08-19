@@ -1,6 +1,6 @@
 #!/bin/sh
 
-chmod +x /usr/sbin/fleth /etc/hotplug.d/iface/25-fleth-ipprefix
+chmod +x /usr/sbin/fleth
 
 if [ ! -f /etc/config/fleth ]; then
     cat <<EOF > /etc/config/fleth

@@ -9,6 +9,7 @@ h_TYPE=$(uci get fleth.global.type)
 h_TUNNEL_INTERFACE=$(uci get fleth.global.interface)
 h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu)
 h_UPLINK_INTERFACE=$(uci get fleth.global.interface6)
+h_IP6PREFIX_ENABLED=$(uci get fleth.global.ip6prefix_enabled)
 
 if [ -z "$h_ENABLED" ] || [ -z "$h_TYPE" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
     echo "Failed to retrieve one or more configuration values"
@@ -209,6 +210,7 @@ EOF
 }
 
 if [ "$1" = "auto" ]; then
+    $0 ip6prefix &
     if [ "$h_ENABLED" == "1" ]; then
         get_area
         get_mape_provider
@@ -231,4 +233,29 @@ elif [ "$1" = "get_dslite_provider" ]; then
     get_area > /dev/null
     get_dslite_provider > /dev/null
     echo $r_AFTR_DOMAIN
+elif [ "$h_IP6PREFIX_ENABLED" -eq 1 ] && [ "$1" = "ip6prefix" ]; then
+    TRIES=0
+    MAX_TRIES=30
+    current_prefix=$(uci get network.${h_UPLINK_INTERFACE}.ip6prefix) > /dev/null
+    while [ $TRIES -lt $MAX_TRIES ]; do
+        ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | grep '"address"' | awk -F '"' '{print $4}' | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
+        if [ -n "$ipv6_address" ]; then
+            pd_prefix=$(echo $ipv6_address | cut -d ':' -f 1-4)::/64
+            if [ "$pd_prefix" != "$current_prefix" ]; then
+                logger -t fleth "Got new PD with ${h_UPLINK_INTERFACE}=${pd_prefix}"
+                uci set network.${h_UPLINK_INTERFACE}.ip6prefix=${pd_prefix}
+                uci commit
+                if [ "$h_ENABLED" -eq 1 ] && [ "$ACTION" = "ifup" ]; then
+                    sleep 10
+                    /usr/sbin/fleth auto
+                fi
+            fi
+            break
+        fi
+        sleep 1
+        TRIES=$((TRIES + 1))
+    done
+    if [ $TRIES -ge $MAX_TRIES ]; then
+        logger -t fleth "Failed to obtain a valid IPv6 address after $MAX_TRIES attempts."
+    fi
 fi
