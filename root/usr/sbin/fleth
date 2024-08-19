@@ -17,19 +17,31 @@ fi
 
 # real xxxx
 r_TYPE=""
+# DS-Lite
 r_AFTR=""
-r_AFTR_DOMAIN=""
+r_AFTR_DOMAIN="UNKNOWN"
+# map-e
+r_PEERADDR=""
+r_IPADDR=""
+r_IP4PREFIXLEN=""
+r_IP6PREFIX=""
+r_IP6PREFIXLEN=""
+r_EALEN=""
+r_PSIDLEN=""
+r_OFFSET=""
+
+
 e_AREA="UNKNOWN"
 
 
 get_area(){
     # east or west
-    wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O/dev/null > /dev/null 2>&1
+    wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O/tmp/null > /dev/null 2>&1
     if [ $? -eq 0 ]; then
         e_AREA="EAST"
         DNS=$DNS_E
     else
-        wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" -O/dev/null > /dev/null 2>&1
+        wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" -O/tmp/null > /dev/null 2>&1
         if [ $? -eq 0 ]; then
             e_AREA="WEST"
             DNS=$DNS_W
@@ -55,6 +67,39 @@ check_ipv6_reachability() {
         return 0
     else
         return 1
+    fi
+}
+
+get_uplink_interface_ipv6() {
+    ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | grep '"address"' | awk -F '"' '{print $4}' | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
+    echo $ipv6_address
+}
+
+# https://ipv4.web.fc2.com/map-e.html
+get_mape_provider() {
+    # I can't rewritten calc logic with shell, asking lua for help
+    t_DATA=$(lua /usr/sbin/fleth-map-e.lua calc "$ipv6_address")
+    # kanashii code kana
+    # yo ku wa ka ra na i
+    printf "%s" "$t_DATA"
+    if [ "$r_TYPE" != "UNKNOWN" ]; then
+        t_i=0
+        while IFS= read -r line; do
+            t_i=$((t_i + 1))
+            case "$t_i" in
+                3) r_PEERADDR=$line ;;
+                4) r_IPADDR=$line ;;
+                5) r_IP4PREFIXLEN=$line ;;
+                6) r_IP6PREFIX=$line ;;
+                7) r_IP6PREFIXLEN=$line ;;
+                8) r_EALEN=$line ;;
+                9) r_PSIDLEN=$line ;;
+                10) r_OFFSET=$line ;;
+            esac
+        done << EOF
+$t_DATA
+EOF
+        r_TYPE="map-e"
     fi
 }
 
@@ -91,17 +136,16 @@ get_dslite_provider(){
 }
 
 set_interface() {
-    local current_peeraddr
-    local current_tunlink
-    local current_proto
-    local current_mtu
-
     current_proto=$(uci get network.${h_TUNNEL_INTERFACE}.proto)
     current_peeraddr=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddr)
     current_tunlink=$(uci get network.${h_UPLINK_INTERFACE}.tunlink)
     current_mtu=$(uci get network.${h_TUNNEL_INTERFACE}.mtu)
 
     if [ "$r_TYPE" = 'ds-lite' ]; then
+        if [ -z "$r_AFTR" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
+            echo "Failed to retrieve one or more configuration values"
+            exit 1
+        fi
         if [ "$current_peeraddr" != "$r_AFTR" ] ||
            [ "$current_tunlink" != "$h_TUNNEL_INTERFACE" ] ||
            [ "$current_proto" != 'dslite' ] ||
@@ -117,7 +161,49 @@ EOF
             uci delete network.${h_TUNNEL_INTERFACE}.device > /dev/null
             uci commit
             ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
-            logger -t fleth "New configuratin commited ${h_TUNNEL_INTERFACE}=${r_AFTR}"
+            logger -t fleth "New ds-lite configuratin committed ${h_TUNNEL_INTERFACE}=${r_AFTR}"
+        fi
+    elif [ "$r_TYPE" = 'map-e' ]; then
+        current_ipaddr=$(uci get network.${h_TUNNEL_INTERFACE}.ipaddr)
+        current_ip4prefixlen=$(uci get network.${h_TUNNEL_INTERFACE}.ip4prefixlen)
+        current_ip6prefix=$(uci get network.${h_TUNNEL_INTERFACE}.ip6prefix)
+        current_ip6prefixlen=$(uci get network.${h_TUNNEL_INTERFACE}.ip6prefixlen)
+        current_ealen=$(uci get network.${h_TUNNEL_INTERFACE}.ealen)
+        current_psidlen=$(uci get network.${h_TUNNEL_INTERFACE}.psidlen)
+        current_offset=$(uci get network.${h_TUNNEL_INTERFACE}.offset)
+        if [ "$current_peeraddr" != "$r_PEERADDR" ] ||
+            [ "$current_tunlink" != "$h_TUNNEL_INTERFACE" ] ||
+            [ "$current_proto" != 'map' ] ||
+            [ "$current_mtu" != "$h_TUNNEL_INTERFACE_MTU" ] ||
+            [ "$current_ipaddr" != "$r_IPADDR" ] ||
+            [ "$current_ip4prefixlen" != "$r_IP4PREFIXLEN" ] ||
+            [ "$current_ip6prefix" != "$r_IP6PREFIX" ] ||
+            [ "$current_ip6prefixlen" != "$r_IP6PREFIXLEN" ] ||
+            [ "$current_ealen" != "$r_EALEN" ] ||
+            [ "$current_psidlen" != "$r_PSIDLEN" ] ||
+            [ "$current_offset" != "$r_OFFSET" ]; then
+            uci batch <<EOF
+set network.${h_TUNNEL_INTERFACE}=interface
+set network.${h_TUNNEL_INTERFACE}.proto='map'
+set network.${h_TUNNEL_INTERFACE}.maptype='map-e'
+set network.${h_TUNNEL_INTERFACE}.peeraddr='${r_PEERADDR}'
+set network.${h_TUNNEL_INTERFACE}.ipaddr='${r_IPADDR}'
+set network.${h_TUNNEL_INTERFACE}.ip4prefixlen='${r_IP4PREFIXLEN}'
+set network.${h_TUNNEL_INTERFACE}.ip6prefix='${r_IP6PREFIX}'
+set network.${h_TUNNEL_INTERFACE}.ip6prefixlen='${r_IP6PREFIXLEN}'
+set network.${h_TUNNEL_INTERFACE}.ealen='${r_EALEN}'
+set network.${h_TUNNEL_INTERFACE}.psidlen='${r_PSIDLEN}'
+set network.${h_TUNNEL_INTERFACE}.offset='${r_OFFSET}'
+
+set network.${h_TUNNEL_INTERFACE}.tunlink='${h_UPLINK_INTERFACE}'
+set network.${h_TUNNEL_INTERFACE}.mtu='${h_TUNNEL_INTERFACE_MTU}'
+set network.${h_TUNNEL_INTERFACE}.legacymap='1'
+set network.${h_TUNNEL_INTERFACE}.encaplimit='ignore'
+EOF
+            uci delete network.${h_TUNNEL_INTERFACE}.device > /dev/null
+            uci commit
+            ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
+            logger -t fleth "New map-e configuratin committed ${h_TUNNEL_INTERFACE}=${r_PEERADDR}"
         fi
     fi
 }
@@ -125,16 +211,19 @@ EOF
 if [ "$1" = "auto" ]; then
     if [ "$h_ENABLED" == "1" ]; then
         get_area
+        get_mape_provider
         get_dslite_provider
-        # if [ -z "$r_AFTR" ]; then
-        #     # get_mape_provider
-        # fi
         set_interface
     fi
+
 elif [ "$1" = "status" ]; then
-    get_area
+    get_area > /dev/null
     get_dslite_provider > /dev/null
+    echo $e_AREA
     echo $r_AFTR_DOMAIN
+elif [ "$1" = "mape_status" ]; then
+    get_uplink_interface_ipv6 > /dev/null
+    get_mape_provider
 elif [ "$1" = "get_area" ]; then
     get_area > /dev/null
     echo $e_AREA

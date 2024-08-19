@@ -25,8 +25,16 @@ DS-Lite:
 
 
 MAP-E:
-- WIP
-> テストの環境がないんので
+- `JPNE（v6プラス）`
+    - So-net
+    - おてがる光
+    - ぷらら（Sコース）(R.I.P)
+    - enひかり
+    - GMOとくとくBB
+    - DMM光
+- `BIGLOBE`
+- `OCN` (R.I.P)
+- `NURO`
 
 # スクリーンショット
 ![information-1](./screenshots/luci-information-1.png)  
