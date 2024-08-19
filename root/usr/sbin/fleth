@@ -24,12 +24,12 @@ e_AREA="UNKNOWN"
 
 get_area(){
     # east or west
-    wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" > /dev/null 2>&1
+    wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O/dev/null > /dev/null 2>&1
     if [ $? -eq 0 ]; then
         e_AREA="EAST"
         DNS=$DNS_E
     else
-        wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" > /dev/null 2>&1
+        wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" -O/dev/null > /dev/null 2>&1
         if [ $? -eq 0 ]; then
             e_AREA="WEST"
             DNS=$DNS_W

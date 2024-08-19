@@ -9,13 +9,13 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 
 DS-Lite:
 - `gw.transix.jp`
-    - IIJひかり
+    - IIJひかり（東日本　テスト済）
     - インターリンクZOOT NATIVE
     - excite MEC光
     - BB.excite光Fit
     - enひかり
 - `dgw.xpass.jp`
-    - 楽天ひかり
+    - 楽天ひかり（東日本　テスト済）
     - GameWith光
     - enひかり
     - BB.exciteコネクト
