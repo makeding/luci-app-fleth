@@ -67,7 +67,6 @@ return view.extend({
           ["mape_map_ports", "Available ports"],
         ];
         mapeFields.forEach((field, i) => {
-          if (i === 0) return;
           let o = s.taboption("info", form.DummyValue, field[0], _(field[1]));
           o.cfgvalue = function () {
             return data.mape_status[i];
