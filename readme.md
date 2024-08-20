@@ -4,6 +4,7 @@
 luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘルパーです。
 > 日本向け
 
+[＞＞＞＞＞＞ダウンロードはこちら＜＜＜＜＜＜＜](https://github.com/makeding/luci-app-fleth/releases)
 # 対応 ISP
 https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d  
 

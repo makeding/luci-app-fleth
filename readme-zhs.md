@@ -1,7 +1,7 @@
 # luci-app-fleth
 luci-app-fleth 是一个助手，可以帮您自动配置 IPv4 over IPv6 隧道。
 > 只能在日本使用
-
+[＞＞＞＞＞＞请在这里下载＜＜＜＜＜＜＜](https://github.com/makeding/luci-app-fleth/releases)
 # 支持的运营商
 https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d  
 
