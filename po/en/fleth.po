@@ -1,0 +1,80 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid "Flet'h Configuration"
+msgstr "Flet'h Configuration"
+
+msgid "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
+msgstr "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
+
+msgid "Area"
+msgstr "Area"
+
+msgid "EAST"
+msgstr "EAST"
+
+msgid "WEST"
+msgstr "WEST"
+
+msgid "DS-Lite Provider"
+msgstr "DS-Lite Provider"
+
+msgid "UNKNOWN"
+msgid "UNKNOWN"
+
+msgid "MAP-E Provider"
+msgstr "MAP-E Provider"
+
+msgid "IP Address"
+msgstr "IP Address"
+
+msgid "Peer Address"
+msgstr "Peer Address"
+
+msgid "IPv4 prefix"
+msgstr "IPv4 prefix"
+
+msgid "IPv4 Prefix Length"
+msgstr "IPv4 Prefix Length"
+
+msgid "IPv6 Prefix"
+msgstr "IPv6 Prefix"
+
+msgid "IPv6 Prefix Length"
+msgstr "IPv6 Prefix Length"
+
+msgid "EA Length"
+msgstr "EA Length"
+
+msgid "PSID Length"
+msgstr "PSID Length"
+
+msgid "Offset"
+msgstr "Offset"
+
+msgid "Available ports"
+msgstr "Available ports"
+
+msgid "Auto Configure tunnel Interface"
+msgstr "Auto Configure tunnel Interface"
+
+msgid "Auto Add IPv6 PD in IPv6 Interface"
+msgstr "Auto Add IPv6 PD in IPv6 Interface"
+
+msgid "We recommend enabling it in MAP-E and and when not using Hikari Denwa."
+msgstr "We recommend enabling it in MAP-E and and when not using Hikari Denwa."
+
+msgid "IPv6 Interface"
+msgstr "IPv6 Interface"
+
+msgid "Uplink interface"
+msgstr "Uplink interface"
+
+msgid "Tunnel Interface"
+msgstr "Tunnel Interface"
+
+msgid "Tunnel Interface MTU"
+msgstr "Tunnel Interface MTU"
+
+msgid "We recommend setting MTU to 1460 in MAP-E and DS-Lite."
+msgstr "We recommend setting MTU to 1460 in MAP-E and DS-Lite."

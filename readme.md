@@ -1,7 +1,7 @@
 # luci-app-fleth
 [English](./readme-en.md) || [Chinese Simplified](./readme-zhs.md)  
 
-luci-app-flethは、IPv4 over IPv6トンネルを自動設定できるヘルパーツールです。
+luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘルパーです。
 > 日本向け
 
 # 対応 ISP

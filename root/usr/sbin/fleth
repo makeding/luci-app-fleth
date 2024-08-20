@@ -34,7 +34,9 @@ r_OFFSET=""
 
 e_AREA="UNKNOWN"
 
-
+# have other way to detect area(and fle〇's default DNS):
+# dhcpv6 request in wan6
+# domain iptvf.jp xxxx-east.jp <- point
 get_area(){
     # east or west
     wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O/tmp/null > /dev/null 2>&1
