@@ -8,7 +8,7 @@ luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘル�
 # 対応 ISP
 https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d  
 
-### DS-Lite:
+## DS-Lite:
 - `gw.transix.jp`
     - BB.excite光（コネクト除く）
     - enひかり
@@ -23,7 +23,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
     - Tigers-net
 - `dslite.v6connect.net`
     - ASAHIネット光
-### MAP-E:
+## MAP-E:
 - `BIGLOBE`
 - `JPNE（v6プラス）`
     - DMM光

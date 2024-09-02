@@ -1,3 +1,5 @@
 /root/usr/lib/lua/luci/i18n/*.lmo
 
 .DS_Store
+
+.vscode/sftp.json

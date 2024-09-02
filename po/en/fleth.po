@@ -61,8 +61,8 @@ msgstr "Auto Configure tunnel Interface"
 msgid "Auto Add IPv6 PD in IPv6 Interface"
 msgstr "Auto Add IPv6 PD in IPv6 Interface"
 
-msgid "We recommend enabling it in MAP-E and and when not using Hikari Denwa."
-msgstr "We recommend enabling it in MAP-E and and when not using Hikari Denwa."
+msgid "We recommend enabling it in MAP-E and when not using Hikari Denwa."
+msgstr "We recommend enabling it in MAP-E and when not using Hikari Denwa."
 
 msgid "IPv6 Interface"
 msgstr "IPv6 Interface"

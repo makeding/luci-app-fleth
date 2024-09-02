@@ -100,7 +100,7 @@ return view.extend({
       "ip6prefix_enabled",
       _("Auto Add IPv6 PD in IPv6 Interface"),
       _(
-        "We recommend enabling it in MAP-E and and when not using Hikari Denwa."
+        "We recommend enabling it in MAP-E and when not using Hikari Denwa."
       )
     );
     o.rmempty = false;
