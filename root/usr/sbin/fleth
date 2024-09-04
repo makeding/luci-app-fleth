@@ -5,7 +5,7 @@ DNS_E=2404:1a8:7f01:a::3
 DNS_W=2001:a7ff:5f01::a
 
 h_ENABLED=$(uci get fleth.global.enabled)
-h_TYPE=$(uci get fleth.global.type)
+h_TYPE=auto
 h_TUNNEL_INTERFACE=$(uci get fleth.global.interface)
 h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu)
 h_UPLINK_INTERFACE=$(uci get fleth.global.interface6)
@@ -66,7 +66,16 @@ get_AAAA_record() {
 
 check_ipv6_reachability() {
     local ip=$1
-    if ping6 -c 1 "$ip" > /dev/null 2>&1; then
+    if ping6 -c 1 -w 2 "$ip" > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+check_interface_proto_invalid() {
+    local status=$(ifstatus $1 2>/dev/null)
+    if echo "$status" | grep -q '"proto": "none"'; then
         return 0
     else
         return 1
@@ -119,8 +128,7 @@ get_dslite_provider(){
         # 2. xpass can be resolved outside but can't ping
         # http://checkv6.xpass.jp/check_address.php
         t_XPASS=$(get_AAAA_record "dgw.xpass.jp")
-        check_ipv6_reachability $t_XPASS
-        if [ $? -eq 0 ]; then
+        if check_ipv6_reachability $t_XPASS; then
             r_TYPE="ds-lite"
             r_AFTR=$t_XPASS
             r_AFTR_DOMAIN="dgw.xpass.jp"
@@ -140,7 +148,7 @@ get_dslite_provider(){
 
 set_interface() {
     current_proto=$(uci get network.${h_TUNNEL_INTERFACE}.proto)
-    current_peeraddr=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddr)
+    current_peeraddrdomain=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddrdomain)
     current_tunlink=$(uci get network.${h_UPLINK_INTERFACE}.tunlink)
     current_mtu=$(uci get network.${h_TUNNEL_INTERFACE}.mtu)
 
@@ -148,8 +156,7 @@ set_interface() {
         if [ -z "$r_AFTR" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
             echo "Failed to retrieve one or more configuration values"
             exit 1
-        fi
-        if [ "$current_peeraddr" != "$r_AFTR" ] ||
+        elif [ "$current_peeraddrdomain" != "$r_AFTR_DOMAIN" ] ||
            [ "$current_tunlink" != "$h_TUNNEL_INTERFACE" ] ||
            [ "$current_proto" != 'dslite' ] ||
            [ "$current_mtu" != "$h_TUNNEL_INTERFACE_MTU" ]; then
@@ -157,6 +164,7 @@ set_interface() {
 set network.${h_TUNNEL_INTERFACE}=interface
 set network.${h_TUNNEL_INTERFACE}.proto='dslite'
 set network.${h_TUNNEL_INTERFACE}.peeraddr='${r_AFTR}'
+set network.${h_TUNNEL_INTERFACE}.peeraddrdomain='${r_AFTR_DOMAIN}'
 set network.${h_TUNNEL_INTERFACE}.tunlink='${h_UPLINK_INTERFACE}'
 set network.${h_TUNNEL_INTERFACE}.mtu='${h_TUNNEL_INTERFACE_MTU}'
 set network.${h_TUNNEL_INTERFACE}.encaplimit='ignore'
@@ -208,6 +216,10 @@ EOF
             ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
             logger -t fleth "New map-e configuratin committed ${h_TUNNEL_INTERFACE}=${r_PEERADDR}"
         fi
+    fi
+    if check_interface_proto_invalid ${h_TUNNEL_INTERFACE}; then
+        logger -t fleth "Network Restarting"
+        /etc/init.d/network restart
     fi
 }
 

@@ -1,14 +1,14 @@
 {
 	"luci-app-fleth": {
-		"description": "Grant access to fleth executables",
+		"description": "Grant access for luci-app-fleth",
 		"read": {
-			"uci": [ "fleth", "network"]
-		},
-		"write": {
 			"file": {
 				"/usr/sbin/fleth": [ "exec" ]
 			},
-            "uci": [ "fleth", "network" ]
+			"uci": [ "fleth" ]
+		},
+		"write": {
+            "uci": [ "fleth" ]
 		}
 	}
 }
