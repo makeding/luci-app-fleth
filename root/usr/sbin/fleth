@@ -39,12 +39,12 @@ e_AREA="UNKNOWN"
 # domain iptvf.jp xxxx-east.jp <- point
 get_area(){
     # east or west
-    wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O/tmp/null > /dev/null 2>&1
+    wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O /tmp/null > /dev/null 2>&1
     if [ $? -eq 0 ]; then
         e_AREA="EAST"
         DNS=$DNS_E
     else
-        wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" -O/tmp/null > /dev/null 2>&1
+        wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" -O /tmp/null > /dev/null 2>&1
         if [ $? -eq 0 ]; then
             e_AREA="WEST"
             DNS=$DNS_W
@@ -224,6 +224,7 @@ EOF
 }
 
 if [ "$1" = "auto" ]; then
+    logger -t fleth "is running $h_ENABLED"
     $0 ip6prefix &
     if [ "$h_ENABLED" == "1" ]; then
         get_area

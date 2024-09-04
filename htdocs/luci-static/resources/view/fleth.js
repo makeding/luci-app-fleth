@@ -33,7 +33,7 @@ return view.extend({
       )
     );
 
-    s = m.section(form.NamedSection, "global", "fleth");
+    s = m.section(form.NamedSection, "global");
     s.tab("info", _("Information"));
     s.tab("general", _("General Settings"));
 
@@ -99,16 +99,20 @@ return view.extend({
       form.Flag,
       "ip6prefix_enabled",
       _("Auto Add IPv6 PD in IPv6 Interface"),
-      _(
-        "We recommend enabling it in MAP-E and when not using Hikari Denwa."
-      )
+      _("We recommend enabling it in MAP-E and when not using Hikari Denwa.")
     );
     o.rmempty = false;
     o.default = "0";
 
-    // o = s.taboption('general', form.Flag, 'ip6relay_enabled', _('Auto Configure IPv6 with relay mode'));
+    // o = s.taboption(
+    //   "general",
+    //   form.Flag,
+    //   "ip6relay_enabled",
+    //   _("Auto Configure lan side IPv6"),
+    //   _("You can hold both ISP and ULA address simultaneously.")
+    // );
     // o.rmempty = false;
-    // o.default = '0';
+    // o.default = "0";
 
     // o = s.taboption('general', form.ListValue, 'type', _('Tunnel Type'), _('Now only support DS-Lite'))
     // o.value('auto', _('Auto'))
@@ -148,19 +152,5 @@ return view.extend({
     o.default = "1460";
 
     return m.render();
-  },
-  handleSaveApply: async function (ev) {
-    await this.__base__.handleSaveApply(ev);
-    // console.log('triggered save & apply button');
-    try {
-      await fs.exec("/usr/sbin/fleth", ["ip6prefix"]);
-    } catch (error) {
-      console.warn(error);
-    }
-    try {
-      await fs.exec("/usr/sbin/fleth", ["auto"]);
-    } catch (error) {
-      console.warn(error);
-    }
-  },
+  }
 });

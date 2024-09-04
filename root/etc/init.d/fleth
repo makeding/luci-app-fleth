@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+USE_PROCD=1
+NAME="fleth"
+
+start_service() {
+    config_load "$NAME"
+    /usr/sbin/fleth auto
+}
+reload_service() {
+    config_load "$NAME"
+    /usr/sbin/fleth auto
+}
+service_triggers() {
+	procd_add_reload_trigger "$NAME"
+}
