@@ -49,6 +49,7 @@ async function FWPFhook() {
     dom_src_dport_input.value = ports[Math.floor(Math.random() * ports.length)];
     dom_src_dport_input.dispatchEvent(new Event("change", { bubbles: true }));
     dom_src_dport_input.classList.remove("cbi-input-invalid");
+    dom_port_invaild_alert.innerText = "";
   });
   const dom_port_invaild_alert = document.createElement("div");
   dom_port_invaild_alert.classList = "cbi-value-description";
