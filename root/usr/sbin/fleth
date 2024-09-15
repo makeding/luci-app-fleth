@@ -248,6 +248,11 @@ elif [ "$1" = "get_dslite_provider" ]; then
     get_area > /dev/null
     get_dslite_provider > /dev/null
     echo $r_AFTR_DOMAIN
+elif [ "$1" = "hook_none.js" ]; then
+    if ! grep -q 'fleth-hook.js' /www/luci-static/resources/protocol/none.js; then
+        cat /www/luci-static/resources/protocol/none.js > /www/luci-static/resources/protocol/none.js.bak
+        sed -i "s|return|if(location.pathname==='/cgi-bin/luci/admin/network/firewall/forwards'){try{const script=document.createElement('script');script.src='/luci-static/resources/view/fleth-hook.js';document.head.appendChild(script);}catch(error){console.warn(error);}}return|" /www/luci-static/resources/protocol/none.js
+    fi
 elif [ "$h_IP6PREFIX_ENABLED" -eq 1 ] && [ "$1" = "ip6prefix" ]; then
     TRIES=0
     MAX_TRIES=30
