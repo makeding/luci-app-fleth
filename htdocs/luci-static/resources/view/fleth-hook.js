@@ -23,7 +23,7 @@ async function FWPFhook() {
   let ports =
     mape_status.length > 10
       ? mape_status[mape_status.length - 1].split(" ")
-      : new Array(65535).fill(1).map((_, i) => i + 1);
+      : new Array(65535).fill(1).map((_, i) => (i + 1).toString());
   // let dom_src_zone_list = dom_src_interface.querySelectorAll('.dropdown > li');
   // let dom_src_interface_list = null
   // let src_interface_list = []
@@ -47,9 +47,7 @@ async function FWPFhook() {
   dom_random_button.style.marginTop = ".5rem";
   dom_random_button.addEventListener("click", () => {
     dom_src_dport_input.value = ports[Math.floor(Math.random() * ports.length)];
-    dom_src_dport_input.dispatchEvent(new Event("change", { bubbles: true }));
-    dom_src_dport_input.classList.remove("cbi-input-invalid");
-    dom_port_invaild_alert.innerText = "";
+    dom_src_dport_input.dispatchEvent(new Event("input", { bubbles: true }));
   });
   const dom_port_invaild_alert = document.createElement("div");
   dom_port_invaild_alert.classList = "cbi-value-description";
@@ -60,12 +58,13 @@ async function FWPFhook() {
     old_t = t;
     setTimeout(() => {
       if (t === old_t) {
-        if (ports.includes(dom_src_dport_input.value)) {
-          dom_port_invaild_alert.innerText = "";
-          dom_src_dport_input.classList.remove("cbi-input-invalid");
-        } else {
+        const current_port_list = dom_src_dport_input.value.split("-");
+        if (current_port_list.find((port) => !ports.includes(port))) {
           dom_port_invaild_alert.innerText = lang_pack[1];
           dom_src_dport_input.classList.add("cbi-input-invalid");
+        } else {
+          dom_port_invaild_alert.innerText = "";
+          dom_src_dport_input.classList.remove("cbi-input-invalid");
         }
       }
     }, 200);
