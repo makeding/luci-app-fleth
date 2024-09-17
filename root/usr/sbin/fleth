@@ -17,7 +17,7 @@ if [ -z "$h_ENABLED" ] || [ -z "$h_TYPE" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ 
 fi
 
 # real xxxx
-r_TYPE=""
+r_TYPE="UNKNOWN"
 # DS-Lite
 r_AFTR=""
 r_AFTR_DOMAIN="UNKNOWN"
@@ -93,8 +93,8 @@ get_mape_provider() {
     t_DATA=$(lua /usr/sbin/fleth-map-e.lua calc "$ipv6_address")
     # kanashii code kana
     # yo ku wa ka ra na i
-    printf "%s" "$t_DATA"
-    if [ "$r_TYPE" != "UNKNOWN" ]; then
+    # printf "%s" "$t_DATA"
+    if [ "$t_DATA" != "UNKNOWN" ]; then
         t_i=0
         while IFS= read -r line; do
             t_i=$((t_i + 1))
@@ -227,10 +227,17 @@ if [ "$1" = "auto" ]; then
     logger -t fleth "is running $h_ENABLED"
     $0 ip6prefix &
     if [ "$h_ENABLED" == "1" ]; then
-        get_area
-        get_mape_provider
-        get_dslite_provider
-        set_interface
+        get_uplink_interface_ipv6 > /dev/null
+        get_mape_provider > /dev/null
+        if [ "$r_TYPE" = "UNKNOWN" ]; then
+            get_area
+            get_dslite_provider
+        fi
+        if [ "$r_TYPE" = "UNKNOWN" ]; then
+            logger -t fleth "Can't detect network type ${h_UPLINK_INTERFACE}=${ipv6_address}"
+        else
+            set_interface
+        fi
     fi
 
 elif [ "$1" = "status" ]; then
