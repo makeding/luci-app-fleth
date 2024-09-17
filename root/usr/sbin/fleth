@@ -93,7 +93,7 @@ get_mape_provider() {
     t_DATA=$(lua /usr/sbin/fleth-map-e.lua calc "$ipv6_address")
     # kanashii code kana
     # yo ku wa ka ra na i
-    # printf "%s" "$t_DATA"
+    printf "%s" "$t_DATA"
     if [ "$t_DATA" != "UNKNOWN" ]; then
         t_i=0
         while IFS= read -r line; do
