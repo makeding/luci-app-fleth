@@ -806,7 +806,7 @@ local function calc(prefix)
             peeraddr = "2001:260:700:1::1:275"
         elseif hextet[2] >= 0x7a84 and hextet[2] < 0x7a88 then
             provider = "BIGLOBE（西日本）"
-            peeraddr = "2001:260:700:1::1:275"
+            peeraddr = "2001:260:700:1::1:276"
         end
     elseif hextet[1] == 0x2400 then
         peeraddr = "2001:380:a120::9"
