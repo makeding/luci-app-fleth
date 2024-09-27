@@ -13,6 +13,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: 'huggy/luci-app-fleth'
+      - uses: actions/checkout@v4
+        with:
+          repository: 'openwrt-dev/po2lmo'
+          ref: 'db656750ab032f3056d329c5e727a10af9ba15dd'
+          path: 'huggy/luci-app-fleth/po2lmo'
+      - name: 'Make po2lmo'
+        run: 'cd $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo && make'
+      - name: 'Manual convert i18n file'
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n
+          $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/ja/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.ja.lmo
+
       - name: Build
         uses: openwrt/gh-action-sdk@main
         env:
@@ -20,5 +32,6 @@ jobs:
           PACKAGES: luci-app-fleth
           FEEDNAME: huggy
           NO_REFRESH_CHECK: true
-      - name: ls packages
-        run: ls bin/packages/x86_64/huggy/
+      - uses: actions/upload-artifact@v4
+        with:
+          path: bin/packages/x86_64/huggy/
