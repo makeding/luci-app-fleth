@@ -12,9 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: 'huggy'
-      - name: ls root
-        run: ls huggy
+          path: 'huggy/luci-app-fleth'
       - name: Build
         uses: openwrt/gh-action-sdk@main
         env:
