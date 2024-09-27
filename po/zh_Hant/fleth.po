@@ -1,0 +1,80 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid "Flet'h Configuration"
+msgstr "Flet'h 設定"
+
+msgid "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
+msgstr "Flet'h 是一個可以自動配置您的 IPv4 over IPv6 隧道的助手。"
+
+msgid "Area"
+msgstr "區域"
+
+msgid "EAST"
+msgstr "東日本"
+
+msgid "WEST"
+msgstr "西日本"
+
+msgid "DS-Lite Provider"
+msgstr "DS-Lite 提供商"
+
+msgid "UNKNOWN"
+msgstr "未知"
+
+msgid "MAP-E Provider"
+msgstr "MAP-E 提供商"
+
+msgid "IP Address"
+msgstr "IP 地址"
+
+msgid "Peer Address"
+msgstr "對端地址"
+
+msgid "IPv4 prefix"
+msgstr "IPv4 前綴"
+
+msgid "IPv4 Prefix Length"
+msgstr "IPv4 前綴長度"
+
+msgid "IPv6 Prefix"
+msgstr "IPv6 前綴"
+
+msgid "IPv6 Prefix Length"
+msgstr "IPv6 前綴長度"
+
+msgid "EA Length"
+msgstr "EA 長度"
+
+msgid "PSID Length"
+msgstr "PSID 長度"
+
+msgid "Offset"
+msgstr "偏移量"
+
+msgid "Available ports"
+msgstr "可用端口"
+
+msgid "Auto Configure tunnel Interface"
+msgstr "自動配置隧道介面"
+
+msgid "Auto Add IPv6 PD in IPv6 Interface"
+msgstr "在 IPv6 介面中自動添加 IPv6 PD"
+
+msgid "We recommend enabling it in MAP-E and when not using Hikari Denwa."
+msgstr "我們建議在 MAP-E 中啟用此選項，並且在不使用光電話時使用。"
+
+msgid "IPv6 Interface"
+msgstr "IPv6 介面"
+
+msgid "Uplink interface"
+msgstr "上行介面"
+
+msgid "Tunnel Interface"
+msgstr "隧道介面"
+
+msgid "Tunnel Interface MTU"
+msgstr "隧道介面 MTU"
+
+msgid "We recommend setting MTU to 1460 in MAP-E and DS-Lite."
+msgstr "我們建議在 MAP-E 和 DS-Lite 中將 MTU 設置為 1460。"

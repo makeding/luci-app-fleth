@@ -56,7 +56,7 @@ msgid "Available ports"
 msgstr "利用可能なポート"
 
 msgid "Auto Configure tunnel Interface"
-msgstr "トンネルインターフェースをの自動的に設定"
+msgstr "トンネル インターフェースをの自動的に設定"
 
 msgid "Auto Add IPv6 PD in IPv6 Interface"
 msgstr "IPv6 インターフェースに IPv6 PD を自動的に追加"
