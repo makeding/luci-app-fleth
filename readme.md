@@ -1,3 +1,4 @@
+![banner](./logo/fleth-banner.svg)  
 # luci-app-fleth
 [English](./readme-en.md) || [Chinese Simplified](./readme-zhs.md)  
 

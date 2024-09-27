@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100">
+  <rect x="0" y="0" width="300" height="100" fill="#f0f0f0" />
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0072cc" />
+      <stop offset="100%" style="stop-color:#4287f5" />
+    </linearGradient>
+  </defs>
+  <path d="M0 20 Q75 0 150 20 T300 20" stroke="#e0e0e0" stroke-width="2" fill="none" />
+  <path d="M0 80 Q75 60 150 80 T300 80" stroke="#e0e0e0" stroke-width="2" fill="none" />
+  <text x="150" y="50" font-family="Arial, sans-serif" font-size="48" font-style="italic" font-weight="bold" text-anchor="middle" dominant-baseline="central" fill="url(#grad)">
+    <tspan fill="url(#grad)">FLET</tspan><tspan fill="#FF69B4">'</tspan><tspan fill="url(#grad)">H</tspan>
+  </text>
+  <text x="150" y="80" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#666">ネットワーク設定を簡単に</text>
+</svg>

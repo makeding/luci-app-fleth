@@ -1,3 +1,4 @@
+![banner](./logo/fleth-banner.svg)  
 # luci-app-fleth
 luci-app-fleth 是一个助手，可以帮您自动配置 IPv4 over IPv6 隧道。  
 

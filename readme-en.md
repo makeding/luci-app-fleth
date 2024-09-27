@@ -1,3 +1,4 @@
+![banner](./logo/fleth-banner.svg)  
 # luci-app-fleth
 luci-app-fleth is a helper that can configure your IPv4 over IPv6 tunnel automatically.  
 > Japan use only

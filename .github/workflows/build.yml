@@ -1,0 +1,53 @@
+---
+name: Build package for luci-app-fleth
+
+on:
+  push:
+    tags:
+      - '*'
+    branches:
+      - master
+      - test-ci
+jobs:
+  build:
+    name: Generic build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Fetch luci-app-fleth code
+        uses: actions/checkout@v4
+        with:
+          path: 'huggy/luci-app-fleth'
+      - name: Fetch po2lmo code
+        uses: actions/checkout@v4
+        with:
+          repository: 'openwrt-dev/po2lmo'
+          ref: 'db656750ab032f3056d329c5e727a10af9ba15dd'
+          path: 'huggy/luci-app-fleth/po2lmo'
+      - name: 'Make po2lmo binary'
+        run: 'cd $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo && make'
+      - name: 'Manual convert i18n(lmo) file'
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n
+          $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/ja/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.ja.lmo
+          $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hans/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh_Hans.lmo
+          $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hant/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh_Hant.lmo
+
+      - name: Build
+        uses: openwrt/gh-action-sdk@main
+        env:
+          # We only use lua and shellscript, so it will worked on arm / mips router
+          ARCH: x86_64-22.03.2
+          PACKAGES: luci-app-fleth
+          FEEDNAME: huggy
+          NO_REFRESH_CHECK: true
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: bin/packages/x86_64/huggy/
+      - name: 'Remove i18n ipk'
+        run: rm -fr $GITHUB_WORKSPACE/bin/packages/x86_64/huggy/luci-app-fleth*git*.ipk
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bin/packages/x86_64/huggy/
