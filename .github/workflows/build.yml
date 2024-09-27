@@ -9,14 +9,17 @@ jobs:
   build:
     name: Generic build
     runs-on: ubuntu-24.04
-
     steps:
       - uses: actions/checkout@v4
+        path: 'huggy'
+      - name: ls root
+        run: ls
       - name: Build
         uses: openwrt/gh-action-sdk@main
         env:
-          ARCH: x86_64
+          ARCH: x86_64-22.03.0
           PACKAGES: luci-app-fleth
           FEEDNAME: huggy
-      - name: ls
+          NO_REFRESH_CHECK: true
+      - name: ls packages
         run: ls bin/packages/x86_64/huggy/
