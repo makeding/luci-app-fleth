@@ -6,31 +6,17 @@ on:
     branches:
       - test-ci
 jobs:
-  prepare:
+  build:
+    name: Generic build
     runs-on: ubuntu-24.04
+
     steps:
-    # - name: install deps
-    #   run: apt install -y 
-    - name: Download SDK from OpenWrt
-      run: |
-        wget https://archive.openwrt.org/releases/22.03.0/targets/x86/generic/openwrt-sdk-22.03.0-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz --tries 2 --quiet
-        tar --strip-components=1 -xf openwrt*.tar.xz
-    - name: Checkout fleth
-      uses: actions/checkout@v4
-      with:
-        path: package/huggy
-    - name: download dependencies
-      run: |
-        pwd
-        ls
-        ls package
-        ./scripts/feeds update -a 
-        ./scripts/feeds install -a
-  compile:
-    runs-on: ubuntu-24.04
-    needs: prepare
-    steps:
-      - name: compile
-        run: |
-          make package/luci-app-fleth/compile V=s
-          ls bin
+      - uses: actions/checkout@v4
+      - name: Build
+        uses: openwrt/gh-action-sdk@main
+        env:
+          ARCH: x86_64
+          PACKAGES: luci-app-fleth
+          FEEDNAME: huggy
+      - name: ls
+        run: ls bin/packages/x86_64/huggy/
