@@ -1,0 +1,32 @@
+---
+name: Build package for luci-app-fleth
+
+on:
+  push:
+    branches:
+      - test-ci
+jobs:
+  prepare:
+    runs-on: debian-12
+    steps:
+    # - name: install deps
+    #   run: apt install -y 
+    - name: Download SDK from OpenWrt
+      run: |
+        wget https://archive.openwrt.org/releases/22.03.0/targets/x86/generic/openwrt-sdk-22.03.0-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz --tries 2
+        tar --strip-components=1 -xf openwrt*.tar.xz
+    - name: Checkout fleth
+      uses: actions/checkout@v4
+      path: packages/huggy
+    - name: download dependencies
+      run: |
+        pwd
+        ls
+        ls packages
+        ./scripts/feeds update -a 
+        ./scripts/feeds install -a
+  compile:
+    runs-on: debian-12
+    run: |
+      make package/luci-app-fleth/compile V=s
+      ls bin
