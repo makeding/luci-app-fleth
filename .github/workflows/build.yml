@@ -16,7 +16,7 @@ jobs:
       - name: Build
         uses: openwrt/gh-action-sdk@main
         env:
-          ARCH: x86_64-22.03.0
+          ARCH: x86_64-22.03.2
           PACKAGES: luci-app-fleth
           FEEDNAME: huggy
           NO_REFRESH_CHECK: true
