@@ -18,12 +18,12 @@ jobs:
     - name: Checkout fleth
       uses: actions/checkout@v4
       with:
-        path: packages/huggy
+        path: package/huggy
     - name: download dependencies
       run: |
         pwd
         ls
-        ls packages
+        ls package
         ./scripts/feeds update -a 
         ./scripts/feeds install -a
   compile:
