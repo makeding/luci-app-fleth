@@ -27,6 +27,8 @@ jobs:
         ./scripts/feeds install -a
   compile:
     runs-on: debian-12
-    run: |
-      make package/luci-app-fleth/compile V=s
-      ls bin
+    steps:
+      name: compile
+      run: |
+        make package/luci-app-fleth/compile V=s
+        ls bin
