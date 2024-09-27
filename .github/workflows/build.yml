@@ -17,7 +17,8 @@ jobs:
         tar --strip-components=1 -xf openwrt*.tar.xz
     - name: Checkout fleth
       uses: actions/checkout@v4
-      path: packages/huggy
+      with:
+        path: packages/huggy
     - name: download dependencies
       run: |
         pwd
@@ -28,7 +29,7 @@ jobs:
   compile:
     runs-on: debian-12
     steps:
-      name: compile
-      run: |
-        make package/luci-app-fleth/compile V=s
-        ls bin
+      - name: compile
+        run: |
+          make package/luci-app-fleth/compile V=s
+          ls bin
