@@ -52,4 +52,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: bin/packages/x86_64/huggy/
+          draft: true
+          make_latest: true
+          files: bin/packages/x86_64/huggy/*.ipk
