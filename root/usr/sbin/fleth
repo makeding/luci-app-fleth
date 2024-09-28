@@ -35,20 +35,28 @@ r_OFFSET=""
 
 e_AREA="UNKNOWN"
 
-# have other way to detect area(and fle〇's default DNS):
-# dhcpv6 request in wan6
-# domain iptvf.jp xxxx-east.jp <- point
 get_area(){
     # east or west
-    wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O /tmp/null > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        e_AREA="EAST"
-        DNS=$DNS_E
-    else
-        wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" -O /tmp/null > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
+    if [ -f /tmp/resolv.conf.d/resolv.conf.auto ]; then
+        if grep -q "flets-east.jp" /tmp/resolv.conf.d/resolv.conf.auto; then
+            e_AREA="EAST"
+            DNS=$DNS_E
+        elif grep -q "flets-west.jp" /tmp/resolv.conf.d/resolv.conf.auto; then
             e_AREA="WEST"
             DNS=$DNS_W
+        fi
+    fi
+    if [ "$e_AREA" = "UNKNOWN" ]; then
+        wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O /tmp/null > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            e_AREA="EAST"
+            DNS=$DNS_E
+        else
+            wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" -O /tmp/null > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                e_AREA="WEST"
+                DNS=$DNS_W
+            fi
         fi
     fi
     echo $e_AREA

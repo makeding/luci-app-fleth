@@ -80,7 +80,7 @@ msgid "We recommend setting MTU to 1460 in MAP-E and DS-Lite."
 msgstr "※MAP-EおよびDS-Liteユーザー：MTUを1460に設定することをお勧めします。"
 
 msgid "Auto Renew DHCPv6"
-msgstr "DHCPv6自動更新"
+msgstr "DHCPv6リースの自動更新"
 
 msgid "We recommend enabling it when using CROSS(10Gbps) plan."
 msgstr "※クロス(10ギガ)プランを使用する場合は、有効にすることをお勧めします。"
