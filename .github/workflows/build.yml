@@ -12,6 +12,8 @@ jobs:
   build:
     name: Generic build
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - name: Fetch luci-app-fleth code
         uses: actions/checkout@v4
