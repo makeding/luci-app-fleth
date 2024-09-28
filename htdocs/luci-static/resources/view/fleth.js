@@ -85,6 +85,12 @@ return view.extend({
       };
     }
 
+    // o = s.taboption('general', form.Button, '_hook_luci-firewall-port-forward');
+		// o.title      = '&#160;';
+		// o.inputtitle = _('Hook Port Forward in firewall');
+		// o.inputstyle = 'apply';
+		// o.onclick = L.bind(this.hookFW, this, m);
+
     o = s.taboption(
       "general",
       form.Flag,
@@ -100,6 +106,16 @@ return view.extend({
       "ip6prefix_enabled",
       _("Auto Add IPv6 PD in IPv6 Interface"),
       _("We recommend enabling it in MAP-E and when not using Hikari Denwa.")
+    );
+    o.rmempty = false;
+    o.default = "0";
+
+    o = s.taboption(
+      "general",
+      form.Flag,
+      "cron_dhcpv6_renew_enabled",
+      _("Auto Renew DHCPv6"),
+      _("We recommend enabling it when using CROSS(10Gbps) plan.")
     );
     o.rmempty = false;
     o.default = "0";

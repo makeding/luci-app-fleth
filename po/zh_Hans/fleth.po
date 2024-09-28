@@ -78,3 +78,15 @@ msgstr "隧道接口 MTU"
 
 msgid "We recommend setting MTU to 1460 in MAP-E and DS-Lite."
 msgstr "我们建议在 MAP-E 和 DS-Lite 中将 MTU 设置为 1460。"
+
+msgid "Auto Renew DHCPv6"
+msgstr "自动续订 DHCPv6"
+
+msgid "We recommend enabling it when using CROSS(10Gbps) plan."
+msgstr "我们建议在使用 CROSS（10Gbps）套餐时启用该功能。"
+
+msgid "Random Port"
+msgstr "随机端口"
+
+msgid "You can't access this port from MAP-E interface"
+msgstr "您无法从 MAP-E 接口访问该端口"

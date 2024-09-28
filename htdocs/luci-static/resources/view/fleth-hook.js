@@ -1,13 +1,4 @@
 let mape_status = [];
-const lang_en = [
-  "Random Port",
-  "You can't access this port from MAP-E interface",
-];
-const lang_ja = [
-  "ランダムポート",
-  "このポートにはMAP-Eインターフェースからアクセスできません",
-];
-const lang_pack = document.documentElement.lang === "ja" ? lang_ja : lang_en;
 
 async function FWPFhook() {
   if (mape_status.length === 0) {
@@ -43,7 +34,7 @@ async function FWPFhook() {
   const dom_src_dport_input = dom_src_dport.querySelector("input");
   const dom_random_button = document.createElement("button");
   dom_random_button.classList = "cbi-button";
-  dom_random_button.innerText = lang_pack[0];
+  dom_random_button.innerText = _("Random Port");
   dom_random_button.style.marginTop = ".5rem";
   dom_random_button.addEventListener("click", () => {
     dom_src_dport_input.value = ports[Math.floor(Math.random() * ports.length)];
@@ -60,7 +51,7 @@ async function FWPFhook() {
       if (t === old_t) {
         const current_port_list = dom_src_dport_input.value.split("-");
         if (current_port_list.find((port) => !ports.includes(port))) {
-          dom_port_invaild_alert.innerText = lang_pack[1];
+          dom_port_invaild_alert.innerText = _("You can't access this port from MAP-E interface");
           dom_src_dport_input.classList.add("cbi-input-invalid");
         } else {
           dom_port_invaild_alert.innerText = "";

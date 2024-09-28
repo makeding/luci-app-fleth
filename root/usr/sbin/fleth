@@ -10,6 +10,7 @@ h_TUNNEL_INTERFACE=$(uci get fleth.global.interface)
 h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu)
 h_UPLINK_INTERFACE=$(uci get fleth.global.interface6)
 h_IP6PREFIX_ENABLED=$(uci get fleth.global.ip6prefix_enabled)
+h_CRON_DHCPV6_RENEW_ENABLED=$(uci get fleth.global.cron_dhcpv6_renew_enabled)
 
 if [ -z "$h_ENABLED" ] || [ -z "$h_TYPE" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
     echo "Failed to retrieve one or more configuration values"
@@ -225,7 +226,17 @@ EOF
 
 if [ "$1" = "auto" ]; then
     logger -t fleth "is running $h_ENABLED"
-    $0 ip6prefix &
+    if [ "$h_IP6PREFIX_ENABLED" == "1" ]; then
+        $0 ip6prefix &
+    elif [ "$h_IP6PREFIX_ENABLED" == "0" ]; then
+        uci delete network.${h_UPLINK_INTERFACE}.ip6prefix
+        uci commit
+    fi
+    if [ "$h_CRON_DHCPV6_RENEW_ENABLED" == "1" ]; then
+        INTERFACE=${h_UPLINK_INTERFACE} ACTION=ifup /etc/hotplug.d/iface/70-fleth-cross-dhcpv6-renew &
+    elif [ "$h_CRON_DHCPV6_RENEW_ENABLED" == "0" ]; then
+        INTERFACE=${h_UPLINK_INTERFACE} ACTION=ifdown /etc/hotplug.d/iface/70-fleth-cross-dhcpv6-renew &
+    fi
     if [ "$h_ENABLED" == "1" ]; then
         get_uplink_interface_ipv6 > /dev/null
         get_mape_provider > /dev/null
@@ -257,9 +268,11 @@ elif [ "$1" = "get_dslite_provider" ]; then
     echo $r_AFTR_DOMAIN
 elif [ "$1" = "hook_none.js" ]; then
     if ! grep -q 'fleth-hook.js' /www/luci-static/resources/protocol/none.js; then
-        cat /www/luci-static/resources/protocol/none.js > /www/luci-static/resources/protocol/none.js.bak
+        $0 restore_none.js
         sed -i "s|return|if(location.pathname==='/cgi-bin/luci/admin/network/firewall/forwards'){try{const script=document.createElement('script');script.src='/luci-static/resources/view/fleth-hook.js';document.head.appendChild(script);}catch(error){console.warn(error);}}return|" /www/luci-static/resources/protocol/none.js
     fi
+elif [ "$1" = "restore_none.js" ]; then
+    printf "'use strict';'require network';return network.registerProtocol('none',{getI18n:function(){return _('Unmanaged');}});" > /www/luci-static/resources/protocol/none.js
 elif [ "$h_IP6PREFIX_ENABLED" -eq 1 ] && [ "$1" = "ip6prefix" ]; then
     TRIES=0
     MAX_TRIES=30

@@ -1,0 +1,21 @@
+#!/bin/ash
+# https://github.com/openwrt/openwrt/issues/13454
+# https://github.com/openwrt/odhcp6c/issues/78
+# https://gist.github.com/missing233/3dafb6ee549ed2271c20bd700b88a9cd
+
+h_UPLINK_INTERFACE=$(uci get fleth.global.interface6)
+h_CRON_DHCPV6_RENEW_ENABLED=$(uci get fleth.global.cron_dhcpv6_renew_enabled)
+
+[ "$INTERFACE" = "$h_UPLINK_INTERFACE" ] || exit 0
+
+CRON_CMD='0 * * * * kill -SIGUSR1 $(pgrep odhcp6c)'
+
+if [ "$ACTION" = "ifup" ] && [ "$h_CRON_DHCPV6_RENEW_ENABLED" -eq 1 ]; then
+    grep -Fq "$CRON_CMD" /etc/crontabs/root || {
+        echo "$CRON_CMD" >> /etc/crontabs/root
+        /etc/init.d/cron restart
+    }
+elif [ "$ACTION" = "ifdown" ]; then
+    sed -i "/$(printf '%b' "$CRON_CMD" | sed 's:[\\/.*^$]:\\&:g')/d" /etc/crontabs/root
+    /etc/init.d/cron restart
+fi
