@@ -31,8 +31,8 @@ jobs:
         run: |
           mkdir -p $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n
           $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/ja/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.ja.lmo
-          $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hans/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh_Hans.lmo
-          $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hant/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh_Hant.lmo
+          $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hans/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh-cn.lmo
+          $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hant/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh-tw.lmo
 
       - name: Build
         uses: openwrt/gh-action-sdk@main
@@ -46,12 +46,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: bin/packages/x86_64/huggy/
-      - name: 'Remove i18n ipk'
-        run: rm -fr $GITHUB_WORKSPACE/bin/packages/x86_64/huggy/luci-app-fleth*git*.ipk
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           draft: true
           make_latest: true
-          files: bin/packages/x86_64/huggy/*.ipk
+          files: bin/packages/x86_64/huggy/luci-app-fleth*
