@@ -306,4 +306,25 @@ elif [ "$h_IP6PREFIX_ENABLED" -eq 1 ] && [ "$1" = "ip6prefix" ]; then
     if [ $TRIES -ge $MAX_TRIES ]; then
         logger -t fleth "Failed to obtain a valid IPv6 address after $MAX_TRIES attempts."
     fi
+else
+    echo "Flet'h by huggy"
+    echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
+    echo ""
+    echo "Usage: $0 {auto|ip6prefix|status|mape_status|get_area|get_dslite_provider|hook_none.js|restore_none.js}"
+    echo "auto                Automatically configure the network settings based on current state and config."
+    echo "status              Show the current area and DS-Lite AFTR domain."
+    echo "ip6prefix           Handle the IPv6 prefix process."
+    echo "mape_status         Show the current MAP-E provider details."
+    echo "get_area            Show the current area information."
+    echo "get_dslite_provider Show the current DS-Lite provider details."
+    echo "hook_none.js        Install the fleth hook in none.js to hook port-forward page."
+    echo "restore_none.js     Restore the none.js to its default state."
+    echo ""
+    echo "To modify settings, use:"
+    echo "uci show fleth.global"
+    echo "uci set fleth.global.enabled=1"
+    echo "uci commit"
+    echo ""
+    echo "For more details, consult the documentation:"
+    echo "https://fleth.huggy.moe/"
 fi

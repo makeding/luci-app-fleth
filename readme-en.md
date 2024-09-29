@@ -23,13 +23,14 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 - `dslite.v6connect.net`
     - ASAHIネット光
 ## MAP-E:
-- `BIGLOBE`
+- `BIGLOBE`（西日本　テスト済）
 - `JPNE（v6プラス）`
     - DMM光
     - GMOとくとくBB
     - enひかり
     - ic-net光コース
     - おてがる光
+    - So-net
     - ぷらら（Sコース）(R.I.P.)
 - `OCN` (R.I.P.)
 - `NURO`
