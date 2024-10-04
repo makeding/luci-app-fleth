@@ -10,6 +10,7 @@ config fleth 'global'
 	option cron_dhcpv6_renew_enabled '0'
 	option type 'auto'
 	option interface 'wan'
+	option interface_zone 'wan'
 	option interface6 'wan6'
 	option mtu '1460'
 EOF

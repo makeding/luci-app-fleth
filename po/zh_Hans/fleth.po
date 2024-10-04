@@ -83,7 +83,10 @@ msgid "Auto Renew DHCPv6"
 msgstr "自动续订 DHCPv6"
 
 msgid "We recommend enabling it when using CROSS(10Gbps) plan."
-msgstr "我们建议在使用 CROSS（10Gbps）套餐时启用该功能。"
+msgstr "我们建议在使用 CROSS(10Gbps) 套餐时启用该功能。"
+
+msgid "Tunnel Interface Firewall Zone"
+msgstr "隧道接口防火墙区域"
 
 msgid "Random Port"
 msgstr "随机端口"

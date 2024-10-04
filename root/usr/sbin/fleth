@@ -8,6 +8,7 @@ h_ENABLED=$(uci get fleth.global.enabled)
 h_TYPE=auto
 h_TUNNEL_INTERFACE=$(uci get fleth.global.interface)
 h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu)
+h_TUNNEL_INTERFACE_zone=$(uci get fleth.global.interface_zone)
 h_UPLINK_INTERFACE=$(uci get fleth.global.interface6)
 h_IP6PREFIX_ENABLED=$(uci get fleth.global.ip6prefix_enabled)
 h_CRON_DHCPV6_RENEW_ENABLED=$(uci get fleth.global.cron_dhcpv6_renew_enabled)
@@ -160,6 +161,8 @@ set_interface() {
     current_peeraddrdomain=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddrdomain)
     current_tunlink=$(uci get network.${h_UPLINK_INTERFACE}.tunlink)
     current_mtu=$(uci get network.${h_TUNNEL_INTERFACE}.mtu)
+    current_zone_index=$(uci show firewall | grep -E "firewall.@zone\[[0-9]+\].network=.*'$h_TUNNEL_INTERFACE'" | sed -n "s/.*@zone\[\([0-9]\+\)\].*/\1/p")
+    new_zone_index=$(uci show firewall | grep -E "firewall.@zone\[[0-9]+\].name='$h_TUNNEL_INTERFACE_zone'" | sed -n "s/.*@zone\[\([0-9]\+\)\].*/\1/p")
 
     if [ "$r_TYPE" = 'ds-lite' ]; then
         if [ -z "$r_AFTR" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
@@ -179,6 +182,10 @@ set network.${h_TUNNEL_INTERFACE}.mtu='${h_TUNNEL_INTERFACE_MTU}'
 set network.${h_TUNNEL_INTERFACE}.encaplimit='ignore'
 EOF
             uci delete network.${h_TUNNEL_INTERFACE}.device > /dev/null
+            if [ "$new_zone_index" != "$current_zone_index" ]; then
+                uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE"
+                uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE"
+            fi
             uci commit
             ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
             logger -t fleth "New ds-lite configuratin committed ${h_TUNNEL_INTERFACE}=${r_AFTR}"
@@ -221,10 +228,18 @@ set network.${h_TUNNEL_INTERFACE}.legacymap='1'
 set network.${h_TUNNEL_INTERFACE}.encaplimit='ignore'
 EOF
             uci delete network.${h_TUNNEL_INTERFACE}.device > /dev/null
+            if [ "$new_zone_index" != "$current_zone_index" ]; then
+                uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE"
+                uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE"
+            fi
             uci commit
             ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
             logger -t fleth "New map-e configuratin committed ${h_TUNNEL_INTERFACE}=${r_PEERADDR}"
         fi
+    elif [ "$new_zone_index" != "$current_zone_index" ]; then
+        uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE"
+        uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE"
+        uci commit firewall
     fi
     if check_interface_proto_invalid ${h_TUNNEL_INTERFACE}; then
         logger -t fleth "Network Restarting"
@@ -310,17 +325,17 @@ else
     echo "Flet'h by huggy"
     echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
     echo ""
-    echo "Usage: $0 {auto|ip6prefix|status|mape_status|get_area|get_dslite_provider|hook_none.js|restore_none.js}"
-    echo "auto                Automatically configure the network settings based on current state and config."
+    echo "Usage: fleth {auto|ip6prefix|status|mape_status|get_area|get_dslite_provider|hook_none.js|restore_none.js}"
+    echo "auto                Configure the tunnel settings based on current state and config."
+    echo "ip6prefix           Configure the IPv6 prefix process."
     echo "status              Show the current area and DS-Lite AFTR domain."
-    echo "ip6prefix           Handle the IPv6 prefix process."
     echo "mape_status         Show the current MAP-E provider details."
-    echo "get_area            Show the current area information."
     echo "get_dslite_provider Show the current DS-Lite provider details."
+    echo "get_area            Show the current area information."
     echo "hook_none.js        Install the fleth hook in none.js to hook port-forward page."
     echo "restore_none.js     Restore the none.js to its default state."
     echo ""
-    echo "To modify settings, use:"
+    echo "To modify settings, try these examples below:"
     echo "uci show fleth.global"
     echo "uci set fleth.global.enabled=1"
     echo "uci commit"

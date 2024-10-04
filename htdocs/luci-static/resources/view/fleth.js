@@ -51,28 +51,26 @@ return view.extend({
     o.cfgvalue = function () {
       return _(data.status[1]);
     };
-    if (data.mape_status.length > 1) {
-      if (data.mape_status[0] !== "UNKNOWN") {
-        const mapeFields = [
-          ["mape_provider", "MAP-E Provider"],
-          ["mape_ipaddr", "IP Address"],
-          ["mape_peeraddr", "Peer Address"],
-          ["mape_ip4prefix", "IPv4 prefix"],
-          ["mape_ip4prefixlen", "IPv4 Prefix Length"],
-          ["mape_ip6prefix", "IPv6 Prefix"],
-          ["mape_ip6prefixlen", "IPv6 Prefix Length"],
-          ["mape_ealen", "EA Length"],
-          ["mape_psidlen", "PSID Length"],
-          ["mape_offset", "Offset"],
-          ["mape_map_ports", "Available ports"],
-        ];
-        mapeFields.forEach((field, i) => {
-          let o = s.taboption("info", form.DummyValue, field[0], _(field[1]));
-          o.cfgvalue = function () {
-            return data.mape_status[i];
-          };
-        });
-      }
+    if (data.mape_status.length > 1 && data.mape_status[0] !== "UNKNOWN") {
+      const mapeFields = [
+        ["mape_provider", "MAP-E Provider"],
+        ["mape_ipaddr", "IP Address"],
+        ["mape_peeraddr", "Peer Address"],
+        ["mape_ip4prefix", "IPv4 prefix"],
+        ["mape_ip4prefixlen", "IPv4 Prefix Length"],
+        ["mape_ip6prefix", "IPv6 Prefix"],
+        ["mape_ip6prefixlen", "IPv6 Prefix Length"],
+        ["mape_ealen", "EA Length"],
+        ["mape_psidlen", "PSID Length"],
+        ["mape_offset", "Offset"],
+        ["mape_map_ports", "Available ports"],
+      ];
+      mapeFields.forEach((field, i) => {
+        let o = s.taboption("info", form.DummyValue, field[0], _(field[1]));
+        o.cfgvalue = function () {
+          return data.mape_status[i];
+        };
+      });
     } else {
       o = s.taboption(
         "info",
@@ -86,10 +84,10 @@ return view.extend({
     }
 
     // o = s.taboption('general', form.Button, '_hook_luci-firewall-port-forward');
-		// o.title      = '&#160;';
-		// o.inputtitle = _('Hook Port Forward in firewall');
-		// o.inputstyle = 'apply';
-		// o.onclick = L.bind(this.hookFW, this, m);
+    // o.title      = '&#160;';
+    // o.inputtitle = _('Hook Port Forward in firewall');
+    // o.inputstyle = 'apply';
+    // o.onclick = L.bind(this.hookFW, this, m);
 
     o = s.taboption(
       "general",
@@ -130,12 +128,6 @@ return view.extend({
     // o.rmempty = false;
     // o.default = "0";
 
-    // o = s.taboption('general', form.ListValue, 'type', _('Tunnel Type'), _('Now only support DS-Lite'))
-    // o.value('auto', _('Auto'))
-    // o.value('ds-lite', _('DS-Lite'))
-    // o.value('map-e', _('MAP-E'))
-    // o.default = 'auto'
-
     o = s.taboption(
       "general",
       widgets.DeviceSelect,
@@ -167,6 +159,15 @@ return view.extend({
     o.noaliases = true;
     o.default = "1460";
 
+    o = s.taboption(
+      "general",
+      widgets.ZoneSelect,
+      "interface_zone",
+      _("Tunnel Interface Firewall Zone")
+    );
+    o.nocreate = true;
+    o.default = "wan";
+
     return m.render();
-  }
+  },
 });
