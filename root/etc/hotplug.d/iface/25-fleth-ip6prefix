@@ -1,7 +1,0 @@
-#!/bin/ash
-# author: huggy<fleth@huggy.moe>
-h_UPLINK_INTERFACE=$(uci get fleth.global.interface6)
-
-[ "$ACTION" = "ifup" ] && [ "$INTERFACE" = "$h_UPLINK_INTERFACE" ]&& {
-    ACTION=ifup /usr/sbin/fleth ip6prefix &
-}

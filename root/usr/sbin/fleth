@@ -297,30 +297,9 @@ elif [ "$1" = "hook_none.js" ]; then
 elif [ "$1" = "restore_none.js" ]; then
     printf "'use strict';'require network';return network.registerProtocol('none',{getI18n:function(){return _('Unmanaged');}});" > /www/luci-static/resources/protocol/none.js
 elif [ "$h_IP6PREFIX_ENABLED" -eq 1 ] && [ "$1" = "ip6prefix" ]; then
-    TRIES=0
-    MAX_TRIES=30
-    current_prefix=$(uci get network.${h_UPLINK_INTERFACE}.ip6prefix) > /dev/null
-    while [ $TRIES -lt $MAX_TRIES ]; do
-        ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | grep '"address"' | awk -F '"' '{print $4}' | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
-        if [ -n "$ipv6_address" ]; then
-            pd_prefix=$(echo $ipv6_address | cut -d ':' -f 1-4)::/64
-            if [ "$pd_prefix" != "$current_prefix" ]; then
-                logger -t fleth "Got new PD with ${h_UPLINK_INTERFACE}=${pd_prefix}"
-                uci set network.${h_UPLINK_INTERFACE}.ip6prefix=${pd_prefix}
-                uci commit
-                if [ "$h_ENABLED" -eq 1 ] && [ "$ACTION" = "ifup" ]; then
-                    sleep 10
-                    /usr/sbin/fleth auto
-                fi
-            fi
-            break
-        fi
-        sleep 1
-        TRIES=$((TRIES + 1))
-    done
-    if [ $TRIES -ge $MAX_TRIES ]; then
-        logger -t fleth "Failed to obtain a valid IPv6 address after $MAX_TRIES attempts."
-    fi
+    uci set network.${h_UPLINK_INTERFACE}.extendprefix=1
+    uci delete network.${h_UPLINK_INTERFACE}.ip6prefix
+    uci commit network.${h_UPLINK_INTERFACE}
 else
     echo "Flet'h by huggy"
     echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
