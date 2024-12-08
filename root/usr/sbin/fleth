@@ -253,6 +253,7 @@ if [ "$1" = "auto" ]; then
         $0 ip6prefix &
     elif [ "$h_IP6PREFIX_ENABLED" == "0" ]; then
         uci delete network.${h_UPLINK_INTERFACE}.ip6prefix
+        uci delete network.${h_UPLINK_INTERFACE}.extendprefix
         uci commit
     fi
     if [ "$h_CRON_DHCPV6_RENEW_ENABLED" == "1" ]; then

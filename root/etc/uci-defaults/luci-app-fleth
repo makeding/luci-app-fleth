@@ -1,6 +1,6 @@
 #!/bin/sh
 
-chmod +x /usr/sbin/fleth /etc/init.d/fleth /etc/hotplug.d/iface/25-fleth-ip6prefix /etc/hotplug.d/iface/70-fleth-cross-dhcpv6-renew
+chmod +x /usr/sbin/fleth /etc/init.d/fleth /etc/hotplug.d/iface/70-fleth-cross-dhcpv6-renew
 
 if [ ! -f /etc/config/fleth ]; then
     cat <<EOF > /etc/config/fleth
