@@ -11,7 +11,7 @@ msgid "Area"
 msgstr "エリア"
 
 msgid "EAST"
-msgstr "東日本"
+msgstr "EAST"
 
 msgid "WEST"
 msgstr "西日本"
