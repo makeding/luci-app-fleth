@@ -11,109 +11,22 @@ fleth_style.innerHTML = `.cbi-value-field { padding-top: 6px;}</style>`;
 document.head.appendChild(fleth_style);
 
 return view.extend({
-  // ¿
-  load: async function () {
-    // Return empty data immediately to allow page to render
-    return {
-      status: [_("Loading..."), _("Loading...")],
-      mape_status: [_("Loading...")],
-    };
-  },
-  
-  // Function to execute command with timeout
-  execWithTimeout: function(cmd, args, timeout) {
-    return Promise.race([
-      fs.exec(cmd, args),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Command timeout')), timeout)
-      )
-    ]).catch(err => {
-      console.warn(`Command failed: ${cmd} ${args.join(' ')}`, err);
-      return { stdout: "" };
+  load: function () {
+    return Promise.all([
+      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
+      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_dslite_provider"]), { stdout: "" }),
+      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
+    ]).then(function (results) {
+      const area = (results[0].stdout || "").trim();
+      const dslite_provider = (results[1].stdout || "").trim();
+      const mape_status = (results[2].stdout || "").split("\n");
+
+      return {
+        area: area || "UNKNOWN",
+        dslite_provider: dslite_provider || "UNKNOWN",
+        mape_status: mape_status,
+      };
     });
-  },
-  
-  // Load status data asynchronously after page render
-  loadStatusAsync: async function() {
-    try {
-      // Execute both commands in parallel with timeout
-      const [statusResult, mapeResult] = await Promise.all([
-        this.execWithTimeout("/usr/sbin/fleth", ["status"], 5000),
-        this.execWithTimeout("/usr/sbin/fleth", ["mape_status"], 5000)
-      ]);
-      
-      const status = (statusResult.stdout || "").split("\n");
-      const mape_status = (mapeResult.stdout || "").split("\n");
-      
-      // Update area field
-      const areaElem = document.querySelector('[data-name="area"] .cbi-value-field');
-      let areaValue = status[0] || "UNKNOWN";
-      if (areaElem && status[0]) {
-        areaElem.textContent = _(status[0] || "UNKNOWN");
-      }
-      
-      // Update DS-Lite provider field
-      const dsliteElem = document.querySelector('[data-name="dslite_privider"] .cbi-value-field');
-      let dsliteValue = status[1] || "UNKNOWN";
-      if (dsliteElem && status[1]) {
-        dsliteElem.textContent = _(status[1] || "UNKNOWN");
-      }
-      
-      // Update MAP-E fields
-      let mapeIsUnknown = true;
-      if (mape_status.length > 1 && mape_status[0] !== "UNKNOWN") {
-        mapeIsUnknown = false;
-        const mapeFields = [
-          "mape_provider", "mape_ipaddr", "mape_peeraddr", 
-          "mape_ip4prefix", "mape_ip4prefixlen", "mape_ip6prefix",
-          "mape_ip6prefixlen", "mape_ealen", "mape_psidlen",
-          "mape_offset", "mape_map_ports"
-        ];
-        
-        mapeFields.forEach((field, i) => {
-          const elem = document.querySelector(`[data-name="${field}"] .cbi-value-field`);
-          if (elem && mape_status[i]) {
-            elem.textContent = mape_status[i];
-          }
-        });
-      } else {
-        // Update MAP-E Provider to UNKNOWN when not available
-        const mapeProviderElem = document.querySelector('[data-name="mape_provider"] .cbi-value-field');
-        if (mapeProviderElem) {
-          mapeProviderElem.textContent = _("UNKNOWN");
-        }
-      }
-      
-      // Check pending status when area is not UNKNOWN but both DSLite and MAP-E are UNKNOWN
-      if (areaValue !== "UNKNOWN" && dsliteValue === "UNKNOWN" && mapeIsUnknown) {
-        try {
-          const pendingResult = await this.execWithTimeout("/usr/sbin/fleth", ["pending_status"], 5000);
-          const pendingStatus = (pendingResult.stdout || "").trim();
-          
-          if (pendingStatus === "_pending") {
-            // Update area field to show pending status
-            if (areaElem) {
-              areaElem.textContent = _(areaValue) + " " + _("(Service Pending)");
-            }
-          }
-        } catch (error) {
-          console.warn("Failed to check pending status:", error);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to load status data:", error);
-      
-      // Set error state for fields
-      const areaElem = document.querySelector('[data-name="area"] .cbi-value-field');
-      if (areaElem) {
-        areaElem.textContent = _("Failed to load");
-      }
-      
-      const dsliteElem = document.querySelector('[data-name="dslite_privider"] .cbi-value-field');
-      if (dsliteElem) {
-        dsliteElem.textContent = _("Failed to load");
-      }
-    }
   },
   
   render: async function (data) {
@@ -133,7 +46,7 @@ return view.extend({
 
     o = s.taboption("info", form.DummyValue, "area", _("Area"));
     o.cfgvalue = function () {
-      return _(data.status[0]);
+      return data.area;
     };
 
     o = s.taboption(
@@ -143,39 +56,47 @@ return view.extend({
       _("DS-Lite Provider")
     );
     o.cfgvalue = function () {
-      return _(data.status[1]);
+      return data.dslite_provider;
     };
-    if (data.mape_status.length > 1 && data.mape_status[0] !== "UNKNOWN" && data.mape_status[0] !== _("Loading...")) {
-      const mapeFields = [
-        ["mape_provider", "MAP-E Provider"],
-        ["mape_ipaddr", "IP Address"],
-        ["mape_peeraddr", "Peer Address"],
-        ["mape_ip4prefix", "IPv4 prefix"],
-        ["mape_ip4prefixlen", "IPv4 Prefix Length"],
-        ["mape_ip6prefix", "IPv6 Prefix"],
-        ["mape_ip6prefixlen", "IPv6 Prefix Length"],
-        ["mape_ealen", "EA Length"],
-        ["mape_psidlen", "PSID Length"],
-        ["mape_offset", "Offset"],
-        ["mape_map_ports", "Available ports"],
-      ];
-      mapeFields.forEach((field, i) => {
-        let o = s.taboption("info", form.DummyValue, field[0], _(field[1]));
-        o.cfgvalue = function () {
-          return data.mape_status[i];
-        };
-      });
-    } else {
-      o = s.taboption(
-        "info",
-        form.DummyValue,
-        "mape_provider",
-        _("MAP-E Provider")
-      );
+    
+    // Create all MAP-E fields
+    const mapeFields = [
+      ["mape_provider", "MAP-E Provider"],
+      ["mape_ipaddr", "IP Address"],
+      ["mape_peeraddr", "Peer Address"],
+      ["mape_ip4prefix", "IPv4 prefix"],
+      ["mape_ip4prefixlen", "IPv4 Prefix Length"],
+      ["mape_ip6prefix", "IPv6 Prefix"],
+      ["mape_ip6prefixlen", "IPv6 Prefix Length"],
+      ["mape_ealen", "EA Length"],
+      ["mape_psidlen", "PSID Length"],
+      ["mape_offset", "Offset"],
+      ["mape_map_ports", "Available ports"],
+    ];
+    
+    // Check if we should hide MAP-E details initially
+    const shouldHideMapeDetails = data.mape_status[0] === "UNKNOWN" || 
+                                   data.mape_status.length <= 1;
+    
+    // Create all MAP-E fields
+    mapeFields.forEach((field, i) => {
+      const [fieldName, fieldLabel] = field;
+      o = s.taboption("info", form.DummyValue, fieldName, _(fieldLabel));
       o.cfgvalue = function () {
-        return data.mape_status[0] === _("Loading...") ? _("Loading...") : _("UNKNOWN");
+        if (i === 0) {  // MAP-E Provider field
+          return data.mape_status[0] || _("UNKNOWN");
+        }
+        return data.mape_status[i] || "";
       };
-    }
+      // Add a class to identify MAP-E detail fields for hiding
+      if (i > 0 && shouldHideMapeDetails) {
+        o.rmempty = false;
+        o.editable = false;
+        // We'll hide these with CSS after render
+        o.modalonly = false;
+        o.optional = true;
+      }
+    });
 
     // o = s.taboption('general', form.Button, '_hook_luci-firewall-port-forward');
     // o.title      = '&#160;';
@@ -261,9 +182,24 @@ return view.extend({
     );
     o.nocreate = true;
     o.default = "wan";
-
-    // Start async loading of status data after render
-    setTimeout(() => this.loadStatusAsync(), 100);
+    
+    // Hide MAP-E detail fields initially if no valid data
+    setTimeout(() => {
+      if (data.mape_status[0] === "UNKNOWN" || 
+          data.mape_status.length <= 1) {
+        const mapeDetailFields = [
+          "mape_ipaddr", "mape_peeraddr", "mape_ip4prefix", "mape_ip4prefixlen",
+          "mape_ip6prefix", "mape_ip6prefixlen", "mape_ealen", "mape_psidlen",
+          "mape_offset", "mape_map_ports"
+        ];
+        mapeDetailFields.forEach(field => {
+          const fieldContainer = document.querySelector(`[data-name="${field}"]`);
+          if (fieldContainer) {
+            fieldContainer.style.display = 'none';
+          }
+        });
+      }
+    }, 100);
     
     return m.render();
   },
