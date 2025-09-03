@@ -14,18 +14,32 @@ return view.extend({
   load: function () {
     return Promise.all([
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
-      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_dslite_provider"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
     ]).then(function (results) {
       const area = (results[0].stdout || "").trim();
-      const dslite_provider = (results[1].stdout || "").trim();
-      const mape_status = (results[2].stdout || "").split("\n");
-
-      return {
-        area: area || "UNKNOWN",
-        dslite_provider: dslite_provider || "UNKNOWN",
-        mape_status: mape_status,
-      };
+      const mape_status = (results[1].stdout || "").split("\n");
+      
+      const areaValue = area || "UNKNOWN";
+      const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
+      
+      // Only get DS-Lite if area is not UNKNOWN and MAP-E is UNKNOWN
+      if (areaValue !== "UNKNOWN" && mapeIsUnknown) {
+        return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_dslite_provider"]), { stdout: "" })
+          .then(function (dsliteResult) {
+            const dslite_provider = (dsliteResult.stdout || "").trim();
+            return {
+              area: areaValue,
+              dslite_provider: dslite_provider || "UNKNOWN",
+              mape_status: mape_status,
+            };
+          });
+      } else {
+        return {
+          area: areaValue,
+          dslite_provider: "UNKNOWN",
+          mape_status: mape_status,
+        };
+      }
     });
   },
   
