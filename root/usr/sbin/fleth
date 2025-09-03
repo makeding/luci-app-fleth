@@ -60,7 +60,27 @@ get_area(){
             fi
         fi
     fi
+    
     echo $e_AREA
+}
+
+get_pending_status(){
+    # Check if IPv6 address is in specific ranges to determine pending status
+    local ipv6=$(get_uplink_interface_ipv6)
+    if [ -n "$ipv6" ]; then
+        # East ranges: 2001:c90::/32, 2404:1a8::/32, 2408::/22
+        if echo "$ipv6" | grep -qE '^2001:c90:|^2404:1a8:|^2408:|^2409:|^240a:|^240b:'; then
+            logger -t fleth "Detected East IPv6 address in pending state: $ipv6"
+            echo "_pending"
+            return
+        # West ranges: 2001:d70::/30, 2001:a000::/21
+        elif echo "$ipv6" | grep -qE '^2001:d70:|^2001:d71:|^2001:d72:|^2001:d73:|^2001:a0[0-7]'; then
+            logger -t fleth "Detected West IPv6 address in pending state: $ipv6"
+            echo "_pending"
+            return
+        fi
+    fi
+    echo ""
 }
 
 get_AAAA_record() {
@@ -278,14 +298,14 @@ if [ "$1" = "auto" ]; then
 elif [ "$1" = "status" ]; then
     get_area > /dev/null
     get_dslite_provider > /dev/null
-    echo $e_AREA
+    echo ${e_AREA}${e_SERVICE_STATUS}
     echo $r_AFTR_DOMAIN
 elif [ "$1" = "mape_status" ]; then
     get_uplink_interface_ipv6 > /dev/null
     get_mape_provider
 elif [ "$1" = "get_area" ]; then
     get_area > /dev/null
-    echo $e_AREA
+    echo ${e_AREA}${e_SERVICE_STATUS}
 elif [ "$1" = "get_dslite_provider" ]; then
     get_area > /dev/null
     get_dslite_provider > /dev/null
