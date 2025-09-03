@@ -298,18 +298,20 @@ if [ "$1" = "auto" ]; then
 elif [ "$1" = "status" ]; then
     get_area > /dev/null
     get_dslite_provider > /dev/null
-    echo ${e_AREA}${e_SERVICE_STATUS}
+    echo ${e_AREA}
     echo $r_AFTR_DOMAIN
 elif [ "$1" = "mape_status" ]; then
     get_uplink_interface_ipv6 > /dev/null
     get_mape_provider
 elif [ "$1" = "get_area" ]; then
     get_area > /dev/null
-    echo ${e_AREA}${e_SERVICE_STATUS}
+    echo ${e_AREA}
 elif [ "$1" = "get_dslite_provider" ]; then
     get_area > /dev/null
     get_dslite_provider > /dev/null
     echo $r_AFTR_DOMAIN
+elif [ "$1" = "pending_status" ]; then
+    get_pending_status
 elif [ "$1" = "hook_none.js" ]; then
     if ! grep -q 'fleth-hook.js' /www/luci-static/resources/protocol/none.js; then
         $0 restore_none.js
@@ -325,13 +327,14 @@ else
     echo "Flet'h by huggy"
     echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
     echo ""
-    echo "Usage: fleth {auto|ip6prefix|status|mape_status|get_area|get_dslite_provider|hook_none.js|restore_none.js}"
+    echo "Usage: fleth {auto|ip6prefix|status|mape_status|get_area|get_dslite_provider|pending_status|hook_none.js|restore_none.js}"
     echo "auto                Configure the tunnel settings based on current state and config."
     echo "ip6prefix           Configure the IPv6 prefix process."
     echo "status              Show the current area and DS-Lite AFTR domain."
     echo "mape_status         Show the current MAP-E provider details."
     echo "get_dslite_provider Show the current DS-Lite provider details."
     echo "get_area            Show the current area information."
+    echo "pending_status      Show if the service is in pending state."
     echo "hook_none.js        Install the fleth hook in none.js to hook port-forward page."
     echo "restore_none.js     Restore the none.js to its default state."
     echo ""

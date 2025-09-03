@@ -88,8 +88,8 @@ msgstr "我们建议在 MAP-E 和 DS-Lite 中将 MTU 设置为 1460。"
 msgid "Auto Renew DHCPv6"
 msgstr "自动续订 DHCPv6"
 
-msgid "If you subscribe the CROSS plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue."
-msgstr "当您契约 CROSS（クロス）方案时，如果遇到1天左右会断网的情况，可以打开此选项以缓解。"
+msgid "If you subscribe the CROSS(10Gbps) plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue."
+msgstr "当您契约 CROSS（クロス）10Gbps 方案时，可能会遇到大约每天断线一次的情况。启用此选项可能有助于缓解此问题。"
 
 msgid "Tunnel Interface Firewall Zone"
 msgstr "隧道接口防火墙区域"
@@ -99,3 +99,6 @@ msgstr "随机端口"
 
 msgid "You can't access this port from MAP-E interface"
 msgstr "您无法从 MAP-E 接口访问该端口"
+
+msgid "(Service Pending)"
+msgstr "(服务待开通)"

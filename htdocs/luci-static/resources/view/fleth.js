@@ -47,18 +47,22 @@ return view.extend({
       
       // Update area field
       const areaElem = document.querySelector('[data-name="area"] .cbi-value-field');
+      let areaValue = status[0] || "UNKNOWN";
       if (areaElem && status[0]) {
         areaElem.textContent = _(status[0] || "UNKNOWN");
       }
       
       // Update DS-Lite provider field
       const dsliteElem = document.querySelector('[data-name="dslite_privider"] .cbi-value-field');
+      let dsliteValue = status[1] || "UNKNOWN";
       if (dsliteElem && status[1]) {
         dsliteElem.textContent = _(status[1] || "UNKNOWN");
       }
       
       // Update MAP-E fields
+      let mapeIsUnknown = true;
       if (mape_status.length > 1 && mape_status[0] !== "UNKNOWN") {
+        mapeIsUnknown = false;
         const mapeFields = [
           "mape_provider", "mape_ipaddr", "mape_peeraddr", 
           "mape_ip4prefix", "mape_ip4prefixlen", "mape_ip6prefix",
@@ -77,6 +81,23 @@ return view.extend({
         const mapeProviderElem = document.querySelector('[data-name="mape_provider"] .cbi-value-field');
         if (mapeProviderElem) {
           mapeProviderElem.textContent = _("UNKNOWN");
+        }
+      }
+      
+      // Check pending status when area is not UNKNOWN but both DSLite and MAP-E are UNKNOWN
+      if (areaValue !== "UNKNOWN" && dsliteValue === "UNKNOWN" && mapeIsUnknown) {
+        try {
+          const pendingResult = await this.execWithTimeout("/usr/sbin/fleth", ["pending_status"], 5000);
+          const pendingStatus = (pendingResult.stdout || "").trim();
+          
+          if (pendingStatus === "_pending") {
+            // Update area field to show pending status
+            if (areaElem) {
+              areaElem.textContent = _(areaValue) + " " + _("(Service Pending)");
+            }
+          }
+        } catch (error) {
+          console.warn("Failed to check pending status:", error);
         }
       }
     } catch (error) {
@@ -186,7 +207,7 @@ return view.extend({
       form.Flag,
       "cron_dhcpv6_renew_enabled",
       _("Auto Renew DHCPv6"),
-      _("We recommend enabling it when using CROSS(10Gbps) plan.")
+      _("If you subscribe the CROSS(10Gbps) plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue.")
     );
     o.rmempty = false;
     o.default = "0";
