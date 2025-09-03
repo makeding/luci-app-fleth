@@ -85,7 +85,7 @@ get_pending_status(){
 
 get_AAAA_record() {
     local domain=$1
-    result=$(timeout 2 nslookup -type=AAAA $domain $DNS 2>/dev/null | grep "Address:")
+    result=$(nslookup -type=AAAA $domain $DNS 2>/dev/null | grep "Address:")
     if [ -n "$result" ]; then
         # get line=2
         echo "$result" | awk 'NR==2' | awk '{print $2}'
@@ -332,9 +332,9 @@ else
     echo "ip6prefix           Configure the IPv6 prefix process."
     echo "status              Show the current area and DS-Lite AFTR domain."
     echo "mape_status         Show the current MAP-E provider details."
+    echo "pending_status      Show if the service is in pending state."
     echo "get_dslite_provider Show the current DS-Lite provider details."
     echo "get_area            Show the current area information."
-    echo "pending_status      Show if the service is in pending state."
     echo "hook_none.js        Install the fleth hook in none.js to hook port-forward page."
     echo "restore_none.js     Restore the none.js to its default state."
     echo ""
