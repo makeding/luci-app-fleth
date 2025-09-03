@@ -22,6 +22,12 @@ msgstr "DS-Lite 提供商"
 msgid "UNKNOWN"
 msgstr "未知"
 
+msgid "Loading..."
+msgstr "載入中..."
+
+msgid "Failed to load"
+msgstr "載入失敗"
+
 msgid "MAP-E Provider"
 msgstr "MAP-E 提供商"
 
@@ -67,7 +73,7 @@ msgstr "我們建議在 MAP-E 中啟用此選項，並且在不使用光電話�
 msgid "IPv6 Interface"
 msgstr "IPv6 介面"
 
-msgid "Uplink interface"
+msgid "Uplink Interface"
 msgstr "上行介面"
 
 msgid "Tunnel Interface"
@@ -83,7 +89,7 @@ msgid "Auto Renew DHCPv6"
 msgstr "自動續訂 DHCPv6"
 
 msgid "We recommend enabling it when using CROSS(10G) plan."
-msgstr "我們建議在使用 CROSS(10Gbps) 方案時啟用該功能。"
+msgstr "當您訂閱 CROSS（クロス）方案時，如果遇到大約 1 天斷網的情況，可以啟用此選項以緩解。"
 
 msgid "Tunnel Interface Firewall Zone"
 msgstr "隧道介面防火牆區域"

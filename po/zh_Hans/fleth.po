@@ -22,6 +22,12 @@ msgstr "DS-Lite 提供商"
 msgid "UNKNOWN"
 msgstr "未知"
 
+msgid "Loading..."
+msgstr "加载中..."
+
+msgid "Failed to load"
+msgstr "加载失败"
+
 msgid "MAP-E Provider"
 msgstr "MAP-E 提供商"
 
@@ -67,7 +73,7 @@ msgstr "我们建议您在 MAP-E 并且在不使用光电话时中启用此选�
 msgid "IPv6 Interface"
 msgstr "IPv6 接口"
 
-msgid "Uplink interface"
+msgid "Uplink Interface"
 msgstr "上行接口"
 
 msgid "Tunnel Interface"
@@ -82,8 +88,8 @@ msgstr "我们建议在 MAP-E 和 DS-Lite 中将 MTU 设置为 1460。"
 msgid "Auto Renew DHCPv6"
 msgstr "自动续订 DHCPv6"
 
-msgid "We recommend enabling it when using CROSS(10Gbps) plan."
-msgstr "我们建议在使用 CROSS(10Gbps) 套餐时启用该功能。"
+msgid "If you subscribe the CROSS plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue."
+msgstr "当您契约 CROSS（クロス）方案时，如果遇到1天左右会断网的情况，可以打开此选项以缓解。"
 
 msgid "Tunnel Interface Firewall Zone"
 msgstr "隧道接口防火墙区域"

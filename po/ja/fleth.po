@@ -22,6 +22,12 @@ msgstr "DS-Lite プロバイダ"
 msgid "UNKNOWN"
 msgstr "不明"
 
+msgid "Loading..."
+msgstr "読み込み中..."
+
+msgid "Failed to load"
+msgstr "読み込みに失敗しました"
+
 msgid "MAP-E Provider"
 msgstr "MAP-E プロバイダ"
 
@@ -67,7 +73,7 @@ msgstr "※MAP-Eユーザー：ひかり電話を利用していない場合は�
 msgid "IPv6 Interface"
 msgstr "IPv6 インターフェース"
 
-msgid "Uplink interface"
+msgid "Uplink Interface"
 msgstr "アップリンク インターフェース"
 
 msgid "Tunnel Interface"
@@ -82,8 +88,8 @@ msgstr "※MAP-EおよびDS-Liteユーザー：MTUを1460に設定すること�
 msgid "Auto Renew DHCPv6"
 msgstr "DHCPv6リースを自動的に更新"
 
-msgid "We recommend enabling it when using CROSS(10Gbps) plan."
-msgstr "※クロス(10ギガ)プランを使用する場合は、有効にすることをお勧めします。"
+msgid "If you subscribe to the CROSS plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue."
+msgstr "※クロス(10ギガ)プランを契約している場合は、約1日ごとに回線が切断される問題が発生する場合があります。<br> このオプションを有効にすると、緩和できる可能性があります。"
 
 msgid "Tunnel Interface Firewall Zone"
 msgstr "トンネル インターフェース ファイアウォール ゾーン"

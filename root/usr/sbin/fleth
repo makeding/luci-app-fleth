@@ -65,7 +65,7 @@ get_area(){
 
 get_AAAA_record() {
     local domain=$1
-    result=$(nslookup -type=AAAA $domain $DNS | grep "Address:")
+    result=$(timeout 2 nslookup -type=AAAA $domain $DNS 2>/dev/null | grep "Address:")
     if [ -n "$result" ]; then
         # get line=2
         echo "$result" | awk 'NR==2' | awk '{print $2}'

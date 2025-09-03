@@ -13,15 +13,88 @@ document.head.appendChild(fleth_style);
 return view.extend({
   // ¿
   load: async function () {
+    // Return empty data immediately to allow page to render
     return {
-      status: (
-        (await fs.exec("/usr/sbin/fleth", ["status"])).stdout || ""
-      ).split("\n"),
-      mape_status: (
-        (await fs.exec("/usr/sbin/fleth", ["mape_status"])).stdout || ""
-      ).split("\n"),
+      status: [_("Loading..."), _("Loading...")],
+      mape_status: [_("Loading...")],
     };
   },
+  
+  // Function to execute command with timeout
+  execWithTimeout: function(cmd, args, timeout) {
+    return Promise.race([
+      fs.exec(cmd, args),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Command timeout')), timeout)
+      )
+    ]).catch(err => {
+      console.warn(`Command failed: ${cmd} ${args.join(' ')}`, err);
+      return { stdout: "" };
+    });
+  },
+  
+  // Load status data asynchronously after page render
+  loadStatusAsync: async function() {
+    try {
+      // Execute both commands in parallel with timeout
+      const [statusResult, mapeResult] = await Promise.all([
+        this.execWithTimeout("/usr/sbin/fleth", ["status"], 5000),
+        this.execWithTimeout("/usr/sbin/fleth", ["mape_status"], 5000)
+      ]);
+      
+      const status = (statusResult.stdout || "").split("\n");
+      const mape_status = (mapeResult.stdout || "").split("\n");
+      
+      // Update area field
+      const areaElem = document.querySelector('[data-name="area"] .cbi-value-field');
+      if (areaElem && status[0]) {
+        areaElem.textContent = _(status[0] || "UNKNOWN");
+      }
+      
+      // Update DS-Lite provider field
+      const dsliteElem = document.querySelector('[data-name="dslite_privider"] .cbi-value-field');
+      if (dsliteElem && status[1]) {
+        dsliteElem.textContent = _(status[1] || "UNKNOWN");
+      }
+      
+      // Update MAP-E fields
+      if (mape_status.length > 1 && mape_status[0] !== "UNKNOWN") {
+        const mapeFields = [
+          "mape_provider", "mape_ipaddr", "mape_peeraddr", 
+          "mape_ip4prefix", "mape_ip4prefixlen", "mape_ip6prefix",
+          "mape_ip6prefixlen", "mape_ealen", "mape_psidlen",
+          "mape_offset", "mape_map_ports"
+        ];
+        
+        mapeFields.forEach((field, i) => {
+          const elem = document.querySelector(`[data-name="${field}"] .cbi-value-field`);
+          if (elem && mape_status[i]) {
+            elem.textContent = mape_status[i];
+          }
+        });
+      } else {
+        // Update MAP-E Provider to UNKNOWN when not available
+        const mapeProviderElem = document.querySelector('[data-name="mape_provider"] .cbi-value-field');
+        if (mapeProviderElem) {
+          mapeProviderElem.textContent = _("UNKNOWN");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load status data:", error);
+      
+      // Set error state for fields
+      const areaElem = document.querySelector('[data-name="area"] .cbi-value-field');
+      if (areaElem) {
+        areaElem.textContent = _("Failed to load");
+      }
+      
+      const dsliteElem = document.querySelector('[data-name="dslite_privider"] .cbi-value-field');
+      if (dsliteElem) {
+        dsliteElem.textContent = _("Failed to load");
+      }
+    }
+  },
+  
   render: async function (data) {
     let m, s, o;
 
@@ -51,7 +124,7 @@ return view.extend({
     o.cfgvalue = function () {
       return _(data.status[1]);
     };
-    if (data.mape_status.length > 1 && data.mape_status[0] !== "UNKNOWN") {
+    if (data.mape_status.length > 1 && data.mape_status[0] !== "UNKNOWN" && data.mape_status[0] !== _("Loading...")) {
       const mapeFields = [
         ["mape_provider", "MAP-E Provider"],
         ["mape_ipaddr", "IP Address"],
@@ -79,7 +152,7 @@ return view.extend({
         _("MAP-E Provider")
       );
       o.cfgvalue = function () {
-        return _("UNKNOWN");
+        return data.mape_status[0] === _("Loading...") ? _("Loading...") : _("UNKNOWN");
       };
     }
 
@@ -168,6 +241,9 @@ return view.extend({
     o.nocreate = true;
     o.default = "wan";
 
+    // Start async loading of status data after render
+    setTimeout(() => this.loadStatusAsync(), 100);
+    
     return m.render();
   },
 });
