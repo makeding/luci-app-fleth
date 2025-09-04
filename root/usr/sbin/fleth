@@ -339,7 +339,7 @@ set dhcp.wan6.interface='wan6'
 set dhcp.wan6.master='1'
 set dhcp.wan6.ra='relay'
 set dhcp.wan6.ndp='relay'
-set dhcp.wan6.dhcpv6='relay'
+del dhcp.wan6.dhcpv6
 EOF
     
     # Configure lan interface for DHCP server with IPv6
@@ -376,7 +376,7 @@ EOF
 set dhcp.wan6=dhcp
 set dhcp.wan6.interface='wan6'
 set dhcp.wan6.master='1'
-set dhcp.wan6.ra='relay'
+del dhcp.wan6.ra
 set dhcp.wan6.dhcpv6='relay'
 del dhcp.wan6.ndp
 EOF
