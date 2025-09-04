@@ -4,6 +4,7 @@
 DNS_E=2404:1a8:7f01:a::3
 DNS_W=2001:a7ff:5f01::a
 
+# Note: UCI variables are not validated here as malicious modification
 h_ENABLED=$(uci get fleth.global.enabled)
 h_TYPE=auto
 h_TUNNEL_INTERFACE=$(uci get fleth.global.interface)
@@ -68,15 +69,16 @@ get_pending_status(){
     # Check if IPv6 address is in specific ranges to determine pending status
     local ipv6=$(get_uplink_interface_ipv6)
     if [ -n "$ipv6" ]; then
-        # East ranges: 2001:c90::/32, 2404:1a8::/32, 2408::/22
-        if echo "$ipv6" | grep -qE '^2001:c90:|^2404:1a8:|^2408:|^2409:|^240a:|^240b:'; then
+        # East: 2001:c90::/32, 2404:1a8::/32, 2408::/22
+        # https://bgp.he.net/net/2408::/22#_rdap
+        if echo "$ipv6" | grep -qE '^2001:c90:|^2404:1a8:|^2408:(?:[0-3][0-9a-f]{0,2})?:'; then
             logger -t fleth "Detected East IPv6 address in pending state: $ipv6"
-            echo "_pending"
+            echo "EAST_pending"
             return
-        # West ranges: 2001:d70::/30, 2001:a000::/21
-        elif echo "$ipv6" | grep -qE '^2001:d70:|^2001:d71:|^2001:d72:|^2001:d73:|^2001:a0[0-7]'; then
+        # West: 2001:d70::/30, 2001:a000::/21
+        elif echo "$ipv6" | grep -qE '^2001:d7[0-3]:|^2001:a0[0-7]'; then
             logger -t fleth "Detected West IPv6 address in pending state: $ipv6"
-            echo "_pending"
+            echo "WEST_pending"
             return
         fi
     fi
@@ -285,8 +287,8 @@ if [ "$1" = "auto" ]; then
         get_uplink_interface_ipv6 > /dev/null
         get_mape_provider > /dev/null
         if [ "$r_TYPE" = "UNKNOWN" ]; then
-            get_area
-            get_dslite_provider
+            get_area > /dev/null
+            get_dslite_provider > /dev/null
         fi
         if [ "$r_TYPE" = "UNKNOWN" ]; then
             logger -t fleth "Can't detect network type ${h_UPLINK_INTERFACE}=${ipv6_address}"
@@ -319,24 +321,108 @@ elif [ "$1" = "hook_none.js" ]; then
     fi
 elif [ "$1" = "restore_none.js" ]; then
     printf "'use strict';'require network';return network.registerProtocol('none',{getI18n:function(){return _('Unmanaged');}});" > /www/luci-static/resources/protocol/none.js
+elif [ "$1" = "setup_ipv6_slaac" ]; then
+    # Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa (/64)
+    logger -t fleth "Starting IPv6 SLAAC configuration"
+    
+    # Configure wan6 interface settings
+    uci batch <<EOF
+set network.wan6.reqaddress='try'
+del network.wan6.reqprefix
+del network.wan6.ip6assign
+EOF
+    
+    # Configure wan6 interface for DHCP relay
+    uci batch <<EOF
+set dhcp.wan6=dhcp
+set dhcp.wan6.interface='wan6'
+set dhcp.wan6.master='1'
+set dhcp.wan6.ra='relay'
+set dhcp.wan6.ndp='relay'
+set dhcp.wan6.dhcpv6='relay'
+EOF
+    
+    # Configure lan interface for DHCP server with IPv6
+    uci batch <<EOF
+set dhcp.lan=dhcp
+set dhcp.lan.interface='lan'
+set dhcp.lan.leasetime='6h'
+set dhcp.lan.dhcpv4='server'
+set dhcp.lan.ndp='relay'
+set dhcp.lan.ra='server'
+set dhcp.lan.ra_default='2'
+del dhcp.lan.ra_flags
+add_list dhcp.lan.ra_flags='managed-config'
+add_list dhcp.lan.ra_flags='other-config'
+set dhcp.lan.dhcpv6='server'
+EOF
+    
+    # Commit changes
+    uci commit dhcp
+    
+    logger -t fleth "IPv6 SLAAC configuration completed successfully"
+    echo "SUCCESS"
+elif [ "$1" = "setup_ipv6_pd" ]; then
+    # Configure IPv6 PD for enterprise or multi-subnet scenarios (/56)
+    logger -t fleth "Starting IPv6 PD configuration"
+    
+    uci batch <<EOF
+set network.wan6.reqprefix='auto'
+set network.wan6.reqaddress='try'
+set network.wan6.ip6assign='64'
+EOF
+
+    uci batch <<EOF
+set dhcp.wan6=dhcp
+set dhcp.wan6.interface='wan6'
+set dhcp.wan6.master='1'
+set dhcp.wan6.ra='relay'
+set dhcp.wan6.dhcpv6='relay'
+del dhcp.wan6.ndp
+EOF
+    
+    uci batch <<EOF
+set network.lan.ip6hint='1'
+set dhcp.lan=dhcp
+set dhcp.lan.interface='lan'
+set dhcp.lan.leasetime='6h'
+set dhcp.lan.dhcpv4='server'
+set dhcp.lan.ra='server'
+set dhcp.lan.ra_default='2'
+del dhcp.lan.ra_flags
+add_list dhcp.lan.ra_flags='managed-config'
+add_list dhcp.lan.ra_flags='other-config'
+set dhcp.lan.dhcpv6='server'
+set dhcp.lan.ra_offlink='1'
+set dhcp.lan.ra_slaac='1'
+del dhcp.lan.ndp
+EOF
+    
+    # Commit changes
+    uci commit network
+    uci commit dhcp
+    
+    logger -t fleth "IPv6 PD configuration completed successfully"
+    echo "SUCCESS"
 elif [ "$h_IP6PREFIX_ENABLED" -eq 1 ] && [ "$1" = "ip6prefix" ]; then
     uci set network.${h_UPLINK_INTERFACE}.extendprefix=1
     uci delete network.${h_UPLINK_INTERFACE}.ip6prefix
     uci commit network.${h_UPLINK_INTERFACE}
 else
     echo "Flet'h by huggy"
-    echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
+    echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically in Japan."
     echo ""
-    echo "Usage: fleth {auto|ip6prefix|status|mape_status|get_area|get_dslite_provider|pending_status|hook_none.js|restore_none.js}"
+    echo "Usage: fleth {auto|ip6prefix|mape_status|get_area|get_dslite_provider|pending_status|hook_none.js|restore_none.js|setup_ipv6_slaac|setup_ipv6_pd}"
     echo "auto                Configure the tunnel settings based on current state and config."
     echo "ip6prefix           Configure the IPv6 prefix process."
-    echo "status              Show the current area and DS-Lite AFTR domain."
-    echo "mape_status         Show the current MAP-E provider details."
     echo "pending_status      Show if the service is in pending state."
-    echo "get_dslite_provider Show the current DS-Lite provider details."
     echo "get_area            Show the current area information."
+    echo "get_dslite_provider Show the current DS-Lite provider details."
+    echo "mape_status         Show the current MAP-E provider details."
     echo "hook_none.js        Install the fleth hook in none.js to hook port-forward page."
     echo "restore_none.js     Restore the none.js to its default state."
+    echo "setup_ipv6_slaac    Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa."
+    echo "setup_ipv6_pd       Configure IPv6 PD for Cross(10Gbps) or with Hikari Denwa."
     echo ""
     echo "To modify settings, try these examples below:"
     echo "uci show fleth.global"

@@ -102,3 +102,54 @@ msgstr "您無法從 MAP-E 介面訪問此連接埠"
 
 msgid "(Service Pending)"
 msgstr "(服務待開通)"
+
+msgid "Actions"
+msgstr "動作"
+
+msgid "Actions will automatically save current configuration before execution."
+msgstr "動作將在執行前自動儲存目前設定。"
+
+msgid "Setup IPv6 SLAAC for NEXT(1Gbps) and without Hikari Denwa"
+msgstr "設定 NEXT（1Gbps）無光電話（僅 SLAAC）的 IPv6"
+
+msgid "Setting up IPv6 SLAAC"
+msgstr "設定 IPv6 SLAAC"
+
+msgid "Applying IPv6 SLAAC configuration for NEXT(1Gbps) without Hikari Denwa..."
+msgstr "正在套用 NEXT（1Gbps）無光電話（僅 SLAAC）的 IPv6 設定..."
+
+msgid "IPv6 SLAAC configuration applied successfully!"
+msgstr "IPv6 SLAAC 設定套用成功！"
+
+msgid "Failed to apply IPv6 SLAAC configuration: %s"
+msgstr "套用 IPv6 SLAAC 設定失敗：%s"
+
+msgid "Error executing IPv6 SLAAC setup: %s"
+msgstr "執行 IPv6 SLAAC 設定時出錯：%s"
+
+msgid "Setup IPv6 PD for Cross(10Gbps) or with Hikari Denwa"
+msgstr "設定 Cross（10Gbps）有光電話（PD）的 IPv6"
+
+msgid "Setting up IPv6 PD"
+msgstr "設定 IPv6 PD"
+
+msgid "Applying IPv6 PD configuration for Cross(10Gbps) or with Hikari Denwa..."
+msgstr "正在套用 Cross（10Gbps）有光電話（PD）的 IPv6 設定..."
+
+msgid "IPv6 PD configuration applied successfully!"
+msgstr "IPv6 PD 設定套用成功！"
+
+msgid "Failed to apply IPv6 PD configuration:"
+msgstr "套用 IPv6 PD 設定失敗："
+
+msgid "Error executing IPv6 PD setup:"
+msgstr "執行 IPv6 PD 設定時出錯："
+
+msgid "Service Status"
+msgstr "服務狀態"
+
+msgid "Optical line construction completed, provider configuration in progress. Please wait patiently."
+msgstr "光線路施工已完成，正在進行運營商配置。請耐心等待。"
+
+msgid "Service typically becomes available in the evening after construction is completed."
+msgstr "施工完成後，服務通常會在傍晚開通。"
