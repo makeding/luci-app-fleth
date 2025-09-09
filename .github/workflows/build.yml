@@ -10,10 +10,17 @@ on:
       - test-ci
 jobs:
   build:
-    name: Generic build
+    name: Build ${{ matrix.package_type }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+    strategy:
+      matrix:
+        include:
+          - package_type: ipk
+            arch: x86_64-22.03.2
+          - package_type: apk
+            arch: x86_64-master
     steps:
       - name: Fetch luci-app-fleth code
         uses: actions/checkout@v4
@@ -34,18 +41,11 @@ jobs:
           $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hans/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh-cn.lmo
           $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hant/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh-tw.lmo
 
-      - name: Build ipk
+      - name: Build ${{ matrix.package_type }}
         uses: openwrt/gh-action-sdk@main
         env:
           # We only use lua and shellscript, so it will worked on arm / mips router
-          ARCH: x86_64-22.03.2
-          PACKAGES: luci-app-fleth
-          FEEDNAME: huggy
-          NO_REFRESH_CHECK: true
-      - name: Build apk
-        uses: openwrt/gh-action-sdk@main
-        env:
-          ARCH: x86_64-master
+          ARCH: ${{ matrix.arch }}
           PACKAGES: luci-app-fleth
           FEEDNAME: huggy
           NO_REFRESH_CHECK: true
