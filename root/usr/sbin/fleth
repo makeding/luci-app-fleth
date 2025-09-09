@@ -297,11 +297,6 @@ if [ "$1" = "auto" ]; then
         fi
     fi
 
-elif [ "$1" = "status" ]; then
-    get_area > /dev/null
-    get_dslite_provider > /dev/null
-    echo ${e_AREA}
-    echo $r_AFTR_DOMAIN
 elif [ "$1" = "mape_status" ]; then
     get_uplink_interface_ipv6 > /dev/null
     get_mape_provider
@@ -422,7 +417,7 @@ else
     echo "hook_none.js        Install the fleth hook in none.js to hook port-forward page."
     echo "restore_none.js     Restore the none.js to its default state."
     echo "setup_ipv6_slaac    Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa."
-    echo "setup_ipv6_pd       Configure IPv6 PD for Cross(10Gbps) or with Hikari Denwa."
+    echo "setup_ipv6_pd       Configure IPv6 PD for CROSS(10Gbps) or with Hikari Denwa."
     echo ""
     echo "To modify settings, try these examples below:"
     echo "uci show fleth.global"

@@ -91,6 +91,9 @@ msgstr "自动续订 DHCPv6"
 msgid "If you subscribe the CROSS(10Gbps) plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue."
 msgstr "当您契约 CROSS（クロス）10Gbps 方案时，可能会遇到大约每天断线一次的情况。启用此选项可能有助于缓解此问题。"
 
+msgid "This option is deprecated and may be removed in future versions."
+msgstr "此选项已废弃，可能会在未来版本中移除。"
+
 msgid "Tunnel Interface Firewall Zone"
 msgstr "隧道接口防火墙区域"
 
@@ -127,14 +130,14 @@ msgstr "应用 IPv6 SLAAC 配置失败：%s"
 msgid "Error executing IPv6 SLAAC setup: %s"
 msgstr "执行 IPv6 SLAAC 设置时出错：%s"
 
-msgid "Setup IPv6 PD for Cross(10Gbps) or with Hikari Denwa"
-msgstr "设置 Cross（10Gbps）有光电话（PD）的 IPv6"
+msgid "Setup IPv6 PD for CROSS(10Gbps) or with Hikari Denwa"
+msgstr "设置 CROSS（10Gbps）有光电话（PD）的 IPv6"
 
 msgid "Setting up IPv6 PD"
 msgstr "设置 IPv6 PD"
 
-msgid "Applying IPv6 PD configuration for Cross(10Gbps) or with Hikari Denwa..."
-msgstr "正在应用 Cross（10Gbps）有光电话（PD）的 IPv6 配置..."
+msgid "Applying IPv6 PD configuration for CROSS(10Gbps) or with Hikari Denwa..."
+msgstr "正在应用 CROSS（10Gbps）有光电话（PD）的 IPv6 配置..."
 
 msgid "IPv6 PD configuration applied successfully!"
 msgstr "IPv6 PD 配置应用成功！"

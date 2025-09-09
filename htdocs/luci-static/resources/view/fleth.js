@@ -177,8 +177,8 @@ return view.extend({
       "general",
       form.Flag,
       "cron_dhcpv6_renew_enabled",
-      _("Auto Renew DHCPv6"),
-      _("If you subscribe the CROSS(10Gbps) plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue.")
+      _("Auto Renew DHCPv6") + " (Deprecated)",
+      _("If you subscribe the CROSS(10Gbps) plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue.") + " " + _("This option is deprecated and may be removed in future versions.")
     );
     o.rmempty = false;
     o.default = "0";
@@ -251,7 +251,7 @@ return view.extend({
     
     o = s.taboption("general", form.Button, "_setup_ipv6_pd");
     o.title = "&#160;";
-    o.inputtitle = _("Setup IPv6 PD for Cross(10Gbps) or with Hikari Denwa");
+    o.inputtitle = _("Setup IPv6 PD for CROSS(10Gbps) or with Hikari Denwa");
     o.inputstyle = "apply";
     o.onclick = L.bind(function(m) {
         return this.setupIPv6PD(m);
@@ -305,7 +305,7 @@ return view.extend({
         .then(function() {
           // Show loading message
           ui.showModal(_('Setting up IPv6 PD'), [
-            E('p', { 'class': 'spinning' }, _('Applying IPv6 PD configuration for Cross(10Gbps) or with Hikari Denwa...'))
+            E('p', { 'class': 'spinning' }, _('Applying IPv6 PD configuration for CROSS(10Gbps) or with Hikari Denwa...'))
           ]);
           
           // Execute the IPv6 PD setup

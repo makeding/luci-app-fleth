@@ -81,4 +81,4 @@ The fleth command supports these operations:
 - `fleth mape_status` - Show MAP-E parameters
 - `fleth get_dslite_provider` - Show DS-Lite provider
 - `fleth setup_ipv6_slaac` - Configure for NEXT(1Gbps) plans
-- `fleth setup_ipv6_pd` - Configure for Cross(10Gbps) plans
+- `fleth setup_ipv6_pd` - Configure for CROSS(10Gbps) plans

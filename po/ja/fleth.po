@@ -91,6 +91,9 @@ msgstr "DHCPv6リースを自動的に更新"
 msgid "If you subscribe the CROSS(10Gbps) plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue."
 msgstr "※クロス(10ギガ)プランを契約している場合は、約1日ごとに回線が切断される問題が発生する場合があります。<br> このオプションを有効にすると、緩和できる可能性があります。"
 
+msgid "This option is deprecated and may be removed in future versions."
+msgstr "このオプションは廃止予定であり、将来のバージョンで削除される可能性があります。"
+
 msgid "Tunnel Interface Firewall Zone"
 msgstr "トンネル インターフェース ファイアウォール ゾーン"
 
@@ -127,13 +130,13 @@ msgstr "IPv6 SLAAC 設定の適用に失敗しました：%s"
 msgid "Error executing IPv6 SLAAC setup: %s"
 msgstr "IPv6 SLAAC 設定の実行中にエラーが発生しました：%s"
 
-msgid "Setup IPv6 PD for Cross(10Gbps) or with Hikari Denwa"
+msgid "Setup IPv6 PD for CROSS(10Gbps) or with Hikari Denwa"
 msgstr "クロス（10Gbps）ひかり電話あり（PD）の IPv6 設定"
 
 msgid "Setting up IPv6 PD"
 msgstr "IPv6 PD の設定中"
 
-msgid "Applying IPv6 PD configuration for Cross(10Gbps) or with Hikari Denwa..."
+msgid "Applying IPv6 PD configuration for CROSS(10Gbps) or with Hikari Denwa..."
 msgstr "クロス（10Gbps）ひかり電話あり（PD）の IPv6 設定を適用中..."
 
 msgid "IPv6 PD configuration applied successfully!"
