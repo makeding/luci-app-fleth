@@ -49,9 +49,10 @@ jobs:
           PACKAGES: luci-app-fleth
           FEEDNAME: huggy
           NO_REFRESH_CHECK: true
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
+          name: luci-app-fleth-${{ matrix.package_type }}
           path: bin/packages/x86_64/huggy/
       # - name: 'Pack all packages'
       #   run: tar cf pack.tar bin/packages/x86_64/base/ds-lite* bin/packages/x86_64/base/ds-lite*
