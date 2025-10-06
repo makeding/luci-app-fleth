@@ -71,7 +71,7 @@ get_pending_status(){
     if [ -n "$ipv6" ]; then
         # East: 2001:c90::/32, 2404:1a8::/32, 2408::/22
         # https://bgp.he.net/net/2408::/22#_rdap
-        if echo "$ipv6" | grep -qE '^2001:c90:|^2404:1a8:|^2408:(?:[0-3][0-9a-f]{0,2})?:'; then
+        if echo "$ipv6" | grep -qE '^2001:c90:|^2404:1a8:|^2408:([0-3][0-9a-f]{0,2})?:'; then
             logger -t fleth "Detected East IPv6 address in pending state: $ipv6"
             echo "EAST_pending"
             return
@@ -399,6 +399,135 @@ EOF
     
     logger -t fleth "IPv6 PD configuration completed successfully"
     echo "SUCCESS"
+elif [ "$1" = "setup_ipip_tunnel" ]; then
+    # Configure IPIP tunnel with parameters from command line
+    logger -t fleth "Starting IPIP tunnel configuration"
+
+    # Get parameters from command line arguments
+    h_IPIP_REMOTE_ENDPOINT="$2"
+    h_IPIP_TUNNEL_INTERFACE="$3"
+    h_IPIP_MTU="$4"
+    h_IPIP_IPV6_INTERFACE_ID="$5"
+    h_IPIP_FIREWALL_ZONE="$6"
+
+    # Set defaults if parameters are empty
+    [ -z "$h_IPIP_TUNNEL_INTERFACE" ] && h_IPIP_TUNNEL_INTERFACE="wan-ipip"
+    [ -z "$h_IPIP_MTU" ] && h_IPIP_MTU="1480"
+    [ -z "$h_IPIP_IPV6_INTERFACE_ID" ] && h_IPIP_IPV6_INTERFACE_ID="::1"
+    [ -z "$h_IPIP_FIREWALL_ZONE" ] && h_IPIP_FIREWALL_ZONE="wan"
+
+    # Generate automatic tunnel name
+    h_IPIP_TUNNEL_NAME="ipip-$(echo $h_IPIP_REMOTE_ENDPOINT | tr '.' '-')"
+
+    # Validate required parameters
+    if [ -z "$h_IPIP_REMOTE_ENDPOINT" ]; then
+        logger -t fleth "Remote endpoint is required for IPIP tunnel"
+        echo "ERROR: Remote endpoint is required"
+        exit 1
+    fi
+
+    # Get local IP address from the specified tunnel interface
+    local_ip=$(uci get network.${h_IPIP_TUNNEL_INTERFACE}.ipaddr 2>/dev/null)
+    if [ -z "$local_ip" ]; then
+        # Try to get IP from interface status
+        local_ip=$(ifconfig $h_IPIP_TUNNEL_INTERFACE 2>/dev/null | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
+    fi
+
+    if [ -z "$local_ip" ]; then
+        logger -t fleth "Unable to determine local IP address for interface $h_IPIP_TUNNEL_INTERFACE"
+        echo "ERROR: Unable to determine local IP address"
+        exit 1
+    fi
+
+    # Get IPv6 prefix from wan6 interface
+    wan6_prefix=$(uci get network.wan6.ip6prefix 2>/dev/null || echo "")
+    if [ -z "$wan6_prefix" ]; then
+        # Try to get prefix from interface status
+        wan6_prefix=$(ip -6 route show dev wan6 2>/dev/null | grep -o '2[0-9a-f:]*:/[0-9]*' | head -1)
+    fi
+
+    # Configure IPIP tunnel interface
+    uci batch <<EOF
+set network.${h_IPIP_TUNNEL_NAME}=interface
+set network.${h_IPIP_TUNNEL_NAME}.proto='ipip'
+set network.${h_IPIP_TUNNEL_NAME}.peeraddr='${h_IPIP_REMOTE_ENDPOINT}'
+set network.${h_IPIP_TUNNEL_NAME}.mtu='${h_IPIP_MTU}'
+set network.${h_IPIP_TUNNEL_NAME}.zone='${h_IPIP_FIREWALL_ZONE}'
+EOF
+
+    # Add static IPv6 address to wan6 interface if prefix is available
+    if [ -n "$wan6_prefix" ]; then
+        # Extract prefix without length
+        ipv6_prefix=$(echo "$wan6_prefix" | cut -d'/' -f1)
+        # Combine prefix with Interface ID
+        full_ipv6="${ipv6_prefix}${h_IPIP_IPV6_INTERFACE_ID}"
+
+        logger -t fleth "Adding static IPv6 address $full_ipv6 to wan6 interface"
+
+        uci batch <<EOF
+add_list network.wan6.ip6addr='${full_ipv6}/64'
+EOF
+    else
+        logger -t fleth "Warning: Could not determine IPv6 prefix for wan6, skipping IPv6 configuration"
+    fi
+
+    # Commit network changes
+    uci commit network
+
+    # Restart network to apply changes
+    /etc/init.d/network restart
+
+    logger -t fleth "IPIP tunnel ${h_IPIP_TUNNEL_NAME} configured successfully"
+    echo "SUCCESS"
+elif [ "$1" = "remove_ipip_tunnel" ]; then
+    # Remove IPIP tunnel configuration
+    logger -t fleth "Starting IPIP tunnel removal"
+
+    # Find all IPIP tunnel interfaces
+    ipip_interfaces=$(uci show network | grep "\.proto='ipip'" | cut -d'.' -f2)
+
+    if [ -z "$ipip_interfaces" ]; then
+        logger -t fleth "No IPIP tunnel interfaces found"
+        echo "No IPIP tunnels to remove"
+        exit 0
+    fi
+
+    # Remove all IPIP tunnel interfaces
+    for interface in $ipip_interfaces; do
+        logger -t fleth "Removing IPIP tunnel interface: $interface"
+        uci delete network.${interface} 2>/dev/null
+    done
+
+    # Commit network changes
+    uci commit network
+
+    # Restart network to apply changes
+    /etc/init.d/network restart
+
+    logger -t fleth "All IPIP tunnels removed successfully"
+    echo "SUCCESS"
+elif [ "$1" = "get_ipip_status" ]; then
+    # Get IPIP tunnel status
+    # Find all IPIP tunnel interfaces
+    ipip_interfaces=$(uci show network | grep "\.proto='ipip'" | cut -d'.' -f2)
+
+    if [ -z "$ipip_interfaces" ]; then
+        echo "NOT_CONFIGURED"
+        exit 0
+    fi
+
+    echo "CONFIGURED"
+    for interface in $ipip_interfaces; do
+        h_IPIP_REMOTE_ENDPOINT=$(uci get network.${interface}.peeraddr 2>/dev/null || echo "")
+        h_IPIP_MTU=$(uci get network.${interface}.mtu 2>/dev/null || echo "")
+        h_IPIP_ZONE=$(uci get network.${interface}.zone 2>/dev/null || echo "")
+
+        echo "Interface: $interface"
+        echo "Remote Endpoint: $h_IPIP_REMOTE_ENDPOINT"
+        echo "MTU: $h_IPIP_MTU"
+        echo "Zone: $h_IPIP_ZONE"
+        echo "---"
+    done
 elif [ "$h_IP6PREFIX_ENABLED" -eq 1 ] && [ "$1" = "ip6prefix" ]; then
     uci set network.${h_UPLINK_INTERFACE}.extendprefix=1
     uci delete network.${h_UPLINK_INTERFACE}.ip6prefix
@@ -407,7 +536,7 @@ else
     echo "Flet'h by huggy"
     echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically in Japan."
     echo ""
-    echo "Usage: fleth {auto|ip6prefix|mape_status|get_area|get_dslite_provider|pending_status|hook_none.js|restore_none.js|setup_ipv6_slaac|setup_ipv6_pd}"
+    echo "Usage: fleth {auto|ip6prefix|mape_status|get_area|get_dslite_provider|pending_status|hook_none.js|restore_none.js|setup_ipv6_slaac|setup_ipv6_pd|setup_ipip_tunnel|remove_ipip_tunnel|get_ipip_status}"
     echo "auto                Configure the tunnel settings based on current state and config."
     echo "ip6prefix           Configure the IPv6 prefix process."
     echo "pending_status      Show if the service is in pending state."
@@ -418,6 +547,10 @@ else
     echo "restore_none.js     Restore the none.js to its default state."
     echo "setup_ipv6_slaac    Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa."
     echo "setup_ipv6_pd       Configure IPv6 PD for CROSS(10Gbps) or with Hikari Denwa."
+    echo "setup_ipip_tunnel <remote_endpoint> [tunnel_interface] [mtu] [ipv6_interface_id] [firewall_zone]"
+    echo "                    Create and configure IPIP tunnel. Tunnel name is auto-generated."
+    echo "remove_ipip_tunnel  Remove all IPIP tunnel configurations."
+    echo "get_ipip_status     Show current IPIP tunnel status for all tunnels."
     echo ""
     echo "To modify settings, try these examples below:"
     echo "uci show fleth.global"

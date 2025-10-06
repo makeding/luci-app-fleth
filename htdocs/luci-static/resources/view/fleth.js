@@ -19,21 +19,20 @@ return view.extend({
     ]).then(function (results) {
       const area = (results[0].stdout || "").trim();
       const mape_status = (results[1].stdout || "").split("\n");
-      
+
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
-      
+
       // Special handling for NURO
       if (mape_status[0] === "NURO") {
         areaValue = "UNKNOWN(NURO)";
       }
-      
-      // Check for pending status if everything is UNKNOWN
-      if (areaValue === "UNKNOWN" && mapeIsUnknown) {
-        return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_pending_status"]), { stdout: "" })
+      // If MAP-E is UNKNOWN, check pending status first
+      if (mapeIsUnknown) {
+        return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["pending_status"]), { stdout: "" })
           .then(function (pendingResult) {
             const pendingStatus = (pendingResult.stdout || "").trim();
-            
+            // If pending status detected, return with pending flag
             if (pendingStatus.endsWith("_pending")) {
               const detectedArea = pendingStatus.split('_')[0];
               return {
@@ -43,30 +42,20 @@ return view.extend({
                 isPending: true,
               };
             }
-            
-            // No pending status, return all UNKNOWN
-            return {
-              area: areaValue,
-              dslite_provider: "UNKNOWN",
-              mape_status: mape_status,
-              isPending: false,
-            };
-          });
-      }
-      
-      // Only get DS-Lite if area is not UNKNOWN and MAP-E is UNKNOWN
-      if (areaValue !== "UNKNOWN" && mapeIsUnknown) {
-        return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_dslite_provider"]), { stdout: "" })
-          .then(function (dsliteResult) {
-            const dslite_provider = (dsliteResult.stdout || "").trim();
-            return {
-              area: areaValue,
-              dslite_provider: dslite_provider || "UNKNOWN",
-              mape_status: mape_status,
-              isPending: false,
-            };
+            // No pending status, check DS-Lite provider
+            return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_dslite_provider"]), { stdout: "" })
+              .then(function (dsliteResult) {
+                const dslite_provider = (dsliteResult.stdout || "").trim();
+                return {
+                  area: areaValue,
+                  dslite_provider: dslite_provider || "UNKNOWN",
+                  mape_status: mape_status,
+                  isPending: false,
+                };
+              });
           });
       } else {
+        // MAP-E detected, no need to check DS-Lite or pending
         return {
           area: areaValue,
           dslite_provider: "UNKNOWN",
@@ -76,15 +65,15 @@ return view.extend({
       }
     });
   },
-  
+
   render: async function (data) {
     let m, s, o;
-    
+
     // Show pending construction popup if detected
     if (data.isPending) {
       ui.addNotification(_('Service Status'), E('div', [
         E('p', _('Optical line construction completed, provider configuration in progress. Please wait patiently.')),
-        E('p', { style: 'color: #666; font-size: 0.9em;' }, _('Service typically becomes available in the evening after construction is completed.'))
+        E('p', { style: 'color: #fdfdfd; font-size: 0.9em;' }, _('Service typically becomes available in the evening after construction is completed.'))
       ]), 'info');
     }
 
@@ -114,16 +103,16 @@ return view.extend({
     o.cfgvalue = function () {
       return data.dslite_provider;
     };
-    
+
     // Check if MAP-E data is available
     const hasMapeData = data.mape_status[0] !== "UNKNOWN" && data.mape_status.length > 1;
-    
+
     // Always show MAP-E Provider
     o = s.taboption("info", form.DummyValue, "mape_provider", _("MAP-E Provider"));
     o.cfgvalue = function () {
       return data.mape_status[0] || _("UNKNOWN");
     };
-    
+
     // Only show detailed MAP-E fields if we have valid data
     if (hasMapeData) {
       const mapeDetailFields = [
@@ -138,7 +127,7 @@ return view.extend({
         ["mape_offset", "Offset"],
         ["mape_map_ports", "Available ports"],
       ];
-      
+
       mapeDetailFields.forEach((field, i) => {
         const [fieldName, fieldLabel] = field;
         o = s.taboption("info", form.DummyValue, fieldName, _(fieldLabel));
@@ -232,7 +221,7 @@ return view.extend({
     );
     o.nocreate = true;
     o.default = "wan";
-    
+
     // Actions section in General Settings
     o = s.taboption("general", form.DummyValue, "_actions_description");
     o.title = _("Actions");
@@ -240,42 +229,42 @@ return view.extend({
     o.cfgvalue = function () {
       return "";
     };
-    
+
     o = s.taboption("general", form.Button, "_setup_ipv6_slaac");
     o.title = "&#160;";
     o.inputtitle = _("Setup IPv6 SLAAC for NEXT(1Gbps) and without Hikari Denwa");
     o.inputstyle = "apply";
-    o.onclick = L.bind(function(m) {
-        return this.setupIPv6SLAAC(m);
+    o.onclick = L.bind(function (m) {
+      return this.setupIPv6SLAAC(m);
     }, this, m);
-    
+
     o = s.taboption("general", form.Button, "_setup_ipv6_pd");
     o.title = "&#160;";
     o.inputtitle = _("Setup IPv6 PD for CROSS(10Gbps) or with Hikari Denwa");
     o.inputstyle = "apply";
-    o.onclick = L.bind(function(m) {
-        return this.setupIPv6PD(m);
+    o.onclick = L.bind(function (m) {
+      return this.setupIPv6PD(m);
     }, this, m);
-    
+
     return m.render();
   },
-  
-  setupIPv6SLAAC: function(mapObj) {
-    return new Promise(function(resolve, reject) {
+
+  setupIPv6SLAAC: function (mapObj) {
+    return new Promise(function (resolve, reject) {
       // First save current configuration
       mapObj.save()
-        .then(function() {
+        .then(function () {
           // Show loading message
           ui.showModal(_('Setting up IPv6 SLAAC'), [
             E('p', { 'class': 'spinning' }, _('Applying IPv6 SLAAC configuration for NEXT(1Gbps) without Hikari Denwa...'))
           ]);
-          
+
           // Execute the IPv6 SLAAC setup
           return fs.exec('/usr/sbin/fleth', ['setup_ipv6_slaac']);
         })
-        .then(function(result) {
+        .then(function (result) {
           ui.hideModal();
-          
+
           if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
             ui.addNotification(null, E('p', _('IPv6 SLAAC configuration applied successfully!')), 'info');
           } else {
@@ -284,10 +273,10 @@ return view.extend({
               E('pre', result.stdout || result.stderr || 'Unknown error')
             ]), 'error');
           }
-          
+
           resolve();
         })
-        .catch(function(error) {
+        .catch(function (error) {
           ui.hideModal();
           ui.addNotification(null, E('div', [
             E('p', _('Error executing IPv6 SLAAC setup:')),
@@ -297,23 +286,23 @@ return view.extend({
         });
     });
   },
-  
-  setupIPv6PD: function(mapObj) {
-    return new Promise(function(resolve, reject) {
+
+  setupIPv6PD: function (mapObj) {
+    return new Promise(function (resolve, reject) {
       // First save current configuration
       mapObj.save()
-        .then(function() {
+        .then(function () {
           // Show loading message
           ui.showModal(_('Setting up IPv6 PD'), [
             E('p', { 'class': 'spinning' }, _('Applying IPv6 PD configuration for CROSS(10Gbps) or with Hikari Denwa...'))
           ]);
-          
+
           // Execute the IPv6 PD setup
           return fs.exec('/usr/sbin/fleth', ['setup_ipv6_pd']);
         })
-        .then(function(result) {
+        .then(function (result) {
           ui.hideModal();
-          
+
           if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
             ui.addNotification(null, E('p', _('IPv6 PD configuration applied successfully!')), 'info');
           } else {
@@ -322,10 +311,10 @@ return view.extend({
               E('pre', result.stdout || result.stderr || 'Unknown error')
             ]), 'error');
           }
-          
+
           resolve();
         })
-        .catch(function(error) {
+        .catch(function (error) {
           ui.hideModal();
           ui.addNotification(null, E('div', [
             E('p', _('Error executing IPv6 PD setup:')),
