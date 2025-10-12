@@ -93,6 +93,7 @@ return view.extend({
     s = m.section(form.NamedSection, "global");
     s.tab("info", _("Information"));
     s.tab("general", _("General Settings"));
+    s.tab("tools", _("Tools"));
     s.tab("ipip_wizard", _("IPIP Setup Wizard"));
 
     o = s.taboption("info", form.DummyValue, "area", _("Area"));
@@ -218,26 +219,41 @@ return view.extend({
     o.nocreate = true;
     o.default = "wan";
 
-    // Actions section in General Settings
-    o = s.taboption("general", form.DummyValue, "_actions_description");
-    o.title = _("Actions");
-    o.description = _("Actions will automatically save current configuration before execution.");
+    // LAN IPv6 Configuration section in Tools tab
+    o = s.taboption("tools", form.DummyValue, "_lan_ipv6_recommendation");
+    o.title = _("LAN IPv6 Configuration");
     o.cfgvalue = function () {
-      return "";
-    };
+      const prefix = data.prefix_length;
+      let icon = "";
+      let text = "";
 
-    o = s.taboption("general", form.Button, "_setup_ipv6_slaac");
+      if (prefix === "/64") {
+        icon = "✓";
+        text = _("Detected") + " /64 (" + _("SLAAC") + ")";
+      } else if (prefix === "/56") {
+        icon = "✓";
+        text = _("Detected") + " /56 (" + _("PD") + ")";
+      } else {
+        icon = "⚠";
+        text = _("Unable to detect IPv6 prefix");
+      }
+
+      return '<span style="color: #0088cc; font-weight: bold;">' + icon + ' ' + text + '</span>';
+    };
+    o.rawhtml = true;
+
+    o = s.taboption("tools", form.Button, "_setup_ipv6_slaac");
     o.title = "&#160;";
-    o.inputtitle = _("Setup IPv6 SLAAC for NEXT(1Gbps) and without Hikari Denwa");
-    o.inputstyle = "apply";
+    o.inputtitle = _("Configure SLAAC (/64)");
+    o.inputstyle = data.prefix_length === "/64" ? "cbi-button-apply" : "cbi-button-action";
     o.onclick = L.bind(function (m) {
       return this.setupIPv6SLAAC(m);
     }, this, m);
 
-    o = s.taboption("general", form.Button, "_setup_ipv6_pd");
+    o = s.taboption("tools", form.Button, "_setup_ipv6_pd");
     o.title = "&#160;";
-    o.inputtitle = _("Setup IPv6 PD for CROSS(10Gbps) or with Hikari Denwa");
-    o.inputstyle = "apply";
+    o.inputtitle = _("Configure PD (/56)");
+    o.inputstyle = data.prefix_length === "/56" ? "cbi-button-apply" : "cbi-button-action";
     o.onclick = L.bind(function (m) {
       return this.setupIPv6PD(m);
     }, this, m);
@@ -429,15 +445,16 @@ return view.extend({
 
     const renderedNode = await m.render();
 
-    // Hide footer when ipip_wizard tab is active
+    // Hide footer when tools or ipip_wizard tab is active
     setTimeout(function() {
       const footer = document.querySelector('.cbi-page-actions');
 
       const toggleFooter = function() {
-        // Check if ipip_wizard tab is active
+        // Check if tools or ipip_wizard tab is active
+        const toolsActive = document.querySelector('.cbi-tab[data-tab="tools"]');
         const ipipWizardActive = document.querySelector('.cbi-tab[data-tab="ipip_wizard"]');
         if (footer) {
-          footer.style.display = ipipWizardActive ? 'none' : '';
+          footer.style.display = (toolsActive || ipipWizardActive) ? 'none' : '';
         }
       };
 
@@ -459,27 +476,30 @@ return view.extend({
     return renderedNode;
   },
 
-  setupIPv6SLAAC: function (mapObj) {
+  setupIPv6Config: function (mapObj, mode) {
+    const modeText = mode === 'slaac' ? 'SLAAC' : 'PD';
+    const command = mode === 'slaac' ? 'setup_ipv6_slaac' : 'setup_ipv6_pd';
+
     return new Promise(function (resolve, reject) {
       // First save current configuration
       mapObj.save()
         .then(function () {
           // Show loading message
-          ui.showModal(_('Setting up IPv6 SLAAC'), [
-            E('p', { 'class': 'spinning' }, _('Applying IPv6 SLAAC configuration for NEXT(1Gbps) without Hikari Denwa...'))
+          ui.showModal(_('Configuring LAN IPv6'), [
+            E('p', { 'class': 'spinning' }, _('Applying ' + modeText + ' configuration...'))
           ]);
 
-          // Execute the IPv6 SLAAC setup
-          return fs.exec('/usr/sbin/fleth', ['setup_ipv6_slaac']);
+          // Execute the IPv6 setup
+          return fs.exec('/usr/sbin/fleth', [command]);
         })
         .then(function (result) {
           ui.hideModal();
 
           if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
-            ui.addNotification(null, E('p', _('IPv6 SLAAC configuration applied successfully!')), 'info');
+            ui.addNotification(null, E('p', _('Configuration applied successfully!')), 'info');
           } else {
             ui.addNotification(null, E('div', [
-              E('p', _('Failed to apply IPv6 SLAAC configuration:')),
+              E('p', _('Failed to apply configuration:')),
               E('pre', result.stdout || result.stderr || 'Unknown error')
             ]), 'error');
           }
@@ -489,7 +509,7 @@ return view.extend({
         .catch(function (error) {
           ui.hideModal();
           ui.addNotification(null, E('div', [
-            E('p', _('Error executing IPv6 SLAAC setup:')),
+            E('p', _('Error executing configuration:')),
             E('pre', error.message || error)
           ]), 'error');
           reject(error);
@@ -497,42 +517,12 @@ return view.extend({
     });
   },
 
+  setupIPv6SLAAC: function (mapObj) {
+    return this.setupIPv6Config(mapObj, 'slaac');
+  },
+
   setupIPv6PD: function (mapObj) {
-    return new Promise(function (resolve, reject) {
-      // First save current configuration
-      mapObj.save()
-        .then(function () {
-          // Show loading message
-          ui.showModal(_('Setting up IPv6 PD'), [
-            E('p', { 'class': 'spinning' }, _('Applying IPv6 PD configuration for CROSS(10Gbps) or with Hikari Denwa...'))
-          ]);
-
-          // Execute the IPv6 PD setup
-          return fs.exec('/usr/sbin/fleth', ['setup_ipv6_pd']);
-        })
-        .then(function (result) {
-          ui.hideModal();
-
-          if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
-            ui.addNotification(null, E('p', _('IPv6 PD configuration applied successfully!')), 'info');
-          } else {
-            ui.addNotification(null, E('div', [
-              E('p', _('Failed to apply IPv6 PD configuration:')),
-              E('pre', result.stdout || result.stderr || 'Unknown error')
-            ]), 'error');
-          }
-
-          resolve();
-        })
-        .catch(function (error) {
-          ui.hideModal();
-          ui.addNotification(null, E('div', [
-            E('p', _('Error executing IPv6 PD setup:')),
-            E('pre', error.message || error)
-          ]), 'error');
-          reject(error);
-        });
-    });
+    return this.setupIPv6Config(mapObj, 'pd');
   },
 
   applyIPIPWizard: function (mapObj, wizardFields) {

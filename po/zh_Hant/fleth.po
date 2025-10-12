@@ -91,47 +91,47 @@ msgstr "您無法從 MAP-E 介面訪問此連接埠"
 msgid "(Service Pending)"
 msgstr "(服務待開通)"
 
-msgid "Actions"
-msgstr "動作"
+msgid "Tools"
+msgstr "工具"
 
-msgid "Actions will automatically save current configuration before execution."
-msgstr "動作將在執行前自動儲存目前設定。"
+msgid "LAN IPv6 Configuration"
+msgstr "LAN IPv6 配置"
 
-msgid "Setup IPv6 SLAAC for NEXT(1Gbps) and without Hikari Denwa"
-msgstr "設定 NEXT（1Gbps）無光電話（僅 SLAAC）的 IPv6"
+msgid "Detected"
+msgstr "已檢測到"
 
-msgid "Setting up IPv6 SLAAC"
-msgstr "設定 IPv6 SLAAC"
+msgid "SLAAC"
+msgstr "SLAAC"
 
-msgid "Applying IPv6 SLAAC configuration for NEXT(1Gbps) without Hikari Denwa..."
-msgstr "正在套用 NEXT（1Gbps）無光電話（僅 SLAAC）的 IPv6 設定..."
+msgid "PD"
+msgstr "PD"
 
-msgid "IPv6 SLAAC configuration applied successfully!"
-msgstr "IPv6 SLAAC 設定套用成功！"
+msgid "Unable to detect IPv6 prefix"
+msgstr "無法檢測 IPv6 前綴"
 
-msgid "Failed to apply IPv6 SLAAC configuration: %s"
-msgstr "套用 IPv6 SLAAC 設定失敗：%s"
+msgid "Configure SLAAC (/64)"
+msgstr "配置 SLAAC (/64)"
 
-msgid "Error executing IPv6 SLAAC setup: %s"
-msgstr "執行 IPv6 SLAAC 設定時出錯：%s"
+msgid "Configure PD (/56)"
+msgstr "配置 PD (/56)"
 
-msgid "Setup IPv6 PD for CROSS(10Gbps) or with Hikari Denwa"
-msgstr "設定 CROSS（10Gbps）有光電話（PD）的 IPv6"
+msgid "Configuring LAN IPv6"
+msgstr "配置 LAN IPv6"
 
-msgid "Setting up IPv6 PD"
-msgstr "設定 IPv6 PD"
+msgid "Applying SLAAC configuration..."
+msgstr "正在套用 SLAAC 配置..."
 
-msgid "Applying IPv6 PD configuration for CROSS(10Gbps) or with Hikari Denwa..."
-msgstr "正在套用 CROSS（10Gbps）有光電話（PD）的 IPv6 設定..."
+msgid "Applying PD configuration..."
+msgstr "正在套用 PD 配置..."
 
-msgid "IPv6 PD configuration applied successfully!"
-msgstr "IPv6 PD 設定套用成功！"
+msgid "Configuration applied successfully!"
+msgstr "配置套用成功！"
 
-msgid "Failed to apply IPv6 PD configuration:"
-msgstr "套用 IPv6 PD 設定失敗："
+msgid "Failed to apply configuration:"
+msgstr "套用配置失敗："
 
-msgid "Error executing IPv6 PD setup:"
-msgstr "執行 IPv6 PD 設定時出錯："
+msgid "Error executing configuration:"
+msgstr "執行配置時出錯："
 
 msgid "Service Status"
 msgstr "服務狀態"

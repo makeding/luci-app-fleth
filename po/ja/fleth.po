@@ -94,47 +94,47 @@ msgstr "このポートにはMAP-Eインターフェースからアクセスで�
 msgid "(Service Pending)"
 msgstr "(回線プロバイダー開通待ち)"
 
-msgid "Actions"
-msgstr "アクション"
+msgid "Tools"
+msgstr "ツール"
 
-msgid "Actions will automatically save current configuration before execution."
-msgstr "アクションは実行前に現在の設定を自動保存します。"
+msgid "LAN IPv6 Configuration"
+msgstr "LAN IPv6 設定"
 
-msgid "Setup IPv6 SLAAC for NEXT(1Gbps) and without Hikari Denwa"
-msgstr "NEXT（1Gbps）ひかり電話なし（SLAAC のみ）の IPv6 設定"
+msgid "Detected"
+msgstr "検出"
 
-msgid "Setting up IPv6 SLAAC"
-msgstr "IPv6 SLAAC の設定中"
+msgid "SLAAC"
+msgstr "SLAAC"
 
-msgid "Applying IPv6 SLAAC configuration for NEXT(1Gbps) without Hikari Denwa..."
-msgstr "NEXT（1Gbps）ひかり電話なし（SLAAC のみ）の IPv6 設定を適用中..."
+msgid "PD"
+msgstr "PD"
 
-msgid "IPv6 SLAAC configuration applied successfully!"
-msgstr "IPv6 SLAAC 設定が正常に適用されました！"
+msgid "Unable to detect IPv6 prefix"
+msgstr "IPv6 プレフィックスを検出できません"
 
-msgid "Failed to apply IPv6 SLAAC configuration: %s"
-msgstr "IPv6 SLAAC 設定の適用に失敗しました：%s"
+msgid "Configure SLAAC (/64)"
+msgstr "SLAAC を設定 (/64)"
 
-msgid "Error executing IPv6 SLAAC setup: %s"
-msgstr "IPv6 SLAAC 設定の実行中にエラーが発生しました：%s"
+msgid "Configure PD (/56)"
+msgstr "PD を設定 (/56)"
 
-msgid "Setup IPv6 PD for CROSS(10Gbps) or with Hikari Denwa"
-msgstr "クロス（10Gbps）ひかり電話あり（PD）の IPv6 設定"
+msgid "Configuring LAN IPv6"
+msgstr "LAN IPv6 設定中"
 
-msgid "Setting up IPv6 PD"
-msgstr "IPv6 PD の設定中"
+msgid "Applying SLAAC configuration..."
+msgstr "SLAAC 設定を適用中..."
 
-msgid "Applying IPv6 PD configuration for CROSS(10Gbps) or with Hikari Denwa..."
-msgstr "クロス（10Gbps）ひかり電話あり（PD）の IPv6 設定を適用中..."
+msgid "Applying PD configuration..."
+msgstr "PD 設定を適用中..."
 
-msgid "IPv6 PD configuration applied successfully!"
-msgstr "IPv6 PD 設定が正常に適用されました！"
+msgid "Configuration applied successfully!"
+msgstr "設定が正常に適用されました！"
 
-msgid "Failed to apply IPv6 PD configuration:"
-msgstr "IPv6 PD 設定の適用に失敗しました："
+msgid "Failed to apply configuration:"
+msgstr "設定の適用に失敗しました："
 
-msgid "Error executing IPv6 PD setup:"
-msgstr "IPv6 PD 設定の実行中にエラーが発生しました："
+msgid "Error executing configuration:"
+msgstr "設定の実行中にエラーが発生しました："
 
 msgid "Service Status"
 msgstr "サービス状況"
