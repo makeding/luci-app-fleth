@@ -64,12 +64,6 @@ msgstr "利用可能なポート"
 msgid "Auto Configure tunnel Interface"
 msgstr "トンネル インターフェースを自動的に設定"
 
-msgid "Auto Add IPv6 PD in IPv6 Interface"
-msgstr "IPv6 インターフェースに IPv6 PD を自動的に追加"
-
-msgid "We recommend enabling it in MAP-E and when not using Hikari Denwa."
-msgstr "※MAP-Eユーザー：ひかり電話を利用していない場合は、有効にすることをお勧めします。"
-
 msgid "IPv6 Interface"
 msgstr "IPv6 インターフェース"
 
@@ -85,14 +79,8 @@ msgstr "トンネル インターフェース MTU"
 msgid "We recommend setting MTU to 1460 in MAP-E and DS-Lite."
 msgstr "※MAP-EおよびDS-Liteユーザー：MTUを1460に設定することをお勧めします。"
 
-msgid "Auto Renew DHCPv6"
-msgstr "DHCPv6リースを自動的に更新"
-
-msgid "If you subscribe the CROSS(10Gbps) plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue."
-msgstr "※クロス(10ギガ)プランを契約している場合は、約1日ごとに回線が切断される問題が発生する場合があります。<br> このオプションを有効にすると、緩和できる可能性があります。"
-
-msgid "This option is deprecated and may be removed in future versions."
-msgstr "このオプションは廃止予定であり、将来のバージョンで削除される可能性があります。"
+msgid "We recommend setting MTU to 1460."
+msgstr "MTU を 1460 に設定することをお勧めします。"
 
 msgid "Tunnel Interface Firewall Zone"
 msgstr "トンネル インターフェース ファイアウォール ゾーン"
@@ -156,3 +144,81 @@ msgstr "現在光回線プロバイダー工事中です。しばらくお待ち
 
 msgid "Service typically becomes available in the evening after construction is completed."
 msgstr "工事完了後は通常夕方頃にサービスが開通いたします。"
+
+msgid "IPIP Setup Wizard"
+msgstr "IPIP セットアップウィザード"
+
+msgid "Enter your IPv4 address (e.g., 111.x.x.x)"
+msgstr "IPv4 アドレスを入力してください（例：111.x.x.x）"
+
+msgid "Interface ID"
+msgstr "インターフェース ID"
+
+msgid "Enter IPv6 interface identifier (e.g., 0011:4514:1b00:0000)"
+msgstr "IPv6 インターフェース識別子を入力してください（例：0011:4514:1b00:0000）"
+
+msgid "Tunnel Type"
+msgstr "トンネルタイプ"
+
+msgid "Select tunnel type based on your provider"
+msgstr "プロバイダーに基づいてトンネルタイプを選択してください"
+
+msgid "Other"
+msgstr "その他"
+
+msgid "BR Address"
+msgstr "BR アドレス"
+
+msgid "Border Relay IPv6 address (auto-filled for v6plus/xpass)"
+msgstr "ボーダーリレー IPv6 アドレス（v6plus/xpass の場合は自動入力）"
+
+msgid "Update Server URL"
+msgstr "アップデートサーバーの URL"
+
+msgid "URL for updating tunnel endpoint (auto-filled for v6plus)"
+msgstr "トンネルエンドポイント更新用 URL（v6plus の場合は自動入力）"
+
+msgid "Username"
+msgstr "ユーザー名"
+
+msgid "Update server username"
+msgstr "アップデートサーバーのユーザー名"
+
+msgid "Password"
+msgstr "パスワード"
+
+msgid "Update server password"
+msgstr "アップデートサーバーのパスワード"
+
+msgid "Tunnel Settings"
+msgstr "トンネル設定"
+
+msgid "The following settings from 'General Settings' will be used:"
+msgstr "以下の「一般設定」の設定が使用されます："
+
+msgid "Apply IPIP Configuration"
+msgstr "IPIP 設定を適用"
+
+msgid "Applying IPIP Wizard Configuration"
+msgstr "IPIP ウィザード設定を適用中"
+
+msgid "Configuring IPIP tunnel with wizard settings..."
+msgstr "ウィザード設定で IPIP トンネルを設定中..."
+
+msgid "IPIP tunnel configured successfully!"
+msgstr "IPIP トンネルが正常に設定されました！"
+
+msgid "Failed to configure IPIP tunnel:"
+msgstr "IPIP トンネルの設定に失敗しました："
+
+msgid "Error executing IPIP wizard setup:"
+msgstr "IPIP ウィザードのセットアップ実行中にエラーが発生しました："
+
+msgid "Read-only Settings"
+msgstr "読み取り専用設定"
+
+msgid "The following settings are inherited from 'General Settings' and cannot be modified here:"
+msgstr "以下の設定は「一般設定」から継承されており、ここでは変更できません："
+
+msgid "Interface ID is required"
+msgstr "インターフェース ID は必須です"

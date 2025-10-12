@@ -1,19 +1,21 @@
 #!/bin/sh
 
-chmod +x /usr/sbin/fleth /etc/init.d/fleth /etc/hotplug.d/iface/70-fleth-cross-dhcpv6-renew
+chmod +x /usr/sbin/fleth /etc/init.d/fleth /etc/hotplug.d/iface/70-fleth
 
 if [ ! -f /etc/config/fleth ]; then
     cat <<EOF > /etc/config/fleth
 config fleth 'global'
 	option enabled '0'
-	option ip6prefix_enabled '0'
-	option cron_dhcpv6_renew_enabled '0'
-	option type 'auto'
 	option interface 'wan'
 	option interface_zone 'wan'
 	option interface6 'wan6'
 	option mtu '1460'
 EOF
+fi
+if [ -f /etc/config/fleth ]; then
+    sed -i '/option ip6prefix_enabled/d' /etc/config/fleth
+    sed -i '/option cron_dhcpv6_renew_enabled/d' /etc/config/fleth
+    sed -i '/option type/d' /etc/config/fleth
 fi
 fleth hook_none.js
 exit 0

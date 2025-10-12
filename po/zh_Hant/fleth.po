@@ -64,12 +64,6 @@ msgstr "可用端口"
 msgid "Auto Configure tunnel Interface"
 msgstr "自動配置隧道介面"
 
-msgid "Auto Add IPv6 PD in IPv6 Interface"
-msgstr "在 IPv6 介面中自動添加 IPv6 PD"
-
-msgid "We recommend enabling it in MAP-E and when not using Hikari Denwa."
-msgstr "我們建議在 MAP-E 中啟用此選項，並且在不使用光電話時使用。"
-
 msgid "IPv6 Interface"
 msgstr "IPv6 介面"
 
@@ -84,15 +78,6 @@ msgstr "隧道介面 MTU"
 
 msgid "We recommend setting MTU to 1460 in MAP-E and DS-Lite."
 msgstr "我們建議在 MAP-E 和 DS-Lite 中將 MTU 設置為 1460。"
-
-msgid "Auto Renew DHCPv6"
-msgstr "自動續訂 DHCPv6"
-
-msgid "If you subscribe the CROSS(10Gbps) plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue."
-msgstr "當您訂閱 CROSS（クロス）10Gbps 方案時，可能會遇到大約每天斷線一次的情況。啟用此選項可能有助於緩解此問題。"
-
-msgid "This option is deprecated and may be removed in future versions."
-msgstr "此選項已廢棄，可能會在未來版本中移除。"
 
 msgid "Tunnel Interface Firewall Zone"
 msgstr "隧道介面防火牆區域"
@@ -156,3 +141,84 @@ msgstr "光線路施工已完成，正在進行運營商配置。請耐心等待
 
 msgid "Service typically becomes available in the evening after construction is completed."
 msgstr "施工完成後，服務通常會在傍晚開通。"
+
+msgid "IPIP Setup Wizard"
+msgstr "IPIP 設定精靈"
+
+msgid "Enter your IPv4 address (e.g., 111.x.x.x)"
+msgstr "輸入您的 IPv4 地址（例如：111.x.x.x）"
+
+msgid "Interface ID"
+msgstr "介面 ID"
+
+msgid "Enter IPv6 interface identifier (e.g., 0011:4514:1b00:0000)"
+msgstr "輸入 IPv6 介面識別碼（例如：0011:4514:1b00:0000）"
+
+msgid "Tunnel Type"
+msgstr "隧道類型"
+
+msgid "Select tunnel type based on your provider"
+msgstr "根據您的提供商選擇隧道類型"
+
+msgid "Other"
+msgstr "其他"
+
+msgid "BR Address"
+msgstr "BR 地址"
+
+msgid "Border Relay IPv6 address (auto-filled for v6plus/xpass)"
+msgstr "邊界中繼 IPv6 地址（v6plus/xpass 自動填充）"
+
+msgid "Update Server URL"
+msgstr "更新伺服器 URL"
+
+msgid "URL for updating tunnel endpoint (auto-filled for v6plus)"
+msgstr "用於更新隧道端點的 URL（v6plus 自動填充）"
+
+msgid "Username"
+msgstr "使用者名稱"
+
+msgid "Update server username"
+msgstr "更新伺服器使用者名稱"
+
+msgid "Password"
+msgstr "密碼"
+
+msgid "Update server password"
+msgstr "更新伺服器密碼"
+
+msgid "Tunnel Settings"
+msgstr "隧道設定"
+
+msgid "The following settings from 'General Settings' will be used:"
+msgstr "將使用「一般設定」中的以下設定："
+
+msgid "Apply IPIP Configuration"
+msgstr "套用 IPIP 設定"
+
+msgid "Applying IPIP Wizard Configuration"
+msgstr "正在套用 IPIP 精靈設定"
+
+msgid "Configuring IPIP tunnel with wizard settings..."
+msgstr "正在使用精靈設定配置 IPIP 隧道..."
+
+msgid "IPIP tunnel configured successfully!"
+msgstr "IPIP 隧道設定成功！"
+
+msgid "Failed to configure IPIP tunnel:"
+msgstr "IPIP 隧道設定失敗："
+
+msgid "Error executing IPIP wizard setup:"
+msgstr "執行 IPIP 精靈設定時發生錯誤："
+
+msgid "Read-only Settings"
+msgstr "唯讀設定"
+
+msgid "The following settings are inherited from 'General Settings' and cannot be modified here:"
+msgstr "以下設定繼承自「一般設定」，無法在此處修改："
+
+msgid "Interface ID is required"
+msgstr "介面 ID 為必填項"
+
+msgid "We recommend setting MTU to 1460."
+msgstr "建議將 MTU 設定為 1460。"

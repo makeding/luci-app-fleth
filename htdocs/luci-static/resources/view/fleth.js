@@ -8,7 +8,7 @@
 
 // fix css paading (kusa
 const fleth_style = document.createElement("style");
-fleth_style.innerHTML = `.cbi-value-field { padding-top: 6px;}</style>`;
+fleth_style.innerHTML = `.cbi-value-field { padding-top: 6px; }`;
 document.head.appendChild(fleth_style);
 
 return view.extend({
@@ -16,9 +16,11 @@ return view.extend({
     return Promise.all([
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
+      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_prefix_length"]), { stdout: "" }),
     ]).then(function (results) {
       const area = (results[0].stdout || "").trim();
       const mape_status = (results[1].stdout || "").split("\n");
+      const prefix_length = (results[2].stdout || "").trim();
 
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
@@ -39,6 +41,7 @@ return view.extend({
                 area: detectedArea,
                 dslite_provider: "UNKNOWN",
                 mape_status: mape_status,
+                prefix_length: prefix_length || "UNKNOWN",
                 isPending: true,
               };
             }
@@ -50,6 +53,7 @@ return view.extend({
                   area: areaValue,
                   dslite_provider: dslite_provider || "UNKNOWN",
                   mape_status: mape_status,
+                  prefix_length: prefix_length || "UNKNOWN",
                   isPending: false,
                 };
               });
@@ -60,6 +64,7 @@ return view.extend({
           area: areaValue,
           dslite_provider: "UNKNOWN",
           mape_status: mape_status,
+          prefix_length: prefix_length || "UNKNOWN",
           isPending: false,
         };
       }
@@ -88,10 +93,21 @@ return view.extend({
     s = m.section(form.NamedSection, "global");
     s.tab("info", _("Information"));
     s.tab("general", _("General Settings"));
+    s.tab("ipip_wizard", _("IPIP Setup Wizard"));
 
     o = s.taboption("info", form.DummyValue, "area", _("Area"));
     o.cfgvalue = function () {
       return data.area;
+    };
+
+    o = s.taboption("info", form.DummyValue, "prefix_length", _("IPv6 Prefix Length"));
+    o.cfgvalue = function () {
+      const prefix = data.prefix_length;
+      if (prefix && prefix !== "UNKNOWN") {
+        const mode = prefix === "/56" ? "PD" : (prefix === "/64" ? "SLAAC" : "");
+        return mode ? prefix + " → " + mode : prefix;
+      }
+      return prefix || "UNKNOWN";
     };
 
     o = s.taboption(
@@ -152,26 +168,6 @@ return view.extend({
     o.rmempty = false;
     o.default = "0";
 
-    o = s.taboption(
-      "general",
-      form.Flag,
-      "ip6prefix_enabled",
-      _("Auto Add IPv6 PD in IPv6 Interface"),
-      _("We recommend enabling it in MAP-E and when not using Hikari Denwa.")
-    );
-    o.rmempty = false;
-    o.default = "0";
-
-    o = s.taboption(
-      "general",
-      form.Flag,
-      "cron_dhcpv6_renew_enabled",
-      _("Auto Renew DHCPv6") + " (Deprecated)",
-      _("If you subscribe the CROSS(10Gbps) plan, you may experience disconnections approximately once a day. Enabling this option may help alleviate the issue.") + " " + _("This option is deprecated and may be removed in future versions.")
-    );
-    o.rmempty = false;
-    o.default = "0";
-
     // o = s.taboption(
     //   "general",
     //   form.Flag,
@@ -208,7 +204,7 @@ return view.extend({
       form.Value,
       "mtu",
       _("Tunnel Interface MTU"),
-      _("We recommend setting MTU to 1460 in MAP-E and DS-Lite.")
+      _("We recommend setting MTU to 1460.")
     );
     o.noaliases = true;
     o.default = "1460";
@@ -246,7 +242,221 @@ return view.extend({
       return this.setupIPv6PD(m);
     }, this, m);
 
-    return m.render();
+    // IPIP Wizard tab - one-time setup wizard (no UCI persistence)
+    // Store field references for later use
+    const wizardFields = {};
+
+    // IP Address
+    o = s.taboption(
+      "ipip_wizard",
+      form.Value,
+      "_ipip_ipaddr",
+      _("IP Address"),
+      _("Enter your IPv4 address (e.g., 111.x.x.x)")
+    );
+    o.datatype = "ipaddr";
+    o.placeholder = "111.0.0.1";
+    o.cfgvalue = function() { return ''; };
+    o.write = function() {};
+    wizardFields.ipaddr = o;
+
+    // Interface ID
+    o = s.taboption(
+      "ipip_wizard",
+      form.Value,
+      "_ipip_interface_id",
+      _("Interface ID"),
+      _("Enter IPv6 interface identifier (e.g., 0011:4514:1b00:0000)")
+    );
+    o.placeholder = "0011:4514:1b00:0000";
+    o.cfgvalue = function() { return ''; };
+    o.write = function() {};
+    wizardFields.interfaceId = o;
+
+    // Tunnel Type
+    o = s.taboption(
+      "ipip_wizard",
+      form.ListValue,
+      "_ipip_tunnel_type",
+      _("Tunnel Type"),
+      _("Select tunnel type based on your provider")
+    );
+
+    // Auto-detect from Information tab
+    const mapeProvider = data.mape_status[0] || "";
+    const isV6Plus = mapeProvider.includes("JPNE");
+    const isXpass = data.dslite_provider === "dgw.xpass.jp";
+    const detectedType = isV6Plus ? "v6plus" : (isXpass ? "xpass" : "other");
+
+    o.value("v6plus", "v6plus");
+    o.value("xpass", "xpass");
+    o.value("other", _("Other"));
+    o.default = detectedType;
+    o.cfgvalue = function() { return detectedType; };
+    o.write = function() {};
+    wizardFields.tunnelType = o;
+
+    // BR Address
+    o = s.taboption(
+      "ipip_wizard",
+      form.Value,
+      "_ipip_br_address",
+      _("BR Address"),
+      _("Border Relay IPv6 address (auto-filled for v6plus/xpass)")
+    );
+    o.datatype = "ip6addr";
+    o.depends("_ipip_tunnel_type", "other");
+    o.optional = true;
+    o.cfgvalue = function() { return ''; };
+    o.write = function() {};
+    wizardFields.brAddress = o;
+
+    // Update Server URL (hidden for now)
+    // const updateUrlOption = s.taboption(
+    //   "ipip_wizard",
+    //   form.Value,
+    //   "_ipip_update_server_url",
+    //   _("Update Server URL"),
+    //   _("URL for updating tunnel endpoint (auto-filled for v6plus)")
+    // );
+    // updateUrlOption.optional = true;
+    // // Set simple placeholder based on detected type (no dynamic updates to avoid UCI delays)
+    // if (detectedType === 'xpass') {
+    //   updateUrlOption.placeholder = 'https://ddnsweb1.ddns.vbbnet.jp';
+    // } else if (detectedType === 'v6plus') {
+    //   updateUrlOption.placeholder = 'http://fcs.enabler.ne.jp/update';
+    // }
+    // updateUrlOption.cfgvalue = function() { return ''; };
+    // updateUrlOption.write = function() {};
+    // wizardFields.updateUrl = updateUrlOption;
+
+    // // Username
+    // const usernameOption = s.taboption(
+    //   "ipip_wizard",
+    //   form.Value,
+    //   "_ipip_username",
+    //   _("Username"),
+    //   _("Update server username")
+    // );
+    // usernameOption.optional = true;
+    // usernameOption.cfgvalue = function() { return ''; };
+    // usernameOption.write = function() {};
+    // wizardFields.username = usernameOption;
+
+    // // Password
+    // const passwordOption = s.taboption(
+    //   "ipip_wizard",
+    //   form.Value,
+    //   "_ipip_password",
+    //   _("Password"),
+    //   _("Update server password")
+    // );
+    // passwordOption.password = true;
+    // passwordOption.optional = true;
+    // passwordOption.cfgvalue = function() { return ''; };
+    // passwordOption.write = function() {};
+    // wizardFields.password = passwordOption;
+
+    // Tunnel Interface (DeviceSelect)
+    o = s.taboption(
+      "ipip_wizard",
+      widgets.DeviceSelect,
+      "_ipip_tunnel_interface",
+      _("Tunnel Interface")
+    );
+    o.noaliases = true;
+    o.default = "wan_ipip";
+    o.optional = true;
+    o.cfgvalue = function() { return 'wan_ipip'; };
+    o.write = function() {};
+    wizardFields.tunnelInterface = o;
+
+    // IPv6 Interface (DeviceSelect)
+    o = s.taboption(
+      "ipip_wizard",
+      widgets.DeviceSelect,
+      "_ipip_interface6",
+      _("IPv6 Interface"),
+      _("Uplink interface")
+    );
+    o.noaliases = true;
+    o.cfgvalue = function(section_id) {
+      return uci.get('fleth', 'global', 'interface6') || 'wan6';
+    };
+    o.write = function() {};
+    o.optional = true;
+    wizardFields.interface6 = o;
+
+    // Tunnel Interface MTU
+    o = s.taboption(
+      "ipip_wizard",
+      form.Value,
+      "_ipip_mtu",
+      _("Tunnel Interface MTU"),
+      _("We recommend setting MTU to 1460.")
+    );
+    o.datatype = "range(576,1500)";
+    o.cfgvalue = function(section_id) {
+      return uci.get('fleth', 'global', 'mtu') || '1460';
+    };
+    o.write = function() {};
+    o.optional = true;
+    wizardFields.mtu = o;
+
+    // Tunnel Interface Firewall Zone (ZoneSelect)
+    o = s.taboption(
+      "ipip_wizard",
+      widgets.ZoneSelect,
+      "_ipip_firewall_zone",
+      _("Tunnel Interface Firewall Zone")
+    );
+    o.nocreate = true;
+    o.cfgvalue = function(section_id) {
+      return uci.get('fleth', 'global', 'interface_zone') || 'wan';
+    };
+    o.write = function() {};
+    o.optional = true;
+    wizardFields.firewallZone = o;
+
+    // Apply Configuration button
+    o = s.taboption("ipip_wizard", form.Button, "_apply_ipip_wizard");
+    o.title = "&#160;";
+    o.inputtitle = _("Apply IPIP Configuration");
+    o.inputstyle = "apply";
+    o.onclick = L.bind(function (m, fields) {
+      return this.applyIPIPWizard(m, fields);
+    }, this, m, wizardFields);
+
+    const renderedNode = await m.render();
+
+    // Hide footer when ipip_wizard tab is active
+    setTimeout(function() {
+      const footer = document.querySelector('.cbi-page-actions');
+
+      const toggleFooter = function() {
+        // Check if ipip_wizard tab is active
+        const ipipWizardActive = document.querySelector('.cbi-tab[data-tab="ipip_wizard"]');
+        if (footer) {
+          footer.style.display = ipipWizardActive ? 'none' : '';
+        }
+      };
+
+      // Initial check on page load
+      toggleFooter();
+
+      // Listen to tab menu clicks
+      const tabMenu = document.querySelector('.cbi-tabmenu');
+      if (tabMenu) {
+        const tabItems = tabMenu.querySelectorAll('li[data-tab]');
+        tabItems.forEach(function(tabItem) {
+          tabItem.addEventListener('click', function() {
+            setTimeout(toggleFooter, 10);
+          });
+        });
+      }
+    }, 0);
+
+    return renderedNode;
   },
 
   setupIPv6SLAAC: function (mapObj) {
@@ -318,6 +528,85 @@ return view.extend({
           ui.hideModal();
           ui.addNotification(null, E('div', [
             E('p', _('Error executing IPv6 PD setup:')),
+            E('pre', error.message || error)
+          ]), 'error');
+          reject(error);
+        });
+    });
+  },
+
+  applyIPIPWizard: function (mapObj, wizardFields) {
+    const self = this;
+    return new Promise(function (resolve, reject) {
+      // Collect form values from field references
+      const getFieldValue = function(field) {
+        if (!field) return '';
+        const section_id = 'global';
+        // Use formvalue to get the current value from the form
+        const value = field.formvalue(section_id);
+        return value || '';
+      };
+
+      const ipaddr = getFieldValue(wizardFields.ipaddr);
+      const interfaceId = getFieldValue(wizardFields.interfaceId);
+      const tunnelType = getFieldValue(wizardFields.tunnelType);
+      const brAddress = getFieldValue(wizardFields.brAddress);
+      const tunnelInterface = getFieldValue(wizardFields.tunnelInterface);
+      const interface6 = getFieldValue(wizardFields.interface6);
+      const mtu = getFieldValue(wizardFields.mtu);
+      const firewallZone = getFieldValue(wizardFields.firewallZone);
+
+      // Validate required fields
+      if (!ipaddr) {
+        ui.addNotification(null, E('p', _('IP Address is required')), 'error');
+        reject(new Error('IP Address is required'));
+        return;
+      }
+
+      if (!interfaceId) {
+        ui.addNotification(null, E('p', _('Interface ID is required')), 'error');
+        reject(new Error('Interface ID is required'));
+        return;
+      }
+
+      // Show loading message
+      ui.showModal(_('Applying IPIP Wizard Configuration'), [
+        E('p', { 'class': 'spinning' }, _('Configuring IPIP tunnel with wizard settings...'))
+      ]);
+
+      // Execute the IPIP wizard setup with command-line arguments
+      fs.exec('/usr/sbin/fleth', [
+        'setup_ipip_wizard',
+        ipaddr || '',
+        interfaceId || '',
+        tunnelType || '',
+        brAddress || '',
+        '', // updateUrl (reserved for future)
+        '', // username (reserved for future)
+        '', // password (reserved for future)
+        tunnelInterface || '',
+        interface6 || '',
+        mtu || '',
+        firewallZone || ''
+      ])
+        .then(function (result) {
+          ui.hideModal();
+
+          if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
+            ui.addNotification(null, E('p', _('IPIP tunnel configured successfully!')), 'info');
+          } else {
+            ui.addNotification(null, E('div', [
+              E('p', _('Failed to configure IPIP tunnel:')),
+              E('pre', result.stdout || result.stderr || 'Unknown error')
+            ]), 'error');
+          }
+
+          resolve();
+        })
+        .catch(function (error) {
+          ui.hideModal();
+          ui.addNotification(null, E('div', [
+            E('p', _('Error executing IPIP wizard setup:')),
             E('pre', error.message || error)
           ]), 'error');
           reject(error);
