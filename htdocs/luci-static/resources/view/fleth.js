@@ -182,21 +182,21 @@ return view.extend({
     o = s.taboption(
       "general",
       widgets.DeviceSelect,
-      "interface6",
-      _("IPv6 Interface"),
-      _("Uplink interface")
-    );
-    o.noaliases = true;
-    o.default = "wan6";
-
-    o = s.taboption(
-      "general",
-      widgets.DeviceSelect,
       "interface",
       _("Tunnel Interface")
     );
     o.noaliases = true;
     o.default = "wan";
+
+    o = s.taboption(
+      "general",
+      widgets.DeviceSelect,
+      "interface6",
+      _("IPv6 Interface"),
+      _("Uplink interface")
+    );
+    o.noaliases = true;
+    o.default = "wan6"
 
     // https://jp.finalfantasyxiv.com/lodestone/character/2621487/blog/3512706/
     // = 1460
