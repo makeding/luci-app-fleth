@@ -1,0 +1,19 @@
+#!/bin/ash
+# Automatic fleth configuration on interface changes
+# Runs 'fleth auto' when the uplink IPv6 interface comes up
+
+h_ENABLED=$(uci get fleth.global.enabled 2>/dev/null)
+h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
+
+# Exit if fleth is not enabled or interface is not configured
+[ "$h_ENABLED" != "1" ] && exit 0
+[ -z "$h_UPLINK_INTERFACE" ] && exit 0
+
+# Only trigger on the configured uplink interface
+[ "$INTERFACE" = "$h_UPLINK_INTERFACE" ] || exit 0
+
+# Run fleth auto when interface comes up
+if [ "$ACTION" = "ifup" ]; then
+    logger -t fleth-hotplug "Interface $INTERFACE up, running fleth auto"
+    /usr/sbin/fleth auto &
+fi

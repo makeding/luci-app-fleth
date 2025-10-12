@@ -11,27 +11,30 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 - `gw.transix.jp`
     - BB.excite光（コネクト除く）
     - enひかり
-    - IIJひかり（東日本　テスト済）
+    - IIJひかり（東日本 テスト済）
     - インターリンクZOOT NATIVE
     - 株式会社インターリンク ZOOT NATIVE
 - `dgw.xpass.jp`
-    - BB.excite コネクト
+    - BB.exciteコネクト
     - enひかり
     - GameWith光
-    - 楽天ひかり（東日本　テスト済）
+    - 楽天ひかり（東日本 テスト済）
     - Tigers-net
 - `dslite.v6connect.net`
     - ASAHIネット光
 ## MAP-E:
-- `BIGLOBE`（西日本　テスト済）
+- `BIGLOBE`
+  - BIGLOBE（西日本 テスト済）
+  - おてがる光（東日本 テスト済）
 - `JPNE（v6プラス）`
     - DMM光
     - GMOとくとくBB
-    - enひかり
+    - enひかり（東日本 テスト済）
     - ic-net光コース
-    - おてがる光
+    - おてがる光（東日本 テスト済）
     - So-net
     - ぷらら（Sコース）(R.I.P.)
+    - 21ip.jp（東日本 テスト済）
 - `OCN` (R.I.P.)
 - `NURO`
 
