@@ -4,16 +4,22 @@
 DNS_E=2404:1a8:7f01:a::3
 DNS_W=2001:a7ff:5f01::a
 
-# Note: UCI variables are not validated here as malicious modification
-h_ENABLED=$(uci get fleth.global.enabled 2>/dev/null)
-h_TUNNEL_INTERFACE=$(uci get fleth.global.interface 2>/dev/null)
-h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu 2>/dev/null)
-h_TUNNEL_INTERFACE_zone=$(uci get fleth.global.interface_zone 2>/dev/null)
-h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
+# Commands that don't require UCI configuration
+if [ "$1" = "hook_none.js" ] || [ "$1" = "restore_none.js" ]; then
+    # Skip UCI configuration checks for these commands
+    :
+else
+    # Note: UCI variables are not validated here as malicious modification
+    h_ENABLED=$(uci get fleth.global.enabled 2>/dev/null)
+    h_TUNNEL_INTERFACE=$(uci get fleth.global.interface 2>/dev/null)
+    h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu 2>/dev/null)
+    h_TUNNEL_INTERFACE_zone=$(uci get fleth.global.interface_zone 2>/dev/null)
+    h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
 
-if [ -z "$h_ENABLED" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
-    echo "Failed to retrieve one or more configuration values"
-    exit 1
+    if [ -z "$h_ENABLED" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
+        echo "Failed to retrieve one or more configuration values"
+        exit 1
+    fi
 fi
 
 # real xxxx
