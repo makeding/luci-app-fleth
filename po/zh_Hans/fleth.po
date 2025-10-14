@@ -142,83 +142,27 @@ msgstr "光线路施工已完成，正在进行运营商配置。请耐心等待
 msgid "Service typically becomes available in the evening after construction is completed."
 msgstr "施工完成后，服务通常会在傍晚开通。"
 
-msgid "IPIP Setup Wizard"
-msgstr "IPIP 设置向导"
-
-msgid "Enter your IPv4 address (e.g., 111.x.x.x)"
-msgstr "输入您的 IPv4 地址（例如：111.x.x.x）"
-
-msgid "Interface ID"
-msgstr "接口 ID"
-
-msgid "Enter IPv6 interface identifier (e.g., 0011:4514:1b00:0000)"
-msgstr "输入 IPv6 接口标识符（例如：0011:4514:1b00:0000）"
-
-msgid "Tunnel Type"
-msgstr "隧道类型"
-
-msgid "Select tunnel type based on your provider"
-msgstr "根据您的提供商选择隧道类型"
-
-msgid "Other"
-msgstr "其他"
-
-msgid "BR Address"
-msgstr "BR 地址"
-
-msgid "Border Relay IPv6 address (auto-filled for v6plus/xpass)"
-msgstr "边界中继 IPv6 地址（v6plus/xpass 自动填充）"
-
-msgid "Update Server URL"
-msgstr "更新服务器 URL"
-
-msgid "URL for updating tunnel endpoint (auto-filled for v6plus)"
-msgstr "用于更新隧道端点的 URL（v6plus 自动填充）"
-
-msgid "Username"
-msgstr "用户名"
-
-msgid "Update server username"
-msgstr "更新服务器用户名"
-
-msgid "Password"
-msgstr "密码"
-
-msgid "Update server password"
-msgstr "更新服务器密码"
-
-msgid "Tunnel Settings"
-msgstr "隧道设置"
-
-msgid "The following settings from 'General Settings' will be used:"
-msgstr "将使用"通用设置"中的以下设置："
-
-msgid "Apply IPIP Configuration"
-msgstr "应用 IPIP 配置"
-
-msgid "Applying IPIP Wizard Configuration"
-msgstr "正在应用 IPIP 向导配置"
-
-msgid "Configuring IPIP tunnel with wizard settings..."
-msgstr "正在使用向导设置配置 IPIP 隧道..."
-
-msgid "IPIP tunnel configured successfully!"
-msgstr "IPIP 隧道配置成功！"
-
-msgid "Failed to configure IPIP tunnel:"
-msgstr "IPIP 隧道配置失败："
-
-msgid "Error executing IPIP wizard setup:"
-msgstr "执行 IPIP 向导设置时出错："
-
-msgid "Read-only Settings"
-msgstr "只读设置"
-
-msgid "The following settings are inherited from 'General Settings' and cannot be modified here:"
-msgstr "以下设置继承自"通用设置"，无法在此处修改："
-
-msgid "Interface ID is required"
-msgstr "接口 ID 为必填项"
-
 msgid "We recommend setting MTU to 1460."
 msgstr "建议将 MTU 设置为 1460。"
+
+# IPIP6H Protocol - Custom additions only
+msgid "IPv4 over IPv6 (fleth edition)"
+msgstr "IPv4 over IPv6 (fleth edition)"
+
+msgid "Public IPv4 Address"
+msgstr "公网 IPv4 地址"
+
+msgid "Your public IPv4 address for the tunnel interface"
+msgstr "隧道接口使用的公网 IPv4 地址"
+
+msgid "IPv6 Interface ID"
+msgstr "IPv6 接口 ID"
+
+msgid "IPv6 interface identifier (last 64 bits). Will be combined with WAN6 prefix to create a virtual IPv6 address. Example: 0011:4514:1b00:0000"
+msgstr "IPv6 接口标识符（后 64 位）。将与 WAN6 前缀组合以创建虚拟 IPv6 地址。示例：0011:4514:1b00:0000"
+
+msgid "IPv6 Interface ID is required"
+msgstr "IPv6 接口 ID 为必填项"
+
+msgid "Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000"
+msgstr "无效的 IPv6 接口标识符格式。示例：0011:4514:1b00:0000"

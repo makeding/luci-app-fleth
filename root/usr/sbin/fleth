@@ -5,11 +5,11 @@ DNS_E=2404:1a8:7f01:a::3
 DNS_W=2001:a7ff:5f01::a
 
 # Note: UCI variables are not validated here as malicious modification
-h_ENABLED=$(uci get fleth.global.enabled)
-h_TUNNEL_INTERFACE=$(uci get fleth.global.interface)
-h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu)
-h_TUNNEL_INTERFACE_zone=$(uci get fleth.global.interface_zone)
-h_UPLINK_INTERFACE=$(uci get fleth.global.interface6)
+h_ENABLED=$(uci get fleth.global.enabled 2>/dev/null)
+h_TUNNEL_INTERFACE=$(uci get fleth.global.interface 2>/dev/null)
+h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu 2>/dev/null)
+h_TUNNEL_INTERFACE_zone=$(uci get fleth.global.interface_zone 2>/dev/null)
+h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
 
 if [ -z "$h_ENABLED" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
     echo "Failed to retrieve one or more configuration values"
@@ -266,10 +266,10 @@ get_dslite_provider(){
 }
 
 set_interface() {
-    current_proto=$(uci get network.${h_TUNNEL_INTERFACE}.proto)
-    current_peeraddrdomain=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddrdomain)
-    current_tunlink=$(uci get network.${h_UPLINK_INTERFACE}.tunlink)
-    current_mtu=$(uci get network.${h_TUNNEL_INTERFACE}.mtu)
+    current_proto=$(uci get network.${h_TUNNEL_INTERFACE}.proto 2>/dev/null)
+    current_peeraddrdomain=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddrdomain 2>/dev/null)
+    current_tunlink=$(uci get network.${h_UPLINK_INTERFACE}.tunlink 2>/dev/null)
+    current_mtu=$(uci get network.${h_TUNNEL_INTERFACE}.mtu 2>/dev/null)
     current_zone_index=$(uci show firewall | grep -E "firewall.@zone\[[0-9]+\].network=.*'$h_TUNNEL_INTERFACE'" | sed -n "s/.*@zone\[\([0-9]\+\)\].*/\1/p")
     new_zone_index=$(uci show firewall | grep -E "firewall.@zone\[[0-9]+\].name='$h_TUNNEL_INTERFACE_zone'" | sed -n "s/.*@zone\[\([0-9]\+\)\].*/\1/p")
 
@@ -300,13 +300,13 @@ EOF
             logger -t fleth "New ds-lite configuratin committed ${h_TUNNEL_INTERFACE}=${r_AFTR}"
         fi
     elif [ "$r_TYPE" = 'map-e' ]; then
-        current_ipaddr=$(uci get network.${h_TUNNEL_INTERFACE}.ipaddr)
-        current_ip4prefixlen=$(uci get network.${h_TUNNEL_INTERFACE}.ip4prefixlen)
-        current_ip6prefix=$(uci get network.${h_TUNNEL_INTERFACE}.ip6prefix)
-        current_ip6prefixlen=$(uci get network.${h_TUNNEL_INTERFACE}.ip6prefixlen)
-        current_ealen=$(uci get network.${h_TUNNEL_INTERFACE}.ealen)
-        current_psidlen=$(uci get network.${h_TUNNEL_INTERFACE}.psidlen)
-        current_offset=$(uci get network.${h_TUNNEL_INTERFACE}.offset)
+        current_ipaddr=$(uci get network.${h_TUNNEL_INTERFACE}.ipaddr 2>/dev/null)
+        current_ip4prefixlen=$(uci get network.${h_TUNNEL_INTERFACE}.ip4prefixlen 2>/dev/null)
+        current_ip6prefix=$(uci get network.${h_TUNNEL_INTERFACE}.ip6prefix 2>/dev/null)
+        current_ip6prefixlen=$(uci get network.${h_TUNNEL_INTERFACE}.ip6prefixlen 2>/dev/null)
+        current_ealen=$(uci get network.${h_TUNNEL_INTERFACE}.ealen 2>/dev/null)
+        current_psidlen=$(uci get network.${h_TUNNEL_INTERFACE}.psidlen 2>/dev/null)
+        current_offset=$(uci get network.${h_TUNNEL_INTERFACE}.offset 2>/dev/null)
         if [ "$current_peeraddr" != "$r_PEERADDR" ] ||
             [ "$current_tunlink" != "$h_TUNNEL_INTERFACE" ] ||
             [ "$current_proto" != 'map' ] ||
@@ -491,128 +491,11 @@ EOF
 
     logger -t fleth "IPv6 PD configuration completed successfully"
     echo "SUCCESS"
-elif [ "$1" = "setup_ipip_wizard" ]; then
-    # Configure IPIP tunnel using wizard parameters from command-line arguments
-    logger -t fleth "Starting IPIP wizard configuration"
-
-    # Get parameters from command-line arguments
-    w_IPADDR="$2"
-    w_INTERFACE_ID="$3"
-    w_TUNNEL_TYPE="$4"
-    w_BR_ADDRESS="$5"
-    w_UPDATE_SERVER_URL="$6"
-    w_USERNAME="$7"
-    w_PASSWORD="$8"
-    w_TUNNEL_INTERFACE="$9"
-    shift 9
-    w_UPLINK_INTERFACE="$1"
-    w_MTU="$2"
-    w_FIREWALL_ZONE="$3"
-
-    # Set defaults
-    [ -z "$w_TUNNEL_INTERFACE" ] && w_TUNNEL_INTERFACE="wan_ipip"
-    [ -z "$w_MTU" ] && w_MTU="1460"
-    [ -z "$w_UPLINK_INTERFACE" ] && w_UPLINK_INTERFACE="wan6"
-    [ -z "$w_FIREWALL_ZONE" ] && w_FIREWALL_ZONE="wan"
-
-    # Auto-fill BR address based on tunnel type
-    if [ "$w_TUNNEL_TYPE" = "v6plus" ]; then
-        [ -z "$w_BR_ADDRESS" ] && w_BR_ADDRESS="2404:9200:225:100::65"
-    elif [ "$w_TUNNEL_TYPE" = "xpass" ]; then
-        [ -z "$w_BR_ADDRESS" ] && w_BR_ADDRESS="2001:f60:0:205::2"
-    fi
-
-    # Validate required parameters
-    if [ -z "$w_IPADDR" ]; then
-        logger -t fleth "IP address is required for IPIP wizard"
-        echo "ERROR: IP address is required"
-        exit 1
-    fi
-
-    if [ -z "$w_INTERFACE_ID" ]; then
-        logger -t fleth "Interface ID is required for IPIP wizard"
-        echo "ERROR: Interface ID is required"
-        exit 1
-    fi
-
-    if [ -z "$w_BR_ADDRESS" ]; then
-        logger -t fleth "BR address is required for IPIP wizard"
-        echo "ERROR: BR address is required"
-        exit 1
-    fi
-
-    # Use tunnel interface name from parameter
-    w_TUNNEL_NAME="${w_TUNNEL_INTERFACE}"
-    # Create IPv6 alias interface first if interface ID is provided
-    w_IPV6_ALIAS="${w_UPLINK_INTERFACE}_"
-    uci batch <<EOF
-set network.${w_IPV6_ALIAS}=interface
-set network.${w_IPV6_ALIAS}.proto='dhcpv6'
-set network.${w_IPV6_ALIAS}.device='@${w_UPLINK_INTERFACE}'
-set network.${w_IPV6_ALIAS}.reqaddress='try'
-set network.${w_IPV6_ALIAS}.reqprefix='no'
-set network.${w_IPV6_ALIAS}.iface_dslite='0'
-set network.${w_IPV6_ALIAS}.ip6ifaceid='${w_INTERFACE_ID}'
-
-set network.${w_TUNNEL_NAME}=interface
-set network.${w_TUNNEL_NAME}.proto='ipip'
-set network.${w_TUNNEL_NAME}.ipaddr='${w_IPADDR}'
-set network.${w_TUNNEL_NAME}.peeraddr='${w_BR_ADDRESS}'
-set network.${w_TUNNEL_NAME}.mtu='${w_MTU}'
-set network.${w_TUNNEL_NAME}.tunlink='${w_IPV6_ALIAS}'
-EOF
-
-    # Add to firewall zone
-    zone_index=$(uci show firewall | grep -E "firewall.@zone\[[0-9]+\].name='$w_FIREWALL_ZONE'" | sed -n "s/.*@zone\[\([0-9]\+\)\].*/\1/p")
-    if [ -n "$zone_index" ]; then
-        uci add_list firewall.@zone[$zone_index].network="${w_TUNNEL_NAME}"
-    fi
-
-    # Commit network and firewall changes
-    uci commit network
-    uci commit firewall
-
-    # Call update server if URL and credentials are provided
-    # if [ -n "$w_UPDATE_SERVER_URL" ] && [ -n "$w_USERNAME" ] && [ -n "$w_PASSWORD" ]; then
-    #     logger -t fleth "Calling update server for ${w_TUNNEL_TYPE}"
-
-    #     case "$w_TUNNEL_TYPE" in
-    #         v6plus)
-    #             # v6plus: Simple HTTP GET
-    #             update_url="${w_UPDATE_SERVER_URL}"
-    #             wget -q -O /dev/null "$update_url" 2>&1
-    #             if [ $? -eq 0 ]; then
-    #                 logger -t fleth "Successfully updated v6plus server"
-    #             else
-    #                 logger -t fleth "Failed to update v6plus server"
-    #             fi
-    #             ;;
-    #         xpass)
-    #             # xpass: HTTPS with curl -k (ignore certificate)
-    #             # Get IPv6 prefix for the update
-    #             ipv6_prefix=$(ip -6 addr show dev ${w_UPLINK_INTERFACE} | grep 'inet6 2' | awk '{print $2}' | head -1 | cut -d'/' -f1)
-    #             update_url="${w_UPDATE_SERVER_URL}"
-    #             curl -k -s "$update_url" >/dev/null 2>&1
-    #             if [ $? -eq 0 ]; then
-    #                 logger -t fleth "Successfully updated xpass server"
-    #             else
-    #                 logger -t fleth "Failed to update xpass server"
-    #             fi
-    #             ;;
-    #         *)
-    #             logger -t fleth "No update server call for type: ${w_TUNNEL_TYPE}"
-    #             ;;
-    #     esac
-    # fi
-
-
-    logger -t fleth "IPIP wizard configuration completed successfully"
-    echo "SUCCESS"
 else
     echo "Flet'h by huggy"
     echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically in Japan."
     echo ""
-    echo "Usage: fleth {auto|mape_status|get_area|get_dslite_provider|pending_status|get_prefix_length|auto_setup_ipv6|hook_none.js|restore_none.js|setup_ipv6_slaac|setup_ipv6_pd|setup_ipip_tunnel|remove_ipip_tunnel|get_ipip_status|setup_ipip_wizard}"
+    echo "Usage: fleth {auto|mape_status|get_area|get_dslite_provider|pending_status|get_prefix_length|auto_setup_ipv6|hook_none.js|restore_none.js|setup_ipv6_slaac|setup_ipv6_pd|setup_ipip_tunnel|remove_ipip_tunnel|get_ipip_status}"
     echo "auto                Configure the tunnel settings based on current state and config."
     echo "pending_status      Show if the service is in pending state."
     echo "get_area            Show the current area information."
@@ -628,7 +511,6 @@ else
     echo "                    Create and configure IPIP tunnel. Tunnel name is auto-generated."
     echo "remove_ipip_tunnel  Remove all IPIP tunnel configurations."
     echo "get_ipip_status     Show current IPIP tunnel status for all tunnels."
-    echo "setup_ipip_wizard   Configure IPIP tunnel using wizard parameters from UCI config."
     echo ""
     echo "To modify settings, try these examples below:"
     echo "uci show fleth.global"

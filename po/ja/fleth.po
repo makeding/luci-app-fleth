@@ -145,80 +145,24 @@ msgstr "現在光回線プロバイダー工事中です。しばらくお待ち
 msgid "Service typically becomes available in the evening after construction is completed."
 msgstr "工事完了後は通常夕方頃にサービスが開通いたします。"
 
-msgid "IPIP Setup Wizard"
-msgstr "IPIP セットアップウィザード"
+# IPIP6H Protocol - Custom additions only
+msgid "IPv4 over IPv6 (fleth edition)"
+msgstr "IPv4 over IPv6 (fleth edition)"
 
-msgid "Enter your IPv4 address (e.g., 111.x.x.x)"
-msgstr "IPv4 アドレスを入力してください（例：111.x.x.x）"
+msgid "Public IPv4 Address"
+msgstr "パブリック IPv4 アドレス"
 
-msgid "Interface ID"
-msgstr "インターフェース ID"
+msgid "Your public IPv4 address for the tunnel interface"
+msgstr "トンネルインターフェース用のパブリック IPv4 アドレス"
 
-msgid "Enter IPv6 interface identifier (e.g., 0011:4514:1b00:0000)"
-msgstr "IPv6 インターフェース識別子を入力してください（例：0011:4514:1b00:0000）"
+msgid "IPv6 Interface ID"
+msgstr "IPv6 インターフェース ID"
 
-msgid "Tunnel Type"
-msgstr "トンネルタイプ"
+msgid "IPv6 interface identifier (last 64 bits). Will be combined with WAN6 prefix to create a virtual IPv6 address. Example: 0011:4514:1b00:0000"
+msgstr "IPv6 インターフェース識別子（下位 64 ビット）。WAN6 プレフィックスと組み合わせて仮想 IPv6 アドレスを作成します。例：0011:4514:1b00:0000"
 
-msgid "Select tunnel type based on your provider"
-msgstr "プロバイダーに基づいてトンネルタイプを選択してください"
+msgid "IPv6 Interface ID is required"
+msgstr "IPv6 インターフェース ID は必須です"
 
-msgid "Other"
-msgstr "その他"
-
-msgid "BR Address"
-msgstr "BR アドレス"
-
-msgid "Border Relay IPv6 address (auto-filled for v6plus/xpass)"
-msgstr "ボーダーリレー IPv6 アドレス（v6plus/xpass の場合は自動入力）"
-
-msgid "Update Server URL"
-msgstr "アップデートサーバーの URL"
-
-msgid "URL for updating tunnel endpoint (auto-filled for v6plus)"
-msgstr "トンネルエンドポイント更新用 URL（v6plus の場合は自動入力）"
-
-msgid "Username"
-msgstr "ユーザー名"
-
-msgid "Update server username"
-msgstr "アップデートサーバーのユーザー名"
-
-msgid "Password"
-msgstr "パスワード"
-
-msgid "Update server password"
-msgstr "アップデートサーバーのパスワード"
-
-msgid "Tunnel Settings"
-msgstr "トンネル設定"
-
-msgid "The following settings from 'General Settings' will be used:"
-msgstr "以下の「一般設定」の設定が使用されます："
-
-msgid "Apply IPIP Configuration"
-msgstr "IPIP 設定を適用"
-
-msgid "Applying IPIP Wizard Configuration"
-msgstr "IPIP ウィザード設定を適用中"
-
-msgid "Configuring IPIP tunnel with wizard settings..."
-msgstr "ウィザード設定で IPIP トンネルを設定中..."
-
-msgid "IPIP tunnel configured successfully!"
-msgstr "IPIP トンネルが正常に設定されました！"
-
-msgid "Failed to configure IPIP tunnel:"
-msgstr "IPIP トンネルの設定に失敗しました："
-
-msgid "Error executing IPIP wizard setup:"
-msgstr "IPIP ウィザードのセットアップ実行中にエラーが発生しました："
-
-msgid "Read-only Settings"
-msgstr "読み取り専用設定"
-
-msgid "The following settings are inherited from 'General Settings' and cannot be modified here:"
-msgstr "以下の設定は「一般設定」から継承されており、ここでは変更できません："
-
-msgid "Interface ID is required"
-msgstr "インターフェース ID は必須です"
+msgid "Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000"
+msgstr "無効な IPv6 インターフェース識別子形式。例：0011:4514:1b00:0000"
