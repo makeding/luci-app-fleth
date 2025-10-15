@@ -4,6 +4,10 @@
 DNS_E=2404:1a8:7f01:a::3
 DNS_W=2001:a7ff:5f01::a
 
+# MAP.sh paths
+MAPSH_PATH="/lib/netifd/proto/map.sh"
+MAPSH_BACKUP_PATH="/lib/netifd/proto/map.sh.flethbak"
+
 # Commands that don't require UCI configuration
 if [ "$1" = "hook_none.js" ] || [ "$1" = "restore_none.js" ]; then
     # Skip UCI configuration checks for these commands
@@ -402,6 +406,15 @@ elif [ "$1" = "get_prefix_length" ]; then
     fi
 elif [ "$1" = "auto_setup_ipv6" ]; then
     auto_setup_ipv6_mode
+elif [ "$1" = "mapsh_status" ]; then
+    # Check if map.sh is patched or original
+    if [ ! -f "$MAPSH_BACKUP_PATH" ]; then
+        echo "original"
+    elif cmp -s "$MAPSH_PATH" "$MAPSH_BACKUP_PATH"; then
+        echo "original"
+    else
+        echo "patched"
+    fi
 elif [ "$1" = "hook_none.js" ]; then
     if ! grep -q 'fleth-hook.js' /www/luci-static/resources/protocol/none.js; then
         $0 restore_none.js
@@ -500,56 +513,51 @@ EOF
     logger -t fleth "IPv6 PD configuration completed successfully"
     echo "SUCCESS"
 elif [ "$1" = "replace_mapsh" ]; then
-    # Replace map.sh with patched version
-    logger -t fleth "Starting map.sh replacement"
-
     MAPSH_URL="https://raw.githubusercontent.com/fakemanhk/openwrt-jp-ipoe/345b1d9add58cf84c3eebe235f695607a78ebcd9/map.sh.new"
-    MAPSH_PATH="/lib/netifd/proto/map.sh"
-    BACKUP_PATH="/lib/netifd/proto/map.sh.flethbak"
 
-    # Check if backup already exists, if not create it
-    if [ ! -f "$BACKUP_PATH" ]; then
-        cp "$MAPSH_PATH" "$BACKUP_PATH"
+    if [ ! -f "$MAPSH_BACKUP_PATH" ]; then
+        cp "$MAPSH_PATH" "$MAPSH_BACKUP_PATH"
         if [ $? -ne 0 ]; then
             echo "ERROR: Failed to create backup"
             exit 1
         fi
     fi
-    # --no-check-certificate
-    wget -q -O /tmp/map.sh.new "$MAPSH_URL"
+    TEMP_FILE=$(mktemp)
     if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to create temporary file"
+        exit 1
+    fi
+    wget -q -O "$TEMP_FILE" "$MAPSH_URL"
+    if [ $? -ne 0 ]; then
+        rm -f "$TEMP_FILE"
         echo "ERROR: Failed to download"
         exit 1
     fi
-
-    # Replace the file
-    mv /tmp/map.sh.new "$MAPSH_PATH"
-    chmod +x "$MAPSH_PATH"
+    mv "$TEMP_FILE" "$MAPSH_PATH"
     if [ $? -ne 0 ]; then
+        rm -f "$TEMP_FILE"
         echo "ERROR: Failed to replace file"
         exit 1
     fi
-
-    logger -t fleth "map.sh replaced successfully"
+    chmod +x "$MAPSH_PATH"
     echo "SUCCESS"
 elif [ "$1" = "restore_mapsh" ]; then
     # Restore original map.sh from backup
-
-    MAPSH_PATH="/lib/netifd/proto/map.sh"
-    BACKUP_PATH="/lib/netifd/proto/map.sh.flethbak"
+    logger -t fleth "Starting map.sh restoration"
 
     # Check if backup exists
-    if [ ! -f "$BACKUP_PATH" ]; then
+    if [ ! -f "$MAPSH_BACKUP_PATH" ]; then
         echo "ERROR: Backup not found"
         exit 1
     fi
 
-    mv "$BACKUP_PATH" "$MAPSH_PATH"
+    mv "$MAPSH_BACKUP_PATH" "$MAPSH_PATH"
     if [ $? -ne 0 ]; then
         echo "ERROR: Failed to restore"
         exit 1
     fi
 
+    logger -t fleth "map.sh restored successfully"
     echo "SUCCESS"
 else
     echo "Flet'h by huggy"
@@ -566,6 +574,7 @@ else
     echo "  get_dslite_provider   Show the current DS-Lite provider details."
     echo "  mape_status           Show the current MAP-E provider details."
     echo "  get_prefix_length     Show the detected IPv6 prefix length (/56 or /64)."
+    echo "  mapsh_status          Show if map.sh is patched or original."
     echo ""
     echo "IPv6 Configuration Commands:"
     echo "  auto_setup_ipv6       Auto-detect prefix and configure PD (/56) or SLAAC (/64) mode."

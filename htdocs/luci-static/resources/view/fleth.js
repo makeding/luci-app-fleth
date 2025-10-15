@@ -17,15 +17,12 @@ return view.extend({
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_prefix_length"]), { stdout: "" }),
-      L.resolveDefault(fs.stat("/lib/netifd/proto/map.sh.flethbak"), null),
-      L.resolveDefault(fs.exec("sh", ["-c", "cmp -s /lib/netifd/proto/map.sh /lib/netifd/proto/map.sh.flethbak && echo 'same' || echo 'different'"]), { stdout: "" }),
+      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mapsh_status"]), { stdout: "" }),
     ]).then(function (results) {
       const area = (results[0].stdout || "").trim();
       const mape_status = (results[1].stdout || "").split("\n");
       const prefix_length = (results[2].stdout || "").trim();
-      const mapBackupExists = results[3] !== null;
-      const filesAreSame = (results[4].stdout || "").trim() === 'same';
-
+      const mapsh_status = (results[3].stdout || "").trim();
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
 
@@ -47,8 +44,7 @@ return view.extend({
                 mape_status: mape_status,
                 prefix_length: prefix_length || "UNKNOWN",
                 isPending: true,
-                mapBackupExists: mapBackupExists,
-                mapIsPatched: mapBackupExists && !filesAreSame,
+                mapIsPatched: mapsh_status === "patched",
               };
             }
             // No pending status, check DS-Lite provider
@@ -61,8 +57,7 @@ return view.extend({
                   mape_status: mape_status,
                   prefix_length: prefix_length || "UNKNOWN",
                   isPending: false,
-                  mapBackupExists: mapBackupExists,
-                  mapIsPatched: mapBackupExists && !filesAreSame,
+                  mapIsPatched: mapsh_status === "patched",
                 };
               });
           });
@@ -74,8 +69,7 @@ return view.extend({
           mape_status: mape_status,
           prefix_length: prefix_length || "UNKNOWN",
           isPending: false,
-          mapBackupExists: mapBackupExists,
-          mapIsPatched: mapBackupExists && !filesAreSame,
+          mapIsPatched: mapsh_status === "patched",
         };
       }
     });
@@ -378,32 +372,36 @@ return view.extend({
     return this.setupIPv6Config(mapObj, 'pd');
   },
 
-  replaceMapSh: function (mapObj) {
+  manageMapSh: function (mapObj, action) {
+    const actionConfig = {
+      replace: { verb: _('Replacing'), gerund: _('Downloading...') },
+      restore: { verb: _('Restoring'), gerund: _('Restoring...') }
+    };
+
+    const config = actionConfig[action];
+    const actionLower = action.toLowerCase();
+
     return new Promise(function (resolve, reject) {
-      // First save current configuration
       mapObj.save()
         .then(function () {
-          // Show loading message
-          ui.showModal(_('Replacing'), [
-            E('p', { 'class': 'spinning' }, _('Downloading...'))
+          ui.showModal(config.verb, [
+            E('p', { 'class': 'spinning' }, config.gerund)
           ]);
 
-          // Execute the replace operation via fleth script
-          return fs.exec('/usr/sbin/fleth', ['replace_mapsh']);
+          return fs.exec('/usr/sbin/fleth', [action + '_mapsh']);
         })
         .then(function (result) {
           ui.hideModal();
 
           if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
-            ui.addNotification(null, E('p', _('Replaced successfully! Please restart the network interface manually.')), 'info');
+            ui.addNotification(null, E('p', _('Operation completed successfully! Please restart the network interface manually.')), 'info');
 
-            // Reload page to update backup status
             setTimeout(function() {
               window.location.reload();
-            }, 2000);
+            }, 5000);
           } else {
             ui.addNotification(null, E('div', [
-              E('p', _('Failed to replace:')),
+              E('p', _('Failed to ' + actionLower + ':')),
               E('pre', result.stdout || result.stderr || 'Unknown error')
             ]), 'error');
           }
@@ -413,7 +411,7 @@ return view.extend({
         .catch(function (error) {
           ui.hideModal();
           ui.addNotification(null, E('div', [
-            E('p', _('Error replacing:')),
+            E('p', _('Error ' + config.gerund.toLowerCase() + ':')),
             E('pre', error.message || error)
           ]), 'error');
           reject(error);
@@ -421,46 +419,11 @@ return view.extend({
     });
   },
 
+  replaceMapSh: function (mapObj) {
+    return this.manageMapSh(mapObj, 'replace');
+  },
+
   restoreMapSh: function (mapObj) {
-    return new Promise(function (resolve, reject) {
-      // First save current configuration
-      mapObj.save()
-        .then(function () {
-          // Show loading message
-          ui.showModal(_('Restoring'), [
-            E('p', { 'class': 'spinning' }, _('Restoring...'))
-          ]);
-
-          // Execute the restore operation via fleth script
-          return fs.exec('/usr/sbin/fleth', ['restore_mapsh']);
-        })
-        .then(function (result) {
-          ui.hideModal();
-
-          if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
-            ui.addNotification(null, E('p', _('Restored successfully! Please restart the network interface manually.')), 'info');
-
-            // Reload page to update backup status
-            setTimeout(function() {
-              window.location.reload();
-            }, 2000);
-          } else {
-            ui.addNotification(null, E('div', [
-              E('p', _('Failed to restore:')),
-              E('pre', result.stdout || result.stderr || 'Unknown error')
-            ]), 'error');
-          }
-
-          resolve();
-        })
-        .catch(function (error) {
-          ui.hideModal();
-          ui.addNotification(null, E('div', [
-            E('p', _('Error restoring:')),
-            E('pre', error.message || error)
-          ]), 'error');
-          reject(error);
-        });
-    });
+    return this.manageMapSh(mapObj, 'restore');
   },
 });
