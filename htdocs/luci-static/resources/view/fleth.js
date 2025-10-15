@@ -113,7 +113,7 @@ return view.extend({
     o = s.taboption(
       "info",
       form.DummyValue,
-      "dslite_privider",
+      "dslite_provider",
       _("DS-Lite Provider")
     );
     o.cfgvalue = function () {
@@ -153,11 +153,6 @@ return view.extend({
       });
     }
 
-    // o = s.taboption('general', form.Button, '_hook_luci-firewall-port-forward');
-    // o.title      = '&#160;';
-    // o.inputtitle = _('Hook Port Forward in firewall');
-    // o.inputstyle = 'apply';
-    // o.onclick = L.bind(this.hookFW, this, m);
 
     o = s.taboption(
       "general",
