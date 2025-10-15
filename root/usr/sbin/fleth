@@ -274,7 +274,7 @@ get_dslite_provider(){
 set_interface() {
     current_proto=$(uci get network.${h_TUNNEL_INTERFACE}.proto 2>/dev/null)
     current_peeraddrdomain=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddrdomain 2>/dev/null)
-    current_tunlink=$(uci get network.${h_UPLINK_INTERFACE}.tunlink 2>/dev/null)
+    current_tunlink=$(uci get network.${h_TUNNEL_INTERFACE}.tunlink 2>/dev/null)
     current_mtu=$(uci get network.${h_TUNNEL_INTERFACE}.mtu 2>/dev/null)
     current_zone_index=$(uci show firewall | grep -E "firewall.@zone\[[0-9]+\].network=.*'$h_TUNNEL_INTERFACE'" | sed -n "s/.*@zone\[\([0-9]\+\)\].*/\1/p")
     new_zone_index=$(uci show firewall | grep -E "firewall.@zone\[[0-9]+\].name='$h_TUNNEL_INTERFACE_zone'" | sed -n "s/.*@zone\[\([0-9]\+\)\].*/\1/p")
@@ -283,8 +283,10 @@ set_interface() {
         if [ -z "$r_AFTR" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
             echo "Failed to retrieve one or more configuration values"
             exit 1
-        elif [ "$current_peeraddrdomain" != "$r_AFTR_DOMAIN" ] ||
-           [ "$current_tunlink" != "$h_TUNNEL_INTERFACE" ] ||
+        fi
+
+        if [ "$current_peeraddrdomain" != "$r_AFTR_DOMAIN" ] ||
+           [ "$current_tunlink" != "$h_UPLINK_INTERFACE" ] ||
            [ "$current_proto" != 'dslite' ] ||
            [ "$current_mtu" != "$h_TUNNEL_INTERFACE_MTU" ]; then
             uci batch <<EOF
@@ -296,10 +298,10 @@ set network.${h_TUNNEL_INTERFACE}.tunlink='${h_UPLINK_INTERFACE}'
 set network.${h_TUNNEL_INTERFACE}.mtu='${h_TUNNEL_INTERFACE_MTU}'
 set network.${h_TUNNEL_INTERFACE}.encaplimit='ignore'
 EOF
-            uci delete network.${h_TUNNEL_INTERFACE}.device > /dev/null
+            uci delete network.${h_TUNNEL_INTERFACE}.device 2>/dev/null
             if [ "$new_zone_index" != "$current_zone_index" ]; then
-                uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE"
-                uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE"
+                uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
+                uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
             fi
             uci commit
             ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
@@ -314,7 +316,7 @@ EOF
         current_psidlen=$(uci get network.${h_TUNNEL_INTERFACE}.psidlen 2>/dev/null)
         current_offset=$(uci get network.${h_TUNNEL_INTERFACE}.offset 2>/dev/null)
         if [ "$current_peeraddr" != "$r_PEERADDR" ] ||
-            [ "$current_tunlink" != "$h_TUNNEL_INTERFACE" ] ||
+            [ "$current_tunlink" != "$h_UPLINK_INTERFACE" ] ||
             [ "$current_proto" != 'map' ] ||
             [ "$current_mtu" != "$h_TUNNEL_INTERFACE_MTU" ] ||
             [ "$current_ipaddr" != "$r_IPADDR" ] ||
@@ -342,18 +344,18 @@ set network.${h_TUNNEL_INTERFACE}.mtu='${h_TUNNEL_INTERFACE_MTU}'
 set network.${h_TUNNEL_INTERFACE}.legacymap='1'
 set network.${h_TUNNEL_INTERFACE}.encaplimit='ignore'
 EOF
-            uci delete network.${h_TUNNEL_INTERFACE}.device > /dev/null
+            uci delete network.${h_TUNNEL_INTERFACE}.device 2>/dev/null
             if [ "$new_zone_index" != "$current_zone_index" ]; then
-                uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE"
-                uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE"
+                uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
+                uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
             fi
             uci commit
             ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
             logger -t fleth "New map-e configuratin committed ${h_TUNNEL_INTERFACE}=${r_PEERADDR}"
         fi
     elif [ "$new_zone_index" != "$current_zone_index" ]; then
-        uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE"
-        uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE"
+        uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
+        uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
         uci commit firewall
     fi
     if check_interface_proto_invalid ${h_TUNNEL_INTERFACE}; then
@@ -522,6 +524,7 @@ elif [ "$1" = "replace_mapsh" ]; then
 
     # Replace the file
     mv /tmp/map.sh.new "$MAPSH_PATH"
+    chmod +x "$MAPSH_PATH"
     if [ $? -ne 0 ]; then
         echo "ERROR: Failed to replace file"
         exit 1
