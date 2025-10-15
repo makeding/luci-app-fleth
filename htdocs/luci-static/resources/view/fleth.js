@@ -277,7 +277,7 @@ return view.extend({
 
     o = s.taboption("tools", form.Button, "_replace_mapsh");
     o.title = "&#160;";
-    o.inputtitle = _("Replace MAP.sh");
+    o.inputtitle = _("Replace");
     o.inputstyle = data.mapBackupExists ? "cbi-button-action" : "cbi-button-apply";
     o.onclick = L.bind(function (m) {
       return this.replaceMapSh(m);
@@ -285,7 +285,7 @@ return view.extend({
 
     o = s.taboption("tools", form.Button, "_restore_mapsh");
     o.title = "&#160;";
-    o.inputtitle = _("Restore Original MAP.sh");
+    o.inputtitle = _("Restore");
     o.inputstyle = "cbi-button-action";
     o.onclick = L.bind(function (m) {
       return this.restoreMapSh(m);
@@ -379,8 +379,8 @@ return view.extend({
       mapObj.save()
         .then(function () {
           // Show loading message
-          ui.showModal(_('Replacing MAP.sh'), [
-            E('p', { 'class': 'spinning' }, _('Downloading and replacing MAP.sh...'))
+          ui.showModal(_('Replacing'), [
+            E('p', { 'class': 'spinning' }, _('Downloading...'))
           ]);
 
           // Execute the replace operation via fleth script
@@ -390,7 +390,7 @@ return view.extend({
           ui.hideModal();
 
           if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
-            ui.addNotification(null, E('p', _('map.sh replaced successfully! Please restart the network interface if needed.')), 'info');
+            ui.addNotification(null, E('p', _('Replaced successfully! Please restart the network interface manually.')), 'info');
 
             // Reload page to update backup status
             setTimeout(function() {
@@ -398,7 +398,7 @@ return view.extend({
             }, 2000);
           } else {
             ui.addNotification(null, E('div', [
-              E('p', _('Failed to replace MAP.sh:')),
+              E('p', _('Failed to replace:')),
               E('pre', result.stdout || result.stderr || 'Unknown error')
             ]), 'error');
           }
@@ -408,7 +408,7 @@ return view.extend({
         .catch(function (error) {
           ui.hideModal();
           ui.addNotification(null, E('div', [
-            E('p', _('Error replacing MAP.sh:')),
+            E('p', _('Error replacing:')),
             E('pre', error.message || error)
           ]), 'error');
           reject(error);
@@ -422,8 +422,8 @@ return view.extend({
       mapObj.save()
         .then(function () {
           // Show loading message
-          ui.showModal(_('Restoring MAP.sh'), [
-            E('p', { 'class': 'spinning' }, _('Restoring original MAP.sh...'))
+          ui.showModal(_('Restoring'), [
+            E('p', { 'class': 'spinning' }, _('Restoring...'))
           ]);
 
           // Execute the restore operation via fleth script
@@ -433,7 +433,7 @@ return view.extend({
           ui.hideModal();
 
           if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
-            ui.addNotification(null, E('p', _('Original map.sh restored successfully! Please restart the network interface if needed.')), 'info');
+            ui.addNotification(null, E('p', _('Restored successfully! Please restart the network interface manually.')), 'info');
 
             // Reload page to update backup status
             setTimeout(function() {
@@ -441,7 +441,7 @@ return view.extend({
             }, 2000);
           } else {
             ui.addNotification(null, E('div', [
-              E('p', _('Failed to restore MAP.sh:')),
+              E('p', _('Failed to restore:')),
               E('pre', result.stdout || result.stderr || 'Unknown error')
             ]), 'error');
           }
@@ -451,7 +451,7 @@ return view.extend({
         .catch(function (error) {
           ui.hideModal();
           ui.addNotification(null, E('div', [
-            E('p', _('Error restoring MAP.sh:')),
+            E('p', _('Error restoring:')),
             E('pre', error.message || error)
           ]), 'error');
           reject(error);

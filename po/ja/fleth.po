@@ -171,7 +171,7 @@ msgid "map.sh Management"
 msgstr "map.sh 管理"
 
 msgid "OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version."
-msgstr "OpenWrt の map.sh にはバグがあります：最初のポートグループのみ動作し、ICMP が機能しません。下記をクリックして修正版に置き換えてください。"
+msgstr "OpenWrt の map.sh にバグがあり、最初のポートグループしか使えず、ICMP も動作しません。修正版への置き換えをお勧めします。"
 
 msgid "See more"
 msgstr "詳細を見る"
@@ -217,3 +217,39 @@ msgstr "map.sh の置き換え中にエラーが発生しました："
 
 msgid "Error restoring MAP.sh:"
 msgstr "map.sh の復元中にエラーが発生しました："
+
+msgid "Replace"
+msgstr "置き換える"
+
+msgid "Restore"
+msgstr "復元"
+
+msgid "Replacing"
+msgstr "置き換え中"
+
+msgid "Downloading..."
+msgstr "ダウンロード中..."
+
+msgid "Restoring"
+msgstr "復元中"
+
+msgid "Restoring..."
+msgstr "復元中..."
+
+msgid "Replaced successfully! Please restart the network interface manually."
+msgstr "置き換え完了！手動でネットワークインターフェースを再起動してください。"
+
+msgid "Restored successfully! Please restart the network interface manually."
+msgstr "復元完了！手動でネットワークインターフェースを再起動してください。"
+
+msgid "Failed to replace:"
+msgstr "置き換え失敗："
+
+msgid "Failed to restore:"
+msgstr "復元失敗："
+
+msgid "Error replacing:"
+msgstr "置き換えエラー："
+
+msgid "Error restoring:"
+msgstr "復元エラー："
