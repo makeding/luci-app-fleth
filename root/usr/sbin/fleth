@@ -497,26 +497,83 @@ EOF
 
     logger -t fleth "IPv6 PD configuration completed successfully"
     echo "SUCCESS"
+elif [ "$1" = "replace_mapsh" ]; then
+    # Replace map.sh with patched version
+    logger -t fleth "Starting map.sh replacement"
+
+    MAPSH_URL="https://raw.githubusercontent.com/fakemanhk/openwrt-jp-ipoe/345b1d9add58cf84c3eebe235f695607a78ebcd9/map.sh.new"
+    MAPSH_PATH="/lib/netifd/proto/map.sh"
+    BACKUP_PATH="/lib/netifd/proto/map.sh.flethbak"
+
+    # Check if backup already exists, if not create it
+    if [ ! -f "$BACKUP_PATH" ]; then
+        cp "$MAPSH_PATH" "$BACKUP_PATH"
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Failed to create backup"
+            exit 1
+        fi
+    fi
+    # --no-check-certificate
+    wget -q -O /tmp/map.sh.new "$MAPSH_URL"
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to download"
+        exit 1
+    fi
+
+    # Replace the file
+    mv /tmp/map.sh.new "$MAPSH_PATH"
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to replace file"
+        exit 1
+    fi
+
+    logger -t fleth "map.sh replaced successfully"
+    echo "SUCCESS"
+elif [ "$1" = "restore_mapsh" ]; then
+    # Restore original map.sh from backup
+
+    MAPSH_PATH="/lib/netifd/proto/map.sh"
+    BACKUP_PATH="/lib/netifd/proto/map.sh.flethbak"
+
+    # Check if backup exists
+    if [ ! -f "$BACKUP_PATH" ]; then
+        echo "ERROR: Backup not found"
+        exit 1
+    fi
+
+    mv "$BACKUP_PATH" "$MAPSH_PATH"
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to restore"
+        exit 1
+    fi
+
+    echo "SUCCESS"
 else
     echo "Flet'h by huggy"
     echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically in Japan."
     echo ""
-    echo "Usage: fleth {auto|mape_status|get_area|get_dslite_provider|pending_status|get_prefix_length|auto_setup_ipv6|hook_none.js|restore_none.js|setup_ipv6_slaac|setup_ipv6_pd|setup_ipip_tunnel|remove_ipip_tunnel|get_ipip_status}"
-    echo "auto                Configure the tunnel settings based on current state and config."
-    echo "pending_status      Show if the service is in pending state."
-    echo "get_area            Show the current area information."
-    echo "get_dslite_provider Show the current DS-Lite provider details."
-    echo "mape_status         Show the current MAP-E provider details."
-    echo "get_prefix_length   Show the detected IPv6 prefix length (/56 or /64)."
-    echo "auto_setup_ipv6     Auto-detect prefix and configure PD (/56) or SLAAC (/64) mode."
-    echo "hook_none.js        Install the fleth hook in none.js to hook port-forward page."
-    echo "restore_none.js     Restore the none.js to its default state."
-    echo "setup_ipv6_slaac    Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa (/64)."
-    echo "setup_ipv6_pd       Configure IPv6 PD for CROSS(10Gbps) or with Hikari Denwa (/56)."
-    echo "setup_ipip_tunnel <remote_endpoint> [tunnel_interface] [mtu] [ipv6_interface_id] [firewall_zone]"
-    echo "                    Create and configure IPIP tunnel. Tunnel name is auto-generated."
-    echo "remove_ipip_tunnel  Remove all IPIP tunnel configurations."
-    echo "get_ipip_status     Show current IPIP tunnel status for all tunnels."
+    echo "Usage: fleth <command> [arguments]"
+    echo ""
+    echo "Tunnel Configuration Commands:"
+    echo "  auto                  Configure the tunnel settings based on current state and config."
+    echo ""
+    echo "Status and Detection Commands:"
+    echo "  pending_status        Show if the service is in pending state."
+    echo "  get_area              Show the current area information (EAST/WEST)."
+    echo "  get_dslite_provider   Show the current DS-Lite provider details."
+    echo "  mape_status           Show the current MAP-E provider details."
+    echo "  get_prefix_length     Show the detected IPv6 prefix length (/56 or /64)."
+    echo ""
+    echo "IPv6 Configuration Commands:"
+    echo "  auto_setup_ipv6       Auto-detect prefix and configure PD (/56) or SLAAC (/64) mode."
+    echo "  setup_ipv6_slaac      Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa (/64)."
+    echo "  setup_ipv6_pd         Configure IPv6 PD for CROSS(10Gbps) or with Hikari Denwa (/56)."
+    echo ""
+    echo "File Patches:"
+    echo "  replace_mapsh         Replace map.sh with patched version (backup created if not exists)."
+    echo "  restore_mapsh         Restore original map.sh from backup."
+    echo "  hook_none.js          Install the fleth hook in none.js to hook port-forward page."
+    echo "  restore_none.js       Restore the none.js to its default state."
     echo ""
     echo "To modify settings, try these examples below:"
     echo "uci show fleth.global"

@@ -17,10 +17,12 @@ return view.extend({
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_prefix_length"]), { stdout: "" }),
+      L.resolveDefault(fs.stat("/lib/netifd/proto/map.sh.flethbak"), null),
     ]).then(function (results) {
       const area = (results[0].stdout || "").trim();
       const mape_status = (results[1].stdout || "").split("\n");
       const prefix_length = (results[2].stdout || "").trim();
+      const mapBackupExists = results[3] !== null;
 
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
@@ -43,6 +45,7 @@ return view.extend({
                 mape_status: mape_status,
                 prefix_length: prefix_length || "UNKNOWN",
                 isPending: true,
+                mapBackupExists: mapBackupExists,
               };
             }
             // No pending status, check DS-Lite provider
@@ -55,6 +58,7 @@ return view.extend({
                   mape_status: mape_status,
                   prefix_length: prefix_length || "UNKNOWN",
                   isPending: false,
+                  mapBackupExists: mapBackupExists,
                 };
               });
           });
@@ -66,6 +70,7 @@ return view.extend({
           mape_status: mape_status,
           prefix_length: prefix_length || "UNKNOWN",
           isPending: false,
+          mapBackupExists: mapBackupExists,
         };
       }
     });
@@ -163,15 +168,6 @@ return view.extend({
     o.rmempty = false;
     o.default = "0";
 
-    // o = s.taboption(
-    //   "general",
-    //   form.Flag,
-    //   "ip6relay_enabled",
-    //   _("Auto Configure lan side IPv6"),
-    //   _("You can hold both ISP and ULA address simultaneously.")
-    // );
-    // o.rmempty = false;
-    // o.default = "0";
 
     o = s.taboption(
       "general",
@@ -252,6 +248,50 @@ return view.extend({
       return this.setupIPv6PD(m);
     }, this, m);
 
+    // map.sh Management section in Tools tab
+    o = s.taboption("tools", form.DummyValue, "_mapsh_description");
+    o.title = _("map.sh Management");
+    o.cfgvalue = function () {
+      return _("OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version.") +
+             ' <a href="https://github.com/fakemanhk/openwrt-jp-ipoe/tree/main" target="_blank" style="color: #0088cc;">(' + _("See more") + ')</a>';
+    };
+    o.rawhtml = true;
+
+    o = s.taboption("tools", form.DummyValue, "_mapsh_status");
+    o.title = "&#160;";
+    o.cfgvalue = function () {
+      let icon = "";
+      let text = "";
+
+      if (data.mapBackupExists) {
+        icon = "✓";
+        text = _("Patched version");
+      } else {
+        icon = "⚠";
+        text = _("Original version");
+      }
+
+      return '<span style="color: #0088cc; font-weight: bold;">' + icon + ' ' + text + '</span>';
+    };
+    o.rawhtml = true;
+
+    o = s.taboption("tools", form.Button, "_replace_mapsh");
+    o.title = "&#160;";
+    o.inputtitle = _("Replace MAP.sh");
+    o.inputstyle = data.mapBackupExists ? "cbi-button-action" : "cbi-button-apply";
+    o.onclick = L.bind(function (m) {
+      return this.replaceMapSh(m);
+    }, this, m);
+
+    o = s.taboption("tools", form.Button, "_restore_mapsh");
+    o.title = "&#160;";
+    o.inputtitle = _("Restore Original MAP.sh");
+    o.inputstyle = "cbi-button-action";
+    o.onclick = L.bind(function (m) {
+      return this.restoreMapSh(m);
+    }, this, m);
+    o.depends("_replace_mapsh", "");
+
     const renderedNode = await m.render();
 
     // Hide footer when tools tab is active
@@ -331,5 +371,91 @@ return view.extend({
 
   setupIPv6PD: function (mapObj) {
     return this.setupIPv6Config(mapObj, 'pd');
+  },
+
+  replaceMapSh: function (mapObj) {
+    return new Promise(function (resolve, reject) {
+      // First save current configuration
+      mapObj.save()
+        .then(function () {
+          // Show loading message
+          ui.showModal(_('Replacing MAP.sh'), [
+            E('p', { 'class': 'spinning' }, _('Downloading and replacing MAP.sh...'))
+          ]);
+
+          // Execute the replace operation via fleth script
+          return fs.exec('/usr/sbin/fleth', ['replace_mapsh']);
+        })
+        .then(function (result) {
+          ui.hideModal();
+
+          if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
+            ui.addNotification(null, E('p', _('map.sh replaced successfully! Please restart the network interface if needed.')), 'info');
+
+            // Reload page to update backup status
+            setTimeout(function() {
+              window.location.reload();
+            }, 2000);
+          } else {
+            ui.addNotification(null, E('div', [
+              E('p', _('Failed to replace MAP.sh:')),
+              E('pre', result.stdout || result.stderr || 'Unknown error')
+            ]), 'error');
+          }
+
+          resolve();
+        })
+        .catch(function (error) {
+          ui.hideModal();
+          ui.addNotification(null, E('div', [
+            E('p', _('Error replacing MAP.sh:')),
+            E('pre', error.message || error)
+          ]), 'error');
+          reject(error);
+        });
+    });
+  },
+
+  restoreMapSh: function (mapObj) {
+    return new Promise(function (resolve, reject) {
+      // First save current configuration
+      mapObj.save()
+        .then(function () {
+          // Show loading message
+          ui.showModal(_('Restoring MAP.sh'), [
+            E('p', { 'class': 'spinning' }, _('Restoring original MAP.sh...'))
+          ]);
+
+          // Execute the restore operation via fleth script
+          return fs.exec('/usr/sbin/fleth', ['restore_mapsh']);
+        })
+        .then(function (result) {
+          ui.hideModal();
+
+          if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
+            ui.addNotification(null, E('p', _('Original map.sh restored successfully! Please restart the network interface if needed.')), 'info');
+
+            // Reload page to update backup status
+            setTimeout(function() {
+              window.location.reload();
+            }, 2000);
+          } else {
+            ui.addNotification(null, E('div', [
+              E('p', _('Failed to restore MAP.sh:')),
+              E('pre', result.stdout || result.stderr || 'Unknown error')
+            ]), 'error');
+          }
+
+          resolve();
+        })
+        .catch(function (error) {
+          ui.hideModal();
+          ui.addNotification(null, E('div', [
+            E('p', _('Error restoring MAP.sh:')),
+            E('pre', error.message || error)
+          ]), 'error');
+          reject(error);
+        });
+    });
   },
 });

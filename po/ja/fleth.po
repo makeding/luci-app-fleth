@@ -166,3 +166,54 @@ msgstr "IPv6 インターフェース ID は必須です"
 
 msgid "Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000"
 msgstr "無効な IPv6 インターフェース識別子形式。例：0011:4514:1b00:0000"
+
+msgid "map.sh Management"
+msgstr "map.sh 管理"
+
+msgid "OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version."
+msgstr "OpenWrt の map.sh にはバグがあります：最初のポートグループのみ動作し、ICMP が機能しません。下記をクリックして修正版に置き換えてください。"
+
+msgid "See more"
+msgstr "詳細を見る"
+
+msgid "Patched version"
+msgstr "パッチ版"
+
+msgid "Original version"
+msgstr "オリジナル版"
+
+msgid "Replace MAP.sh"
+msgstr "map.sh を置き換える"
+
+msgid "Restore Original MAP.sh"
+msgstr "オリジナル map.sh に戻す"
+
+msgid "Replacing MAP.sh"
+msgstr "map.sh を置き換え中"
+
+msgid "Downloading and replacing MAP.sh..."
+msgstr "map.sh をダウンロードして置き換え中..."
+
+msgid "Restoring MAP.sh"
+msgstr "map.sh を復元中"
+
+msgid "Restoring original MAP.sh..."
+msgstr "オリジナル map.sh を復元中..."
+
+msgid "map.sh replaced successfully! Please restart the network interface if needed."
+msgstr "map.sh の置き換えに成功しました！変更を有効にするには、手動でネットワークインターフェースを再起動してください。"
+
+msgid "Original map.sh restored successfully! Please restart the network interface if needed."
+msgstr "オリジナル map.sh の復元に成功しました！変更を有効にするには、手動でネットワークインターフェースを再起動してください。"
+
+msgid "Failed to replace MAP.sh:"
+msgstr "map.sh の置き換えに失敗しました："
+
+msgid "Failed to restore MAP.sh:"
+msgstr "map.sh の復元に失敗しました："
+
+msgid "Error replacing MAP.sh:"
+msgstr "map.sh の置き換え中にエラーが発生しました："
+
+msgid "Error restoring MAP.sh:"
+msgstr "map.sh の復元中にエラーが発生しました："

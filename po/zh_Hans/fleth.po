@@ -166,3 +166,54 @@ msgstr "IPv6 接口 ID 为必填项"
 
 msgid "Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000"
 msgstr "无效的 IPv6 接口标识符格式。示例：0011:4514:1b00:0000"
+
+msgid "map.sh Management"
+msgstr "map.sh 管理"
+
+msgid "OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version."
+msgstr "OpenWrt 的 map.sh 存在 bug：仅第一组端口可用且 ICMP 无法工作。点击下方按钮替换为修复版。"
+
+msgid "See more"
+msgstr "查看详情"
+
+msgid "Patched version"
+msgstr "已打补丁版本"
+
+msgid "Original version"
+msgstr "原始版本"
+
+msgid "Replace MAP.sh"
+msgstr "替换 MAP.sh"
+
+msgid "Restore Original MAP.sh"
+msgstr "恢复原始 MAP.sh"
+
+msgid "Replacing MAP.sh"
+msgstr "替换 map.sh 中"
+
+msgid "Downloading and replacing MAP.sh..."
+msgstr "正在下载并替换 MAP.sh..."
+
+msgid "Restoring MAP.sh"
+msgstr "恢复 map.sh 中"
+
+msgid "Restoring original MAP.sh..."
+msgstr "正在恢复原始 MAP.sh..."
+
+msgid "map.sh replaced successfully! Please restart the network interface if needed."
+msgstr "map.sh 替换成功！请手动重启网络接口以使更改生效。"
+
+msgid "Original map.sh restored successfully! Please restart the network interface if needed."
+msgstr "原始 map.sh 恢复成功！请手动重启网络接口以使更改生效。"
+
+msgid "Failed to replace MAP.sh:"
+msgstr "替换 map.sh 失败："
+
+msgid "Failed to restore MAP.sh:"
+msgstr "恢复 map.sh 失败："
+
+msgid "Error replacing MAP.sh:"
+msgstr "替换 map.sh 时出错："
+
+msgid "Error restoring MAP.sh:"
+msgstr "恢复 map.sh 时出错："
