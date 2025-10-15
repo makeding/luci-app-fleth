@@ -18,11 +18,13 @@ return view.extend({
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_prefix_length"]), { stdout: "" }),
       L.resolveDefault(fs.stat("/lib/netifd/proto/map.sh.flethbak"), null),
+      L.resolveDefault(fs.exec("sh", ["-c", "cmp -s /lib/netifd/proto/map.sh /lib/netifd/proto/map.sh.flethbak && echo 'same' || echo 'different'"]), { stdout: "" }),
     ]).then(function (results) {
       const area = (results[0].stdout || "").trim();
       const mape_status = (results[1].stdout || "").split("\n");
       const prefix_length = (results[2].stdout || "").trim();
       const mapBackupExists = results[3] !== null;
+      const filesAreSame = (results[4].stdout || "").trim() === 'same';
 
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
@@ -46,6 +48,7 @@ return view.extend({
                 prefix_length: prefix_length || "UNKNOWN",
                 isPending: true,
                 mapBackupExists: mapBackupExists,
+                mapIsPatched: mapBackupExists && !filesAreSame,
               };
             }
             // No pending status, check DS-Lite provider
@@ -59,6 +62,7 @@ return view.extend({
                   prefix_length: prefix_length || "UNKNOWN",
                   isPending: false,
                   mapBackupExists: mapBackupExists,
+                  mapIsPatched: mapBackupExists && !filesAreSame,
                 };
               });
           });
@@ -71,6 +75,7 @@ return view.extend({
           prefix_length: prefix_length || "UNKNOWN",
           isPending: false,
           mapBackupExists: mapBackupExists,
+          mapIsPatched: mapBackupExists && !filesAreSame,
         };
       }
     });
@@ -263,7 +268,7 @@ return view.extend({
       let icon = "";
       let text = "";
 
-      if (data.mapBackupExists) {
+      if (data.mapIsPatched) {
         icon = "✓";
         text = _("Patched version");
       } else {
@@ -278,7 +283,7 @@ return view.extend({
     o = s.taboption("tools", form.Button, "_replace_mapsh");
     o.title = "&#160;";
     o.inputtitle = _("Replace");
-    o.inputstyle = data.mapBackupExists ? "cbi-button-action" : "cbi-button-apply";
+    o.inputstyle = data.mapIsPatched ? "cbi-button-action" : "cbi-button-apply";
     o.onclick = L.bind(function (m) {
       return this.replaceMapSh(m);
     }, this, m);
