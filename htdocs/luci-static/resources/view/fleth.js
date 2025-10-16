@@ -8,7 +8,15 @@
 
 // fix css paading (kusa
 const fleth_style = document.createElement("style");
-fleth_style.innerHTML = `.cbi-value-field { padding-top: 6px; }`;
+fleth_style.innerHTML = `
+  .cbi-value-field { padding-top: 6px; }
+  .port-highlight {
+    background-color: rgb(207, 226, 255);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+`;
 document.head.appendChild(fleth_style);
 
 return view.extend({
@@ -26,52 +34,29 @@ return view.extend({
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
 
-      // Special handling for NURO
-      if (mape_status[0] === "NURO") {
-        areaValue = "UNKNOWN(NURO)";
-      }
-      // If MAP-E is UNKNOWN, check pending status first
+      // Base return object with common fields
+      const baseData = {
+        mape_status: mape_status,
+        prefix_length: prefix_length || "UNKNOWN",
+        mapIsPatched: mapsh_status === "patched",
+      };
+
+      if (mape_status[0] === "NURO") areaValue = "UNKNOWN(NURO)";
+
       if (mapeIsUnknown) {
         return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["pending_status"]), { stdout: "" })
           .then(function (pendingResult) {
             const pendingStatus = (pendingResult.stdout || "").trim();
-            // If pending status detected, return with pending flag
             if (pendingStatus.endsWith("_pending")) {
-              const detectedArea = pendingStatus.split('_')[0];
-              return {
-                area: detectedArea,
-                dslite_provider: "UNKNOWN",
-                mape_status: mape_status,
-                prefix_length: prefix_length || "UNKNOWN",
-                isPending: true,
-                mapIsPatched: mapsh_status === "patched",
-              };
+              return { ...baseData, area: pendingStatus.split('_')[0], dslite_provider: "UNKNOWN", isPending: true };
             }
-            // No pending status, check DS-Lite provider
             return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_dslite_provider"]), { stdout: "" })
               .then(function (dsliteResult) {
-                const dslite_provider = (dsliteResult.stdout || "").trim();
-                return {
-                  area: areaValue,
-                  dslite_provider: dslite_provider || "UNKNOWN",
-                  mape_status: mape_status,
-                  prefix_length: prefix_length || "UNKNOWN",
-                  isPending: false,
-                  mapIsPatched: mapsh_status === "patched",
-                };
+                return { ...baseData, area: areaValue, dslite_provider: (dsliteResult.stdout || "").trim() || "UNKNOWN", isPending: false };
               });
           });
-      } else {
-        // MAP-E detected, no need to check DS-Lite or pending
-        return {
-          area: areaValue,
-          dslite_provider: "UNKNOWN",
-          mape_status: mape_status,
-          prefix_length: prefix_length || "UNKNOWN",
-          isPending: false,
-          mapIsPatched: mapsh_status === "patched",
-        };
       }
+      return { ...baseData, area: areaValue, dslite_provider: "UNKNOWN", isPending: false };
     });
   },
 
@@ -151,9 +136,49 @@ return view.extend({
       mapeDetailFields.forEach((field, i) => {
         const [fieldName, fieldLabel] = field;
         o = s.taboption("info", form.DummyValue, fieldName, _(fieldLabel));
-        o.cfgvalue = function () {
-          return data.mape_status[i + 1] || "";
-        };
+
+        // Special rendering for Available ports
+        if (fieldName === "mape_map_ports") {
+          o.rawhtml = true;
+          o.cfgvalue = function () {
+            const portsString = data.mape_status[i + 1] || "";
+            if (!portsString) return "";
+
+            // Split ports into individual numbers
+            const ports = portsString.split(/\s+/).filter(p => p);
+            const highlightedPorts = ports.map(port => {
+              const len = port.length;
+              const half = len / 2;
+              const reversed = port.split('').reverse().join('');
+              const counts = {};
+              for (let c of port) counts[c] = (counts[c] || 0) + 1;
+
+              const isSpecial = /(\d)\1{2,}/.test(port) || // consecutive repeats
+                port.endsWith('0') || // ends with 0
+                (len >= 2 && len % 2 === 0 && port.substring(0, half) === port.substring(half)) || // ABAB
+                (len >= 3 && port === reversed) || // palindrome
+                Object.values(counts).some(n => n >= 3); // frequent digit
+
+              return isSpecial ? '<span class="port-highlight">' + port + '</span>' : port;
+            });
+
+            return highlightedPorts.join(' ');
+          };
+          // Override render to display as div instead of input
+          o.render = function () {
+            const value = this.cfgvalue();
+            const contentDiv = E('div', { 'style': 'line-height: 1.8; word-wrap: break-word;' });
+            contentDiv.innerHTML = value;
+            return E('div', { 'class': 'cbi-value' }, [
+              E('label', { 'class': 'cbi-value-title' }, _(fieldLabel)),
+              E('div', { 'class': 'cbi-value-field' }, contentDiv)
+            ]);
+          }.bind(o);
+        } else {
+          o.cfgvalue = function () {
+            return data.mape_status[i + 1] || "";
+          };
+        }
       });
     }
 
@@ -252,7 +277,7 @@ return view.extend({
     o.title = _("map.sh Management");
     o.cfgvalue = function () {
       return _("OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version.") +
-             ' <a href="https://github.com/fakemanhk/openwrt-jp-ipoe/tree/main" target="_blank" style="color: #0088cc;">(' + _("See more") + ')</a>';
+        ' <a href="https://github.com/fakemanhk/openwrt-jp-ipoe/tree/main" target="_blank" style="color: #0088cc;">(' + _("See more") + ')</a>';
     };
     o.rawhtml = true;
 
@@ -274,12 +299,12 @@ return view.extend({
     };
     o.rawhtml = true;
 
-    o = s.taboption("tools", form.Button, "_replace_mapsh");
+    o = s.taboption("tools", form.Button, "_patch_mapsh");
     o.title = "&#160;";
-    o.inputtitle = _("Replace");
+    o.inputtitle = _("Patch");
     o.inputstyle = data.mapIsPatched ? "cbi-button-action" : "cbi-button-apply";
     o.onclick = L.bind(function (m) {
-      return this.replaceMapSh(m);
+      return this.patchMapSh(m);
     }, this, m);
 
     o = s.taboption("tools", form.Button, "_restore_mapsh");
@@ -289,15 +314,15 @@ return view.extend({
     o.onclick = L.bind(function (m) {
       return this.restoreMapSh(m);
     }, this, m);
-    o.depends("_replace_mapsh", "");
+    o.depends("_patch_mapsh", "");
 
     const renderedNode = await m.render();
 
     // Hide footer when tools tab is active
-    setTimeout(function() {
+    setTimeout(function () {
       const footer = document.querySelector('.cbi-page-actions');
 
-      const toggleFooter = function() {
+      const toggleFooter = function () {
         // Check if tools tab is active
         const toolsActive = document.querySelector('.cbi-tab[data-tab="tools"]');
         if (footer) {
@@ -312,8 +337,8 @@ return view.extend({
       const tabMenu = document.querySelector('.cbi-tabmenu');
       if (tabMenu) {
         const tabItems = tabMenu.querySelectorAll('li[data-tab]');
-        tabItems.forEach(function(tabItem) {
-          tabItem.addEventListener('click', function() {
+        tabItems.forEach(function (tabItem) {
+          tabItem.addEventListener('click', function () {
             setTimeout(toggleFooter, 10);
           });
         });
@@ -374,7 +399,7 @@ return view.extend({
 
   manageMapSh: function (mapObj, action) {
     const actionConfig = {
-      replace: { verb: _('Replacing'), gerund: _('Downloading...') },
+      patch: { verb: _('Patching'), gerund: _('Downloading...') },
       restore: { verb: _('Restoring'), gerund: _('Restoring...') }
     };
 
@@ -388,7 +413,7 @@ return view.extend({
             E('p', { 'class': 'spinning' }, config.gerund)
           ]);
 
-          return fs.exec('/usr/sbin/fleth', [action + '_mapsh']);
+          return fs.exec('/usr/sbin/fleth', [action + '_map.sh']);
         })
         .then(function (result) {
           ui.hideModal();
@@ -396,7 +421,7 @@ return view.extend({
           if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
             ui.addNotification(null, E('p', _('Operation completed successfully! Please restart the network interface manually.')), 'info');
 
-            setTimeout(function() {
+            setTimeout(function () {
               window.location.reload();
             }, 5000);
           } else {
@@ -419,8 +444,8 @@ return view.extend({
     });
   },
 
-  replaceMapSh: function (mapObj) {
-    return this.manageMapSh(mapObj, 'replace');
+  patchMapSh: function (mapObj) {
+    return this.manageMapSh(mapObj, 'patch');
   },
 
   restoreMapSh: function (mapObj) {

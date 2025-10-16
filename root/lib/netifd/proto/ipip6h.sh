@@ -47,8 +47,8 @@ proto_ipip6h_setup() {
 	}
 
 	[ -z "$ip4ifaddr" ] && {
-		logger -t ipip6h "[${cfg}] ERROR: Missing local IPv4 address"
-		proto_notify_error "$cfg" "MISSING_LOCAL_IPV4"
+		logger -t ipip6h "[${cfg}] ERROR: Missing Public IPv4 address"
+		proto_notify_error "$cfg" "MISSING_PUBLIC_IPV4"
 		proto_block_restart "$cfg"
 		return
 	}

@@ -59,4 +59,4 @@ po2lmo po/ja/fleth.po root/usr/lib/lua/luci/i18n/fleth.ja.lmo
 ```
 
 # License
-MIT
+MIT + GPL2(If the `luci-proto-ipip6h` component is included in the build)

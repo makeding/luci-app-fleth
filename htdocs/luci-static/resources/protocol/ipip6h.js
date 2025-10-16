@@ -56,8 +56,7 @@ return network.registerProtocol('ipip6h', {
 		o.datatype = 'ip4addr("nomask")';
 		o.placeholder = '111.0.0.1';
 
-		o = s.taboption('general', form.Value, 'interface_id', _('IPv6 Interface ID'),
-			_('IPv6 interface identifier (last 64 bits). Will be combined with WAN6 prefix to create a virtual IPv6 address. Example: 0011:4514:1b00:0000'));
+		o = s.taboption('general', form.Value, 'interface_id', _('IPv6 Interface ID'));
 		o.placeholder = '0011:4514:1b00:0000';
 		o.rmempty = false;
 		o.validate = function (_section_id, value) {

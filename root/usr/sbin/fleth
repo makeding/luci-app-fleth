@@ -512,7 +512,7 @@ EOF
 
     logger -t fleth "IPv6 PD configuration completed successfully"
     echo "SUCCESS"
-elif [ "$1" = "replace_mapsh" ]; then
+elif [ "$1" = "patch_map.sh" ]; then
     MAPSH_URL="https://raw.githubusercontent.com/fakemanhk/openwrt-jp-ipoe/345b1d9add58cf84c3eebe235f695607a78ebcd9/map.sh.new"
 
     if [ ! -f "$MAPSH_BACKUP_PATH" ]; then
@@ -541,7 +541,7 @@ elif [ "$1" = "replace_mapsh" ]; then
     fi
     chmod +x "$MAPSH_PATH"
     echo "SUCCESS"
-elif [ "$1" = "restore_mapsh" ]; then
+elif [ "$1" = "restore_map.sh" ]; then
     # Restore original map.sh from backup
     logger -t fleth "Starting map.sh restoration"
 
@@ -582,8 +582,8 @@ else
     echo "  setup_ipv6_pd         Configure IPv6 PD for CROSS(10Gbps) or with Hikari Denwa (/56)."
     echo ""
     echo "File Patches:"
-    echo "  replace_mapsh         Replace map.sh with patched version (backup created if not exists)."
-    echo "  restore_mapsh         Restore original map.sh from backup."
+    echo "  patch_map.sh          Patch map.sh with fixed version (backup created if not exists)."
+    echo "  restore_map.sh        Restore original map.sh from backup."
     echo "  hook_none.js          Install the fleth hook in none.js to hook port-forward page."
     echo "  restore_none.js       Restore the none.js to its default state."
     echo ""

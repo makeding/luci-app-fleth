@@ -158,8 +158,6 @@ msgstr "隧道接口使用的公网 IPv4 地址"
 msgid "IPv6 Interface ID"
 msgstr "IPv6 接口 ID"
 
-msgid "IPv6 interface identifier (last 64 bits). Will be combined with WAN6 prefix to create a virtual IPv6 address. Example: 0011:4514:1b00:0000"
-msgstr "IPv6 接口标识符（后 64 位）。将与 WAN6 前缀组合以创建虚拟 IPv6 地址。示例：0011:4514:1b00:0000"
 
 msgid "IPv6 Interface ID is required"
 msgstr "IPv6 接口 ID 为必填项"
@@ -182,74 +180,20 @@ msgstr "已打补丁版本"
 msgid "Original version"
 msgstr "原始版本"
 
-msgid "Replace MAP.sh"
-msgstr "替换"
-
-msgid "Restore Original MAP.sh"
-msgstr "恢复"
-
-msgid "Replacing MAP.sh"
-msgstr "替换中"
-
-msgid "Downloading and replacing MAP.sh..."
-msgstr "下载中..."
-
-msgid "Restoring MAP.sh"
-msgstr "恢复中"
-
-msgid "Restoring original MAP.sh..."
-msgstr "恢复中..."
-
-msgid "map.sh replaced successfully! Please restart the network interface if needed."
-msgstr "替换完成！请手动重启网络接口。"
-
-msgid "Original map.sh restored successfully! Please restart the network interface if needed."
-msgstr "恢复完成！请手动重启网络接口。"
-
-msgid "Failed to replace MAP.sh:"
-msgstr "替换 map.sh 失败："
-
-msgid "Failed to restore MAP.sh:"
-msgstr "恢复 map.sh 失败："
-
-msgid "Error replacing MAP.sh:"
-msgstr "替换 map.sh 时出错："
-
-msgid "Error restoring MAP.sh:"
-msgstr "恢复 map.sh 时出错："
-
-msgid "Replace"
-msgstr "替换"
+msgid "Patch"
+msgstr "修补"
 
 msgid "Restore"
 msgstr "恢复"
 
-msgid "Replacing"
-msgstr "替换中"
+msgid "Patching"
+msgstr "修补中"
 
 msgid "Downloading..."
 msgstr "下载中..."
 
-msgid "Restoring"
-msgstr "恢复中"
-
 msgid "Restoring..."
 msgstr "恢复中..."
 
-msgid "Replaced successfully! Please restart the network interface manually."
-msgstr "替换完成！请手动重启网络接口。"
-
-msgid "Restored successfully! Please restart the network interface manually."
-msgstr "恢复完成！请手动重启网络接口。"
-
-msgid "Failed to replace:"
-msgstr "替换失败："
-
-msgid "Failed to restore:"
-msgstr "恢复失败："
-
-msgid "Error replacing:"
-msgstr "替换错误："
-
-msgid "Error restoring:"
-msgstr "恢复错误："
+msgid "Operation completed successfully! Please restart the network interface manually."
+msgstr "操作完成！请手动重启网络接口。"
