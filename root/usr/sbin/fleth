@@ -277,7 +277,6 @@ get_dslite_provider(){
 
 set_interface() {
     current_proto=$(uci get network.${h_TUNNEL_INTERFACE}.proto 2>/dev/null)
-    current_peeraddrdomain=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddrdomain 2>/dev/null)
     current_tunlink=$(uci get network.${h_TUNNEL_INTERFACE}.tunlink 2>/dev/null)
     current_mtu=$(uci get network.${h_TUNNEL_INTERFACE}.mtu 2>/dev/null)
     current_zone_index=$(uci show firewall | grep -E "firewall.@zone\[[0-9]+\].network=.*'$h_TUNNEL_INTERFACE'" | sed -n "s/.*@zone\[\([0-9]\+\)\].*/\1/p")
@@ -288,7 +287,7 @@ set_interface() {
             echo "Failed to retrieve one or more configuration values"
             exit 1
         fi
-
+        current_peeraddrdomain=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddrdomain 2>/dev/null)
         if [ "$current_peeraddrdomain" != "$r_AFTR_DOMAIN" ] ||
            [ "$current_tunlink" != "$h_UPLINK_INTERFACE" ] ||
            [ "$current_proto" != 'dslite' ] ||
@@ -312,6 +311,7 @@ EOF
             logger -t fleth "New ds-lite configuratin committed ${h_TUNNEL_INTERFACE}=${r_AFTR}"
         fi
     elif [ "$r_TYPE" = 'map-e' ]; then
+        current_peeraddr=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddr 2>/dev/null)
         current_ipaddr=$(uci get network.${h_TUNNEL_INTERFACE}.ipaddr 2>/dev/null)
         current_ip4prefixlen=$(uci get network.${h_TUNNEL_INTERFACE}.ip4prefixlen 2>/dev/null)
         current_ip6prefix=$(uci get network.${h_TUNNEL_INTERFACE}.ip6prefix 2>/dev/null)
