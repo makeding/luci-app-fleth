@@ -369,6 +369,9 @@ EOF
 }
 
 if [ "$1" = "auto" ]; then
+    if [ "$(pgrep -f "fleth auto" | wc -l)" -ge 3 ]; then
+        exit 0
+    fi
     logger -t fleth "is running $h_ENABLED"
     if [ "$h_ENABLED" == "1" ]; then
         get_uplink_interface_ipv6 > /dev/null
@@ -429,6 +432,7 @@ elif [ "$1" = "setup_ipv6_slaac" ]; then
     # Configure uplink interface settings
     uci batch <<EOF
 set network.${h_UPLINK_INTERFACE}.reqaddress='try'
+set network.${h_UPLINK_INTERFACE}.extendprefix='1'
 del network.${h_UPLINK_INTERFACE}.reqprefix
 del network.${h_UPLINK_INTERFACE}.ip6assign
 set dhcp.${h_UPLINK_INTERFACE}=dhcp
@@ -474,6 +478,7 @@ elif [ "$1" = "setup_ipv6_pd" ]; then
 set network.${h_UPLINK_INTERFACE}.reqprefix='auto'
 set network.${h_UPLINK_INTERFACE}.reqaddress='try'
 set network.${h_UPLINK_INTERFACE}.ip6assign='64'
+del network.${h_UPLINK_INTERFACE}.extendprefix
 set dhcp.${h_UPLINK_INTERFACE}=dhcp
 set dhcp.${h_UPLINK_INTERFACE}.interface='${h_UPLINK_INTERFACE}'
 set dhcp.${h_UPLINK_INTERFACE}.master='1'
