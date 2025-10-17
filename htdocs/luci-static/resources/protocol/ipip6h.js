@@ -90,6 +90,6 @@ return network.registerProtocol('ipip6h', {
 
 		o = s.taboption('advanced', form.Value, 'mtu', _('Use MTU on tunnel interface'));
 		o.placeholder = '1460';
-		o.datatype = 'max(1500)';
+		o.datatype = 'range(1280,1500)';
 	}
 });

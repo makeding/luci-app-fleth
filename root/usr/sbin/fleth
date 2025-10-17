@@ -69,7 +69,7 @@ get_area(){
         fi
     fi
     
-    echo $e_AREA
+    echo "$e_AREA"
 }
 
 get_pending_status(){
@@ -308,7 +308,7 @@ EOF
             fi
             uci commit
             ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
-            logger -t fleth "New ds-lite configuratin committed ${h_TUNNEL_INTERFACE}=${r_AFTR}"
+            logger -t fleth "New ds-lite configuration committed ${h_TUNNEL_INTERFACE}=${r_AFTR}"
         fi
     elif [ "$r_TYPE" = 'map-e' ]; then
         current_peeraddr=$(uci get network.${h_TUNNEL_INTERFACE}.peeraddr 2>/dev/null)
@@ -355,7 +355,7 @@ EOF
             fi
             uci commit
             ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
-            logger -t fleth "New map-e configuratin committed ${h_TUNNEL_INTERFACE}=${r_PEERADDR}"
+            logger -t fleth "New map-e configuration committed ${h_TUNNEL_INTERFACE}=${r_PEERADDR}"
         fi
     elif [ "$new_zone_index" != "$current_zone_index" ]; then
         uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
