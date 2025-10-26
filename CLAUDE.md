@@ -44,7 +44,7 @@ po2lmo po/ja/fleth.po root/usr/lib/lua/luci/i18n/fleth.ja.lmo
 
 4. **System Integration**
    - `root/etc/init.d/fleth` - System service daemon
-   - `root/etc/hotplug.d/iface/70-fleth-cross-dhcpv6-renew` - Interface monitoring
+   - `root/etc/hotplug.d/iface/70-fleth` - Interface hotplug handler (triggers on interface up)
    - `root/etc/uci-defaults/luci-app-fleth` - Default configuration setup
 
 ### Configuration Management

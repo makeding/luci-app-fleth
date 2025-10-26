@@ -4,6 +4,10 @@
 DNS_E=2404:1a8:7f01:a::3
 DNS_W=2001:a7ff:5f01::a
 
+# Lock file for preventing concurrent execution
+LOCK_FILE="/var/run/fleth.lock"
+LOCK_FD=200
+
 # MAP.sh paths
 MAPSH_PATH="/lib/netifd/proto/map.sh"
 MAPSH_BACKUP_PATH="/lib/netifd/proto/map.sh.flethbak"
@@ -56,13 +60,11 @@ get_area(){
         fi
     fi
     if [ "$e_AREA" = "UNKNOWN" ]; then
-        wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O /tmp/null > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
+        if wget --timeout=1 -s "http://[2404:1a8:f401:100::1]/l/__healthcheck" -O /dev/null > /dev/null 2>&1; then
             e_AREA="EAST"
             DNS=$DNS_E
         else
-            wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" -O /tmp/null > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
+            if wget --timeout=1 -s "http://[2001:a7ff:ff0e:1::2]/l/__healthcheck" -O /dev/null > /dev/null 2>&1; then
                 e_AREA="WEST"
                 DNS=$DNS_W
             fi
@@ -119,6 +121,29 @@ check_interface_proto_invalid() {
     else
         return 1
     fi
+}
+
+# Verify file SHA256 checksum
+# Usage: verify_sha256 <file_path> <expected_hash>
+# Returns: 0 if match, 1 if mismatch or sha256sum not available
+verify_sha256() {
+    local file_path="$1"
+    local expected_hash="$2"
+
+    if ! command -v sha256sum >/dev/null 2>&1; then
+        logger -t fleth "WARNING: sha256sum not available, skipping checksum verification"
+        return 0  # Continue without verification if tool unavailable
+    fi
+
+    local actual_hash=$(sha256sum "$file_path" | awk '{print $1}')
+
+    if [ "$actual_hash" != "$expected_hash" ]; then
+        logger -t fleth "ERROR: SHA256 checksum mismatch!"
+        logger -t fleth "Expected: $expected_hash"
+        logger -t fleth "Got:      $actual_hash"
+        return 1
+    fi
+    return 0
 }
 
 get_uplink_interface_ipv6() {
@@ -373,7 +398,7 @@ if [ "$1" = "auto" ]; then
         exit 0
     fi
     logger -t fleth "is running $h_ENABLED"
-    if [ "$h_ENABLED" == "1" ]; then
+    if [ "$h_ENABLED" = "1" ]; then
         get_uplink_interface_ipv6 > /dev/null
         get_mape_provider > /dev/null
         if [ "$r_TYPE" = "UNKNOWN" ]; then
@@ -519,7 +544,7 @@ EOF
     echo "SUCCESS"
 elif [ "$1" = "patch_map.sh" ]; then
     MAPSH_URL="https://raw.githubusercontent.com/fakemanhk/openwrt-jp-ipoe/345b1d9add58cf84c3eebe235f695607a78ebcd9/map.sh.new"
-
+    EXPECTED_SHA256="d64b8018f9eda6dfb84089f7b2fb168c7e7c04ece0c33315422120cdcebdd0b4"
     if [ ! -f "$MAPSH_BACKUP_PATH" ]; then
         cp "$MAPSH_PATH" "$MAPSH_BACKUP_PATH"
         if [ $? -ne 0 ]; then
@@ -532,18 +557,28 @@ elif [ "$1" = "patch_map.sh" ]; then
         echo "ERROR: Failed to create temporary file"
         exit 1
     fi
-    wget -q -O "$TEMP_FILE" "$MAPSH_URL"
+    wget --timeout=10 --tries=3 -q -O "$TEMP_FILE" "$MAPSH_URL"
     if [ $? -ne 0 ]; then
         rm -f "$TEMP_FILE"
         echo "ERROR: Failed to download"
         exit 1
     fi
+
+    # Verify downloaded file integrity
+    if ! verify_sha256 "$TEMP_FILE" "$EXPECTED_SHA256"; then
+        rm -f "$TEMP_FILE"
+        echo "ERROR: Security check failed - checksum mismatch"
+        exit 1
+    fi
+
+    # Replace the file
     mv "$TEMP_FILE" "$MAPSH_PATH"
     if [ $? -ne 0 ]; then
         rm -f "$TEMP_FILE"
         echo "ERROR: Failed to replace file"
         exit 1
     fi
+
     chmod +x "$MAPSH_PATH"
     echo "SUCCESS"
 elif [ "$1" = "restore_map.sh" ]; then

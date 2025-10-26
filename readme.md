@@ -29,6 +29,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 - `BIGLOBE`
   - BIGLOBE（西日本 テスト済）
   - おてがる光（東日本 テスト済）
+  - BB.excite光 10G MAP-E（東日本 テスト済）
 - `JPNE（v6プラス）`
     - DMM光
     - GMOとくとくBB

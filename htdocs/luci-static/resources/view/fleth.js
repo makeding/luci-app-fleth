@@ -20,6 +20,35 @@ fleth_style.innerHTML = `
 document.head.appendChild(fleth_style);
 
 return view.extend({
+  // Cache for port highlight calculations
+  _portHighlightCache: {},
+
+  // Check if a port number is "special" (memorable/interesting)
+  _isSpecialPort: function(port) {
+    const len = port.length;
+
+    // Use cached result if available
+    if (this._portHighlightCache[port] !== undefined) {
+      return this._portHighlightCache[port];
+    }
+
+    const half = len / 2;
+    const reversed = port.split('').reverse().join('');
+    const counts = {};
+    for (let c of port) counts[c] = (counts[c] || 0) + 1;
+
+    // Check special patterns
+    const isSpecial = /(\d)\1{2,}/.test(port) ||  // consecutive repeats (e.g. 111, 222)
+      port.endsWith('0') ||  // ends with 0
+      (len >= 2 && len % 2 === 0 && port.substring(0, half) === port.substring(half)) ||  // ABAB pattern
+      (len >= 3 && port === reversed) ||  // palindrome (e.g. 12321)
+      Object.values(counts).some(n => n >= 3);  // digit appears 3+ times
+
+    // Cache the result
+    this._portHighlightCache[port] = isSpecial;
+    return isSpecial;
+  },
+
   load: function () {
     return Promise.all([
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
@@ -63,7 +92,7 @@ return view.extend({
   render: async function (data) {
     let m, s, o;
 
-    // Show pending construction popup if detected
+    // Show notification for pending service status (fiber construction completed but ISP setup not ready)
     if (data.isPending) {
       ui.addNotification(_('Service Status'), E('div', [
         E('p', _('Optical line construction completed, provider configuration in progress. Please wait patiently.')),
@@ -137,33 +166,24 @@ return view.extend({
         const [fieldName, fieldLabel] = field;
         o = s.taboption("info", form.DummyValue, fieldName, _(fieldLabel));
 
-        // Special rendering for Available ports
+        // Special rendering for Available ports with highlighting
         if (fieldName === "mape_map_ports") {
           o.rawhtml = true;
           o.cfgvalue = function () {
             const portsString = data.mape_status[i + 1] || "";
             if (!portsString) return "";
 
-            // Split ports into individual numbers
+            // Split ports into individual numbers and highlight special ones
             const ports = portsString.split(/\s+/).filter(p => p);
+            const viewContext = this;  // Save reference for use in arrow function
             const highlightedPorts = ports.map(port => {
-              const len = port.length;
-              const half = len / 2;
-              const reversed = port.split('').reverse().join('');
-              const counts = {};
-              for (let c of port) counts[c] = (counts[c] || 0) + 1;
-
-              const isSpecial = /(\d)\1{2,}/.test(port) || // consecutive repeats
-                port.endsWith('0') || // ends with 0
-                (len >= 2 && len % 2 === 0 && port.substring(0, half) === port.substring(half)) || // ABAB
-                (len >= 3 && port === reversed) || // palindrome
-                Object.values(counts).some(n => n >= 3); // frequent digit
-
-              return isSpecial ? '<span class="port-highlight">' + port + '</span>' : port;
+              return viewContext._isSpecialPort(port) ?
+                '<span class="port-highlight">' + port + '</span>' :
+                port;
             });
 
             return highlightedPorts.join(' ');
-          };
+          }.bind(this);
           // Override render to display as div instead of input
           o.render = function () {
             const value = this.cfgvalue();
