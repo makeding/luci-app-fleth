@@ -912,6 +912,7 @@ local function calc(prefix)
         table.insert(ipaddr, 0)
         ip6prefixlen = 38
         psidlen = 6
+        offset = 6
     else
         print("UNKNOWN")
         return
