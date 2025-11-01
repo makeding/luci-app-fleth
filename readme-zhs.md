@@ -40,11 +40,11 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
     - ぷらら（Sコース）(R.I.P.)
     - 21ip.jp（東日本 テスト済）
 - `OCN` (R.I.P.)（東日本 テスト済）
+- `NURO`
 
 ## 独立IP
 - `JPNE（v6プラス）`
   - enひかり（東日本 テスト済）
-- `NURO`
 
 # 截图
 ![information](./screenshots/luci-information-3.jpeg)  
