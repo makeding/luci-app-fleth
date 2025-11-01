@@ -504,6 +504,7 @@ set network.${h_UPLINK_INTERFACE}.reqprefix='auto'
 set network.${h_UPLINK_INTERFACE}.reqaddress='try'
 set network.${h_UPLINK_INTERFACE}.ip6assign='64'
 del network.${h_UPLINK_INTERFACE}.extendprefix
+set network.${h_UPLINK_INTERFACE}.ip6ifaceid='eui64'
 set dhcp.${h_UPLINK_INTERFACE}=dhcp
 set dhcp.${h_UPLINK_INTERFACE}.interface='${h_UPLINK_INTERFACE}'
 set dhcp.${h_UPLINK_INTERFACE}.master='1'

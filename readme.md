@@ -2,7 +2,7 @@
 # luci-app-fleth
 [English](./readme-en.md) || [Chinese Simplified](./readme-zhs.md)  
 
-luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘルパーです。  
+luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘルパーです。DS-Lite、MAP-E、および IPIP6 トンネル（独立IP）に対応しています。
 
 > 日本向け
 
@@ -12,7 +12,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 
 ## DS-Lite:
 - `gw.transix.jp`
-    - BB.excite光（コネクト除く）
+    - BB.excite光（コネクト と 10Gbps MAP-E PLAN 除く）
     - enひかり
     - IIJひかり（東日本 テスト済）
     - インターリンクZOOT NATIVE
@@ -29,7 +29,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 - `BIGLOBE`
   - BIGLOBE（西日本 テスト済）
   - おてがる光（東日本 テスト済）
-  - BB.excite光 10G MAP-E（東日本 テスト済）
+  - BB.excite光 10Gbps MAP-E PLAN（東日本 テスト済）
 - `JPNE（v6プラス）`
     - DMM光
     - GMOとくとくBB
@@ -39,13 +39,20 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
     - So-net
     - ぷらら（Sコース）(R.I.P.)
     - 21ip.jp（東日本 テスト済）
-- `OCN` (R.I.P.)
+- `OCN` (R.I.P.)（東日本 テスト済）
+
+## 独立IP
+- `JPNE（v6プラス）`
+  - enひかり（東日本 テスト済）
 - `NURO`
 
 # スクリーンショット
-![information-1](./screenshots/luci-information-2.png)  
-![configuration-1](./screenshots/luci-configuration-2.png)  
+![information](./screenshots/luci-information-3.jpeg)  
+![configuration](./screenshots/luci-configuration-3.jpeg)  
+![tools](./screenshots/luci-tools-1.jpeg)  
+![luci-proto-ipip6h](./screenshots/luci-proto-ipip6h.jpeg)  
 ![firewall-port-forward-hook-1](./screenshots/firewall-port-forward-hook-1.png)
+
 
 # コンパイル
 ビルドSDKを自分で用意してください。

@@ -1,15 +1,18 @@
-![banner](./logo/fleth-banner.svg)  
+![banner](./logo/fleth-banner.svg)
 # luci-app-fleth
-luci-app-fleth is a helper that can configure your IPv4 over IPv6 tunnel automatically.  
+[Japanese](./readme.md) || [Chinese Simplified](./readme-zhs.md)
+
+luci-app-fleth is a helper that can automatically configure IPv4 over IPv6 tunnels. Supports DS-Lite, MAP-E, and IPIP6 tunnels (Dedicated IP).
+
 > Japan use only
 
-[＞＞＞＞＞＞Download here＜＜＜＜＜＜＜](https://github.com/makeding/luci-app-fleth/releases)
-# Support ISP
+[>>>>>> Download Here <<<<<<](https://github.com/makeding/luci-app-fleth/releases)
+# Supported ISPs
 https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d  
 
 ## DS-Lite:
 - `gw.transix.jp`
-    - BB.excite光（コネクト除く）
+    - BB.excite光（コネクト と 10Gbps MAP-E PLAN 除く）
     - enひかり
     - IIJひかり（東日本 テスト済）
     - インターリンクZOOT NATIVE
@@ -26,6 +29,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 - `BIGLOBE`
   - BIGLOBE（西日本 テスト済）
   - おてがる光（東日本 テスト済）
+  - BB.excite光 10Gbps MAP-E PLAN（東日本 テスト済）
 - `JPNE（v6プラス）`
     - DMM光
     - GMOとくとくBB
@@ -35,16 +39,22 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
     - So-net
     - ぷらら（Sコース）(R.I.P.)
     - 21ip.jp（東日本 テスト済）
-- `OCN` (R.I.P.)
+- `OCN` (R.I.P.)（東日本 テスト済）
+
+## Dedicated IP
+- `JPNE（v6プラス）`
+  - enひかり（東日本 テスト済）
 - `NURO`
 
 # Screenshots
-![information-1](./screenshots/luci-information-2.png)  
-![configuration-1](./screenshots/luci-configuration-2.png)  
+![information](./screenshots/luci-information-3.jpeg)  
+![configuration](./screenshots/luci-configuration-3.jpeg)  
+![tools](./screenshots/luci-tools-1.jpeg)  
+![luci-proto-ipip6h](./screenshots/luci-proto-ipip6h.jpeg)  
 ![firewall-port-forward-hook-1](./screenshots/firewall-port-forward-hook-1.png)
-# Compile
 
-prepare your building SDK by yourself.
+# Compilation
+Please prepare your own build SDK.
 
 ```
 git clone https://github.com/makeding/luci-app-fleth package/huggy/luci-app-fleth
@@ -56,4 +66,4 @@ i18n:
 po2lmo po/ja/fleth.po root/usr/lib/lua/luci/i18n/fleth.ja.lmo
 ```
 # License
-MIT + GPL2(If the `luci-proto-ipip6h` component is included in the build)
+MIT + GPL2 (If the `luci-proto-ipip6h` component is included in the build)
