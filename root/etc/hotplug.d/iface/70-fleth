@@ -9,11 +9,64 @@ h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
 [ "$h_ENABLED" != "1" ] && exit 0
 [ -z "$h_UPLINK_INTERFACE" ] && exit 0
 
-# Only trigger on the configured uplink interface
-[ "$INTERFACE" = "$h_UPLINK_INTERFACE" ] || exit 0
-
-# Run fleth auto when interface comes up
-if [ "$ACTION" = "ifup" ]; then
+# Run fleth auto when the uplink interface comes up
+if [ "$INTERFACE" = "$h_UPLINK_INTERFACE" ] && [ "$ACTION" = "ifup" ]; then
     logger -t fleth-hotplug "Interface $INTERFACE up, running fleth auto"
     /usr/sbin/fleth auto &
+fi
+
+# Connectivity test for tunnel interfaces
+if [ "$ACTION" = "ifup" ]; then
+    # Get interface protocol type
+    proto=$(uci get network.${INTERFACE}.proto 2>/dev/null)
+
+    # Check if protocol type requires tunnel activation
+    case "$proto" in
+        map|dslite|ipip6|ipip6h)
+            logger -t fleth-hotplug "Interface $INTERFACE ($proto) detected, scheduling tunnel activation in 30 seconds"
+
+            # Kill previous waiting process if exists
+            PID_FILE="/var/run/fleth-tunnel-${INTERFACE}.pid"
+            if [ -f "$PID_FILE" ]; then
+                old_pid=$(cat "$PID_FILE" 2>/dev/null)
+                if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
+                    logger -t fleth-hotplug "Killing previous tunnel activation process (PID: $old_pid)"
+                    kill "$old_pid" 2>/dev/null
+                fi
+            fi
+
+            # Non-blocking delayed ping to activate tunnel
+            (
+                # Save current process PID
+                echo $$ > "$PID_FILE"
+
+                sleep 30
+
+                # Check if interface is still up
+                if ! ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.up' 2>/dev/null | grep -q true; then
+                    logger -t fleth-hotplug "Interface $INTERFACE is no longer up, skipping tunnel activation"
+                    rm -f "$PID_FILE"
+                    exit 0
+                fi
+
+                # Get actual device name for the interface
+                device=$(uci get network.${INTERFACE}.device 2>/dev/null)
+                [ -z "$device" ] && device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)
+                [ -z "$device" ] && device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.device' 2>/dev/null)
+
+                if [ -n "$device" ]; then
+                    # Execute ping to activate tunnel (3 second timeout)
+                    if ping -I "$device" 1.1.1.1 -c 1 -W 3 >/dev/null 2>&1; then
+                        logger -t fleth-hotplug "Interface $INTERFACE ($proto) tunnel activated successfully"
+                    else
+                        logger -t fleth-hotplug "Interface $INTERFACE ($proto) tunnel activation attempted (no response)"
+                    fi
+                else
+                    logger -t fleth-hotplug "Interface $INTERFACE ($proto) tunnel activation skipped (no device found)"
+                fi
+
+                rm -f "$PID_FILE"
+            ) &
+            ;;
+    esac
 fi
