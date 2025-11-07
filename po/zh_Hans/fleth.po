@@ -197,3 +197,18 @@ msgstr "恢复中..."
 
 msgid "Operation completed successfully! Please restart the network interface manually."
 msgstr "操作完成！请手动重启网络接口。"
+
+msgid "Prefix Alignment Warning"
+msgstr "前缀对齐警告"
+
+msgid "Your IPv6 prefix is not aligned for MAP-E/IPIP6 tunnels."
+msgstr "您的 IPv6 前缀未对齐，无法用于 MAP-E/IPIP6 隧道。"
+
+msgid "The 4th hextet is"
+msgstr "第 4 段为"
+
+msgid "but it must end with \"00\" for MAP-E/IPIP6 to work properly."
+msgstr "，但必须以 \"00\" 结尾才能使 MAP-E/IPIP6 正常工作。"
+
+msgid "Please check your upstream router's prefix delegation settings."
+msgstr "请检查上游路由器的前缀委派设置。"

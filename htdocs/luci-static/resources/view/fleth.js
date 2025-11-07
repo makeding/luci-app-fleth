@@ -72,6 +72,14 @@ return view.extend({
 
       if (mape_status[0] === "NURO") areaValue = "UNKNOWN(NURO)";
 
+      // Check prefix alignment for non-/56,/64 with MAP-E
+      const needsAlignmentCheck = !mapeIsUnknown &&
+        !["/56", "/64", "UNKNOWN"].includes(prefix_length);
+
+      const alignmentCheckPromise = needsAlignmentCheck
+        ? L.resolveDefault(fs.exec("/usr/sbin/fleth", ["check_alignment"]), { stdout: "" })
+        : Promise.resolve({ stdout: "" });
+
       if (mapeIsUnknown) {
         return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["pending_status"]), { stdout: "" })
           .then(function (pendingResult) {
@@ -85,7 +93,11 @@ return view.extend({
               });
           });
       }
-      return { ...baseData, area: areaValue, dslite_provider: "UNKNOWN", isPending: false };
+
+      return alignmentCheckPromise.then(function (alignmentResult) {
+        const alignment_check = (alignmentResult.stdout || "").trim();
+        return { ...baseData, area: areaValue, dslite_provider: "UNKNOWN", isPending: false, alignment_check: alignment_check };
+      });
     });
   },
 
@@ -98,6 +110,21 @@ return view.extend({
         E('p', _('Optical line construction completed, provider configuration in progress. Please wait patiently.')),
         E('p', { style: 'color: #fdfdfd; font-size: 0.9em;' }, _('Service typically becomes available in the evening after construction is completed.'))
       ]), 'info');
+    }
+
+    // Show warning for prefix alignment issues
+    if (data.alignment_check && data.alignment_check.startsWith('NOT_ALIGNED:')) {
+      const hextet = data.alignment_check.split(':')[1];
+      ui.addNotification(_('Prefix Alignment Warning'), E('div', [
+        E('p', _('Your IPv6 prefix is not aligned for MAP-E/IPIP6 tunnels.')),
+        E('p', { style: 'font-size: 0.9em;' },
+          _('The 4th hextet is') + ' ' + hextet + ', ' +
+          _('but it must end with "00" for MAP-E/IPIP6 to work properly.')
+        ),
+        E('p', { style: 'font-size: 0.9em;' },
+          _('Please check your upstream router\'s prefix delegation settings.')
+        )
+      ]), 'warning');
     }
 
     m = new form.Map(

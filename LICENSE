@@ -18,5 +18,15 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 
-NOTE: If the `luci-proto-ipip6h` component is included in the build,
-this software is additionally licensed under the GNU General Public License version 2 (GPL-2.0).
+---
+
+EXCEPTION: The following files are derived from OpenWrt/LuCI and are
+licensed under GPL-2.0:
+
+- root/lib/netifd/proto/ipip6h.sh (based on OpenWrt dslite.sh)
+- htdocs/luci-static/resources/protocol/ipip6h.js (based on LuCI ipip6.js)
+
+When distributed as a compiled package including these GPL-2.0 components,
+the entire work is subject to GPL-2.0 requirements. If you fork and modify
+this project while including these GPL-2.0 components, you must make your
+modified version available under GPL-2.0 as open source.

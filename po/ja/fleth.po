@@ -197,3 +197,18 @@ msgstr "復元中..."
 
 msgid "Operation completed successfully! Please restart the network interface manually."
 msgstr "操作が完了しました！手動でネットワークインターフェースを再起動してください。"
+
+msgid "Prefix Alignment Warning"
+msgstr "プレフィックス配置警告"
+
+msgid "Your IPv6 prefix is not aligned for MAP-E/IPIP6 tunnels."
+msgstr "IPv6 プレフィックスが MAP-E/IPIP6 トンネルに対応していません。"
+
+msgid "The 4th hextet is"
+msgstr "第4セグメントは"
+
+msgid "but it must end with \"00\" for MAP-E/IPIP6 to work properly."
+msgstr "ですが、MAP-E/IPIP6 を正常に動作させるには \"00\" で終わる必要があります。"
+
+msgid "Please check your upstream router's prefix delegation settings."
+msgstr "上位ルーターのプレフィックス委譲設定を確認してください。"

@@ -178,6 +178,58 @@ get_uplink_prefix_length() {
     fi
 }
 
+check_prefix_alignment() {
+    # Check if IPv6 prefix is aligned for MAP-E/IPIP6 usage
+    # Skips /56 (ISP-assigned, always aligned) and /64 (SLAAC mode)
+    # Checks /60, /62, etc. (subdivided from /56, may not be aligned)
+    # For non-/56,/64: 4th hextet must end with 00 (e.g., b000 not b004)
+    # Usage: check_prefix_alignment [ipv6_address]
+    # Returns: "ALIGNED" or "NOT_ALIGNED:hextet" or "SKIPPED:/XX"
+
+    local ipv6_addr="${1:-$(get_uplink_interface_ipv6)}"
+
+    if [ -z "$ipv6_addr" ]; then
+        echo "ERROR:NO_IPV6_ADDRESS"
+        return 1
+    fi
+
+    # Check prefix length - /56 and /64 skip alignment check
+    local prefix_len=$(get_uplink_prefix_length)
+    if [ "$prefix_len" = "56" ] || [ "$prefix_len" = "64" ]; then
+        echo "SKIPPED:/$prefix_len"
+        return 0
+    fi
+
+    # Other prefix lengths (/60, /62, etc.) need alignment check
+    # Extract 4th hextet from IPv6 address (format: xxxx:xxxx:xxxx:YYYY::...)
+    local addr_clean=$(echo "$ipv6_addr" | sed 's/%.*$//')
+    local fourth_hextet=$(echo "$addr_clean" | cut -d: -f4)
+
+    if [ -z "$fourth_hextet" ]; then
+        echo "ERROR:INVALID_FORMAT"
+        return 1
+    fi
+
+    # Normalize hextet to 4 digits (pad with leading zeros if needed)
+    fourth_hextet=$(printf "%04x" "0x$fourth_hextet" 2>/dev/null)
+
+    if [ -z "$fourth_hextet" ]; then
+        echo "ERROR:INVALID_HEXTET"
+        return 1
+    fi
+
+    # Check if last 2 hex digits are 00
+    local last_byte=$(echo "$fourth_hextet" | tail -c 3)
+
+    if [ "$last_byte" != "00" ]; then
+        echo "NOT_ALIGNED:$fourth_hextet"
+        return 1
+    fi
+
+    echo "ALIGNED"
+    return 0
+}
+
 auto_setup_ipv6_mode() {
     # Automatically detect and configure IPv6 mode based on prefix length
     local prefix_len=$(get_uplink_prefix_length)
@@ -235,7 +287,7 @@ auto_configure_extendprefix() {
     if [ "$config_changed" = "1" ]; then
         uci commit network
         logger -t fleth "Restarting ${h_UPLINK_INTERFACE} due to extendprefix configuration change"
-        ifdown ${h_UPLINK_INTERFACE} && sleep 2 && ifup ${h_UPLINK_INTERFACE}
+        ifdown ${h_UPLINK_INTERFACE}; sleep 2; ifup ${h_UPLINK_INTERFACE}
     fi
 
     return 0
@@ -332,7 +384,7 @@ EOF
                 uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
             fi
             uci commit
-            ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
+            ifdown ${h_TUNNEL_INTERFACE}; sleep 2; ifup ${h_TUNNEL_INTERFACE}
             logger -t fleth "New ds-lite configuration committed ${h_TUNNEL_INTERFACE}=${r_AFTR}"
         fi
     elif [ "$r_TYPE" = 'map-e' ]; then
@@ -379,7 +431,7 @@ EOF
                 uci add_list firewall.@zone[$new_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
             fi
             uci commit
-            ifdown ${h_TUNNEL_INTERFACE} && sleep 2 && ifup ${h_TUNNEL_INTERFACE}
+            ifdown ${h_TUNNEL_INTERFACE}; sleep 2; ifup ${h_TUNNEL_INTERFACE}
             logger -t fleth "New map-e configuration committed ${h_TUNNEL_INTERFACE}=${r_PEERADDR}"
         fi
     elif [ "$new_zone_index" != "$current_zone_index" ]; then
@@ -432,6 +484,8 @@ elif [ "$1" = "get_prefix_length" ]; then
     else
         echo "UNKNOWN"
     fi
+elif [ "$1" = "check_alignment" ]; then
+    check_prefix_alignment "$2"
 elif [ "$1" = "auto_setup_ipv6" ]; then
     auto_setup_ipv6_mode
 elif [ "$1" = "mapsh_status" ]; then
@@ -489,8 +543,8 @@ EOF
     uci commit network
     uci commit dhcp
     logger -t fleth "Restarting lan AND ${h_UPLINK_INTERFACE} interface"
-    ifdown lan && ifup lan &
-    ifdown ${h_UPLINK_INTERFACE} && sleep 2 && ifup ${h_UPLINK_INTERFACE}
+    ifdown lan; ifup lan &
+    ifdown ${h_UPLINK_INTERFACE}; sleep 2; ifup ${h_UPLINK_INTERFACE}
     logger -t fleth "Restarting odhcpd"
     /etc/init.d/odhcpd restart
     logger -t fleth "IPv6 SLAAC configuration completed successfully"
@@ -515,7 +569,7 @@ EOF
 
     # Configure lan interface for DHCP server with IPv6
     uci batch <<EOF
-
+set network.lan.ip6assign='64'
 set network.lan.ip6hint='1'
 set dhcp.lan=dhcp
 set dhcp.lan.interface='lan'
@@ -536,8 +590,8 @@ EOF
     uci commit network
     uci commit dhcp
     logger -t fleth "Restarting lan AND ${h_UPLINK_INTERFACE} interface"
-    ifdown lan && ifup lan &
-    ifdown ${h_UPLINK_INTERFACE} && sleep 2 && ifup ${h_UPLINK_INTERFACE}
+    ifdown lan; ifup lan &
+    ifdown ${h_UPLINK_INTERFACE}; sleep 2; ifup ${h_UPLINK_INTERFACE}
     logger -t fleth "Restarting odhcpd"
     /etc/init.d/odhcpd restart
 
@@ -615,6 +669,7 @@ else
     echo "  get_dslite_provider   Show the current DS-Lite provider details."
     echo "  mape_status           Show the current MAP-E provider details."
     echo "  get_prefix_length     Show the detected IPv6 prefix length (/56 or /64)."
+    echo "  check_alignment [ip]  Check if prefix is aligned for MAP-E/IPIP6 (4th hextet ends with 00)."
     echo "  mapsh_status          Show if map.sh is patched or original."
     echo ""
     echo "IPv6 Configuration Commands:"

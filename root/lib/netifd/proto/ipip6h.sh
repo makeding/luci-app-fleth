@@ -100,6 +100,21 @@ proto_ipip6h_setup() {
 				return
 			fi
 
+			# Check prefix alignment for non-/56,/64 prefixes (e.g., /60, /62)
+			# /56 (ISP-assigned) and /64 (SLAAC) are always aligned
+			if [ "$prefix_len" != "56" ] && [ "$prefix_len" != "64" ]; then
+				local alignment_check=$(fleth check_alignment "$wan6_prefix" 2>/dev/null)
+				local check_status="${alignment_check%%:*}"
+				if [ "$check_status" != "ALIGNED" ] && [ "$check_status" != "SKIPPED" ]; then
+					logger -t ipip6h "[${cfg}] ERROR: Prefix not aligned for IPIP6 - $alignment_check"
+					logger -t ipip6h "[${cfg}] The 4th hextet of your prefix must end with '00' for MAP-E/IPIP6"
+					logger -t ipip6h "[${cfg}] Current prefix: $wan6_prefix/$prefix_len"
+					proto_notify_error "$cfg" "PREFIX_NOT_ALIGNED"
+					proto_block_restart "$cfg"
+					return
+				fi
+			fi
+
 			local prefix_part=$(echo "$wan6_prefix" | cut -d: -f1-4)
 			local clean_id=$(echo "$interface_id" | sed 's/^:*//;s/:*$//')
 			ip6addr="${prefix_part}:${clean_id}"
