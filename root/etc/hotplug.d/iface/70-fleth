@@ -49,10 +49,8 @@ if [ "$ACTION" = "ifup" ]; then
                     exit 0
                 fi
 
-                # Get actual device name for the interface
-                device=$(uci get network.${INTERFACE}.device 2>/dev/null)
-                [ -z "$device" ] && device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)
-                [ -z "$device" ] && device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.device' 2>/dev/null)
+                # Get actual device name for the interface (l3_device is always available for tunnel interfaces)
+                device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)
 
                 if [ -n "$device" ]; then
                     # Execute ping to activate tunnel (3 second timeout)
