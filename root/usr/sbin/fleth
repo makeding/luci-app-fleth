@@ -612,7 +612,7 @@ elif [ "$1" = "patch_map.sh" ]; then
         echo "ERROR: Failed to create temporary file"
         exit 1
     fi
-    wget --timeout=10 --tries=3 -q -O "$TEMP_FILE" "$MAPSH_URL"
+    wget --timeout=10 -q -O "$TEMP_FILE" "$MAPSH_URL"
     if [ $? -ne 0 ]; then
         rm -f "$TEMP_FILE"
         echo "ERROR: Failed to download"
