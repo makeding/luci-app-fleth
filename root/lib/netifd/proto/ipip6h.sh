@@ -179,16 +179,6 @@ proto_ipip6h_setup() {
 		json_close_array
 		json_close_object
 		ubus call network add_dynamic "$(json_dump)"
-
-		# Deprecate static address if prefer_slaac is enabled
-		local prefer_slaac=$(uci get fleth.global.prefer_slaac 2>/dev/null)
-		if [ "$prefer_slaac" = "1" ]; then
-			local parent_device=$(ifstatus ${parent_iface} 2>/dev/null | jsonfilter -e '@.device' 2>/dev/null)
-			if [ -n "$parent_device" ]; then
-				ip -6 addr change "${ip6addr}"/128 dev "$parent_device" preferred_lft 0 2>/dev/null
-				logger -t ipip6h "[${cfg}] Deprecated static address ${ip6addr} to prefer SLAAC"
-			fi
-		fi
 	fi
 
 	logger -t ipip6h "[${cfg}] Setup completed"
