@@ -4,6 +4,8 @@
 
 h_ENABLED=$(uci get fleth.global.enabled 2>/dev/null)
 h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
+h_PREFER_SLAAC=$(uci get fleth.global.prefer_slaac 2>/dev/null)
+h_TUNNEL_ACTIVATION=$(uci get fleth.global.tunnel_activation 2>/dev/null)
 
 # Exit if fleth is not enabled or interface is not configured
 [ "$h_ENABLED" != "1" ] && exit 0
@@ -16,7 +18,7 @@ if [ "$INTERFACE" = "$h_UPLINK_INTERFACE" ] && [ "$ACTION" = "ifup" ]; then
 fi
 
 # Connectivity test for tunnel interfaces
-if [ "$ACTION" = "ifup" ]; then
+if [ "$h_TUNNEL_ACTIVATION" = "1" ] && [ "$ACTION" = "ifup" ]; then
     # Get interface protocol type
     proto=$(uci get network.${INTERFACE}.proto 2>/dev/null)
 
@@ -67,4 +69,23 @@ if [ "$ACTION" = "ifup" ]; then
             ) &
             ;;
     esac
+fi
+
+# Deprecate static /128 addresses to prioritize SLAAC
+# This ensures SLAAC addresses are preferred over manually configured addresses
+if [ "$h_PREFER_SLAAC" = "1" ] && { [ "$ACTION" = "ifup" ] || [ "$ACTION" = "ifupdate" ]; }; then
+    device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.device' 2>/dev/null)
+    [ -z "$device" ] && device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)
+    if [ -n "$device" ]; then
+        ip -6 addr show dev "$device" scope global 2>/dev/null | grep "inet6" | while read -r line; do
+            addr=$(echo "$line" | awk '{print $2}')
+            if echo "$addr" | grep -q "/128$"; then
+                if ! echo "$line" | grep -q "dynamic"; then
+                    clean_addr=$(echo "$addr" | cut -d'/' -f1)
+                    ip -6 addr change "$clean_addr"/128 dev "$device" preferred_lft 0
+                    logger -t fleth-hotplug "Deprecated static /128 address $clean_addr on $device (interface: $INTERFACE)"
+                fi
+            fi
+        done
+    fi
 fi

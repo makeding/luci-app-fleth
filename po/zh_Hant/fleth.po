@@ -212,3 +212,15 @@ msgstr "，但必須以 \"00\" 結尾才能使 MAP-E/IPIP6 正常運作。"
 
 msgid "Please check your upstream router's prefix delegation settings."
 msgstr "請檢查上游路由器的前綴委派設定。"
+
+msgid "Prefer SLAAC Address"
+msgstr "優先 SLAAC 地址"
+
+msgid "Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses"
+msgstr "路由器出站連線將優先使用 SLAAC 地址而非 MAP-E/ipip6h 靜態地址"
+
+msgid "Auto Activate Tunnel"
+msgstr "自動啟動隧道"
+
+msgid "Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly."
+msgstr "自動傳送 ping 以啟動隧道。如果沒有流量，某些隧道可能無法正常建立連線。"

@@ -280,6 +280,26 @@ return view.extend({
     o.nocreate = true;
     o.default = "wan";
 
+    o = s.taboption(
+      "general",
+      form.Flag,
+      "prefer_slaac",
+      _("Prefer SLAAC Address"),
+      _("Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses")
+    );
+    o.rmempty = false;
+    o.default = "1";
+
+    o = s.taboption(
+      "general",
+      form.Flag,
+      "tunnel_activation",
+      _("Auto Activate Tunnel"),
+      _("Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly.")
+    );
+    o.rmempty = false;
+    o.default = "1";
+
     // LAN IPv6 Configuration section in Tools tab
     o = s.taboption("tools", form.DummyValue, "_lan_ipv6_recommendation");
     o.title = _("LAN IPv6 Configuration");

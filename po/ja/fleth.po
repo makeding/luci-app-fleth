@@ -212,3 +212,15 @@ msgstr "ですが、MAP-E/IPIP6 を正常に動作させるには \"00\" で終�
 
 msgid "Please check your upstream router's prefix delegation settings."
 msgstr "上位ルーターのプレフィックス委譲設定を確認してください。"
+
+msgid "Prefer SLAAC Address"
+msgstr "SLAAC アドレス優先"
+
+msgid "Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses"
+msgstr "ルーターの送信接続は MAP-E/ipip6h 静的アドレスより SLAAC アドレスを優先します"
+
+msgid "Auto Activate Tunnel"
+msgstr "トンネル自動有効化"
+
+msgid "Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly."
+msgstr "トンネルを有効化するために自動的に Ping を送信します。トラフィックがない場合、一部のトンネルは正常に接続を確立できない場合があります。"
