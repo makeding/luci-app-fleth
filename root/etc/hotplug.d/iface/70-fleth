@@ -17,52 +17,38 @@ if [ "$INTERFACE" = "$h_UPLINK_INTERFACE" ] && [ "$ACTION" = "ifup" ]; then
     /usr/sbin/fleth auto &
 fi
 
+# Get interface protocol type for tunnel-related operations
+if [ "$ACTION" = "ifup" ]; then
+    proto=$(uci get network.${INTERFACE}.proto 2>/dev/null)
+fi
+
 # Connectivity test for tunnel interfaces
 if [ "$h_TUNNEL_ACTIVATION" = "1" ] && [ "$ACTION" = "ifup" ]; then
-    # Get interface protocol type
-    proto=$(uci get network.${INTERFACE}.proto 2>/dev/null)
-
-    # Check if protocol type requires tunnel activation
     case "$proto" in
         map|dslite|ipip6|ipip6h)
-            logger -t fleth-hotplug "Interface $INTERFACE ($proto) detected, scheduling tunnel activation in 30 seconds"
-
             # Kill previous waiting process if exists
             PID_FILE="/var/run/fleth-tunnel-${INTERFACE}.pid"
             if [ -f "$PID_FILE" ]; then
                 old_pid=$(cat "$PID_FILE" 2>/dev/null)
-                if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
-                    logger -t fleth-hotplug "Killing previous tunnel activation process (PID: $old_pid)"
-                    kill "$old_pid" 2>/dev/null
-                fi
+                [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null && kill "$old_pid" 2>/dev/null
             fi
 
             # Non-blocking delayed ping to activate tunnel
             (
-                # Save current process PID
                 echo $$ > "$PID_FILE"
-
                 sleep 30
 
                 # Check if interface is still up
                 if ! ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.up' 2>/dev/null | grep -q true; then
-                    logger -t fleth-hotplug "Interface $INTERFACE is no longer up, skipping tunnel activation"
                     rm -f "$PID_FILE"
                     exit 0
                 fi
 
-                # Get actual device name for the interface (l3_device is always available for tunnel interfaces)
+                # Get actual device name for the interface
                 device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)
 
                 if [ -n "$device" ]; then
-                    # Execute ping to activate tunnel (3 second timeout)
-                    if ping -I "$device" 1.1.1.1 -c 1 -W 3 >/dev/null 2>&1; then
-                        logger -t fleth-hotplug "Interface $INTERFACE ($proto) tunnel activated successfully"
-                    else
-                        logger -t fleth-hotplug "Interface $INTERFACE ($proto) tunnel activation attempted (no response)"
-                    fi
-                else
-                    logger -t fleth-hotplug "Interface $INTERFACE ($proto) tunnel activation skipped (no device found)"
+                    ping -I "$device" 1.1.1.1 -c 1 -W 3 >/dev/null 2>&1
                 fi
 
                 rm -f "$PID_FILE"
@@ -72,20 +58,37 @@ if [ "$h_TUNNEL_ACTIVATION" = "1" ] && [ "$ACTION" = "ifup" ]; then
 fi
 
 # Deprecate static /128 addresses to prioritize SLAAC
-# This ensures SLAAC addresses are preferred over manually configured addresses
-if [ "$h_PREFER_SLAAC" = "1" ] && { [ "$ACTION" = "ifup" ] || [ "$ACTION" = "ifupdate" ]; }; then
-    device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.device' 2>/dev/null)
-    [ -z "$device" ] && device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)
-    if [ -n "$device" ]; then
-        ip -6 addr show dev "$device" scope global 2>/dev/null | grep "inet6" | while read -r line; do
-            addr=$(echo "$line" | awk '{print $2}')
-            if echo "$addr" | grep -q "/128$"; then
-                if ! echo "$line" | grep -q "dynamic"; then
-                    clean_addr=$(echo "$addr" | cut -d'/' -f1)
-                    ip -6 addr change "$clean_addr"/128 dev "$device" preferred_lft 0
-                    logger -t fleth-hotplug "Deprecated static /128 address $clean_addr on $device (interface: $INTERFACE)"
+if [ "$h_PREFER_SLAAC" = "1" ]; then
+    should_check=0
+
+    # Check on tunnel interface ifup or wan6 ifupdate
+    if [ "$ACTION" = "ifup" ]; then
+        case "$proto" in
+            map|ipip6|ipip6h)
+                should_check=1
+                ;;
+        esac
+    elif [ "$ACTION" = "ifupdate" ] && [ "$INTERFACE" = "$h_UPLINK_INTERFACE" ]; then
+        should_check=1
+    fi
+
+    if [ "$should_check" = "1" ]; then
+        device=$(uci get network.${h_UPLINK_INTERFACE}.device 2>/dev/null)
+        if [ -n "$device" ]; then
+            ip -6 addr show dev "$device" scope global 2>/dev/null | while read -r line; do
+                if echo "$line" | grep -q "inet6"; then
+                    addr=$(echo "$line" | awk '{print $2}')
+                    if echo "$addr" | grep -q "/128$"; then
+                        echo "$line" | grep -q "deprecated" && continue
+                        echo "$line" | grep -q "dynamic" && continue
+                        read -r nextline
+                        echo "$nextline" | grep -q "preferred_lft 0" && continue
+                        clean_addr=$(echo "$addr" | cut -d'/' -f1)
+                        ip -6 addr change "$clean_addr"/128 dev "$device" preferred_lft 0
+                        logger -t fleth-hotplug "Deprecated static /128 address $clean_addr on $device"
+                    fi
                 fi
-            fi
-        done
+            done
+        fi
     fi
 fi
