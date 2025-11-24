@@ -40,6 +40,24 @@ return network.registerProtocol('ipip6h', {
 	renderFormOptions: function (s) {
 		var o;
 
+		function ipv4ToHex(ipv4) {
+			if (!ipv4) return '';
+
+			var octets = ipv4.split('.');
+			var endsWithDot = ipv4.endsWith('.');
+
+			if (endsWithDot && octets[octets.length - 1] === '') octets.pop();
+			else if (!endsWithDot && octets.length < 4) octets.pop();
+
+			var hexParts = [];
+			for (var i = 0; i < 4; i++) {
+				var num = parseInt(octets[i], 10);
+				hexParts.push(isNaN(num) || num < 0 || num > 255 ? '00' : ('00' + num.toString(16)).slice(-2));
+			}
+
+			return '00' + hexParts[0] + ':' + hexParts[1] + hexParts[2] + ':' + hexParts[3] + '00:0000';
+		}
+
 		// BR Address
 		o = s.taboption('general', form.Value, 'peeraddr', _('BR Address'),
 			_('Border Relay IPv6 address'));
@@ -91,5 +109,24 @@ return network.registerProtocol('ipip6h', {
 		o = s.taboption('advanced', form.Value, 'mtu', _('Use MTU on tunnel interface'));
 		o.placeholder = '1460';
 		o.datatype = 'range(1280,1500)';
+
+
+		setTimeout(function() {
+			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
+			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
+			var peerInput = document.querySelector('[data-name="peeraddr"] input[type="hidden"]');
+
+			if (ip4Input && ifIdInput && peerInput) {
+				ip4Input.addEventListener('input', function() {
+					if (peerInput.value === '2404:9200:225:100::65') {
+						var hex = ipv4ToHex(ip4Input.value);
+						if (hex) {
+							ifIdInput.value = hex;
+							ifIdInput.dispatchEvent(new Event('change', { bubbles: true }));
+						}
+					}
+				});
+			}
+		}, 100);
 	}
 });
