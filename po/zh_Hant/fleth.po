@@ -162,8 +162,23 @@ msgstr "IPv6 介面 ID"
 msgid "IPv6 Interface ID is required"
 msgstr "IPv6 介面 ID 為必填項"
 
+msgid "IPv6 Interface ID is required for v6plus and SoftBank 10G"
+msgstr "v6plus 和 SoftBank 10G 需要填寫 IPv6 介面 ID"
+
 msgid "Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000"
 msgstr "無效的 IPv6 介面識別碼格式。範例：0011:4514:1b00:0000"
+
+msgid "Fill with 1 (Softbank)"
+msgstr "填充全 1 (Softbank)"
+
+msgid "1111:1111:1111:1111"
+msgstr "1111:1111:1111:1111"
+
+msgid "Fill from IPv4"
+msgstr "從 IPv4 轉換"
+
+msgid "Use IPv4 → Hex"
+msgstr "使用 IPv4 → 十六進制"
 
 msgid "map.sh Management"
 msgstr "map.sh 管理"

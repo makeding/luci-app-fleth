@@ -510,6 +510,7 @@ elif [ "$1" = "setup_ipv6_slaac" ]; then
 
     # Configure uplink interface settings
     uci batch <<EOF
+set network.${h_UPLINK_INTERFACE}.proto='dhcpv6'
 set network.${h_UPLINK_INTERFACE}.reqaddress='try'
 set network.${h_UPLINK_INTERFACE}.extendprefix='1'
 del network.${h_UPLINK_INTERFACE}.reqprefix
@@ -554,6 +555,7 @@ elif [ "$1" = "setup_ipv6_pd" ]; then
     logger -t fleth "Starting IPv6 PD configuration"
 
     uci batch <<EOF
+set network.${h_UPLINK_INTERFACE}.proto='dhcpv6'
 set network.${h_UPLINK_INTERFACE}.reqprefix='auto'
 set network.${h_UPLINK_INTERFACE}.reqaddress='try'
 set network.${h_UPLINK_INTERFACE}.ip6assign='64'

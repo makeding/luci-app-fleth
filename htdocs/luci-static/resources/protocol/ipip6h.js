@@ -62,7 +62,7 @@ return network.registerProtocol('ipip6h', {
 		o = s.taboption('general', form.Value, 'peeraddr', _('BR Address'),
 			_('Border Relay IPv6 address'));
 		o.value('2404:9200:225:100::65', '2404:9200:225:100::65 (v6plus)');
-		o.value('2001:f60:0:205::2', '2001:f60:0:205::2 (Xpass)');
+		// o.value('2001:f60:0:205::2', '2001:f60:0:205::2 (Xpass)');
 		o.value('2400:2000:4:0:a000::1999', '2400:2000:4:0:a000::1999 (SoftBank 10G)');
 		o.default = '2404:9200:225:100::65';
 		o.datatype = 'or(hostname,ip6addr("nomask"))';
@@ -75,15 +75,53 @@ return network.registerProtocol('ipip6h', {
 		o.placeholder = '111.0.0.1';
 
 		o = s.taboption('general', form.Value, 'interface_id', _('IPv6 Interface ID'));
-		o.placeholder = '0011:4514:1b00:0000';
-		o.rmempty = false;
+		o.placeholder = '006f:0000:0100:0000';
+		o.optional = true;
 		o.validate = function (_section_id, value) {
-			if (!value || value.length === 0)
-				return _('IPv6 Interface ID is required');
-			// Validate IPv6 interface ID format (1-7 groups of 1-4 hex digits separated by colons)
-			if (!/^([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}$/.test(value))
-				return _('Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000');
+			// Get current peeraddr value
+			var peerInput = document.querySelector('[data-name="peeraddr"] input[type="hidden"]');
+			var peeraddr = peerInput ? peerInput.value : '';
+
+			// Interface ID is required for v6plus and SoftBank 10G
+			var requiresInterfaceId = (peeraddr === '2404:9200:225:100::65' || peeraddr === '2400:2000:4:0:a000::1999');
+
+			if (requiresInterfaceId && (!value || value.length === 0)) {
+				return _('IPv6 Interface ID is required for v6plus and SoftBank 10G');
+			}
+
+			// Validate format if value is provided
+			if (value && value.length > 0) {
+				if (!/^([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}$/.test(value))
+					return _('Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000');
+			}
+
 			return true;
+		};
+
+		o = s.taboption('general', form.Button, '_fill_from_ipv4', _('Fill from IPv4'));
+		o.inputtitle = _('Use IPv4 → Hex');
+		o.inputstyle = 'apply';
+		o.onclick = function() {
+			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
+			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
+			if (ip4Input && ifIdInput) {
+				var hex = ipv4ToHex(ip4Input.value);
+				if (hex) {
+					ifIdInput.value = hex;
+					ifIdInput.dispatchEvent(new Event('change', { bubbles: true }));
+				}
+			}
+		};
+
+		o = s.taboption('general', form.Button, '_fill_ones', _('Fill with 1 (Softbank)'));
+		o.inputtitle = _('1111:1111:1111:1111');
+		o.inputstyle = 'apply';
+		o.onclick = function() {
+			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
+			if (ifIdInput) {
+				ifIdInput.value = '1111:1111:1111:1111';
+				ifIdInput.dispatchEvent(new Event('change', { bubbles: true }));
+			}
 		};
 
 		o = s.taboption('advanced', widgets.NetworkSelect, 'tunlink', _('Tunnel Link'));
@@ -114,11 +152,11 @@ return network.registerProtocol('ipip6h', {
 		setTimeout(function() {
 			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
 			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
-			var peerInput = document.querySelector('[data-name="peeraddr"] input[type="hidden"]');
 
-			if (ip4Input && ifIdInput && peerInput) {
+			if (ip4Input && ifIdInput) {
 				ip4Input.addEventListener('input', function() {
-					if (peerInput.value === '2404:9200:225:100::65') {
+					var peerInput = document.querySelector('[data-name="peeraddr"] input[type="hidden"]');
+					if (peerInput && peerInput.value === '2404:9200:225:100::65') {
 						var hex = ipv4ToHex(ip4Input.value);
 						if (hex) {
 							ifIdInput.value = hex;
