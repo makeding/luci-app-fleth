@@ -45,9 +45,9 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 ## 独立IP
 - `JPNE（v6プラス）`
   - enひかり（東日本 テスト済）
-  - SoftBank 光
-    - 1Gbps
-    - 10Gbps（東日本 テスト済）
+- SoftBank 光
+  - 1Gbps
+  - 10Gbps（東日本 テスト済）
 
 # スクリーンショット
 ![information](./screenshots/luci-information-3.jpeg)  
