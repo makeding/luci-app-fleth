@@ -156,9 +156,10 @@ proto_ipip6h_setup() {
 	json_add_int ttl "${ttl:-64}"
 	json_add_string local "$ip6addr"
 	json_add_string remote "$peeraddr"
-	[ -n "$encaplimit" ] && [ "$encaplimit" != "ignore" ] && json_add_string encaplimit "$encaplimit"
 	[ -n "$tunlink" ] && json_add_string link "$tunlink"
-	[ -n "$weakif" ] && json_add_boolean weakif "$weakif"
+	json_add_object "data"
+	  [ -n "$encaplimit" ] && json_add_string encaplimit "$encaplimit"
+	json_close_object
 	proto_close_tunnel
 
 	proto_add_data
