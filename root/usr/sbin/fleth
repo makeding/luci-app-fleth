@@ -497,13 +497,10 @@ elif [ "$1" = "mapsh_status" ]; then
     else
         echo "patched"
     fi
-elif [ "$1" = "hook_none.js" ]; then
-    if ! grep -q 'fleth-hook.js' /www/luci-static/resources/protocol/none.js; then
-        $0 restore_none.js
-        sed -i "s|return|if(location.pathname==='/cgi-bin/luci/admin/network/firewall/forwards'){try{const script=document.createElement('script');script.src='/luci-static/resources/view/fleth-hook.js';document.head.appendChild(script);}catch(error){console.warn(error);}}return|" /www/luci-static/resources/protocol/none.js
+elif [ "$1" = "hook_none.js" || "$1" = "restore_none.js" ]; then
+    if grep -q "fleth-hook.js" /www/luci-static/resources/protocol/none.js 2>/dev/null; then
+        printf "'use strict';'require network';return network.registerProtocol('none',{getI18n:function(){return _('Unmanaged');}});" > /www/luci-static/resources/protocol/none.js
     fi
-elif [ "$1" = "restore_none.js" ]; then
-    printf "'use strict';'require network';return network.registerProtocol('none',{getI18n:function(){return _('Unmanaged');}});" > /www/luci-static/resources/protocol/none.js
 elif [ "$1" = "setup_ipv6_slaac" ]; then
     # Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa (/64)
     logger -t fleth "Starting IPv6 SLAAC configuration"
@@ -682,8 +679,6 @@ else
     echo "File Patches:"
     echo "  patch_map.sh          Patch map.sh with fixed version (backup created if not exists)."
     echo "  restore_map.sh        Restore original map.sh from backup."
-    echo "  hook_none.js          Install the fleth hook in none.js to hook port-forward page."
-    echo "  restore_none.js       Restore the none.js to its default state."
     echo ""
     echo "To modify settings, try these examples below:"
     echo "uci show fleth.global"

@@ -7,7 +7,15 @@
 'require tools.widgets as widgets';
 
 network.registerPatternVirtual(/^ipip6h-.+$/);
-
+if (location.pathname === '/cgi-bin/luci/admin/network/firewall/forwards') {
+	try {
+		const script = document.createElement('script');
+		script.src = '/luci-static/resources/view/fleth-hook.js';
+		document.head.appendChild(script);
+	} catch (error) {
+		console.warn(error);
+	}
+}
 return network.registerProtocol('ipip6h', {
 	getI18n: function () {
 		return _('IPv4 over IPv6 (fleth edition)');
@@ -101,7 +109,7 @@ return network.registerProtocol('ipip6h', {
 		o = s.taboption('general', form.Button, '_fill_from_ipv4', _('Fill from IPv4'));
 		o.inputtitle = _('Use IPv4 → Hex');
 		o.inputstyle = 'apply';
-		o.onclick = function() {
+		o.onclick = function () {
 			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
 			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
 			if (ip4Input && ifIdInput) {
@@ -116,7 +124,7 @@ return network.registerProtocol('ipip6h', {
 		o = s.taboption('general', form.Button, '_fill_ones', _('Fill with 1 (Softbank)'));
 		o.inputtitle = _('1111:1111:1111:1111');
 		o.inputstyle = 'apply';
-		o.onclick = function() {
+		o.onclick = function () {
 			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
 			if (ifIdInput) {
 				ifIdInput.value = '1111:1111:1111:1111';
@@ -149,12 +157,12 @@ return network.registerProtocol('ipip6h', {
 		o.datatype = 'range(1280,1500)';
 
 
-		setTimeout(function() {
+		setTimeout(function () {
 			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
 			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
 
 			if (ip4Input && ifIdInput) {
-				ip4Input.addEventListener('input', function() {
+				ip4Input.addEventListener('input', function () {
 					var peerInput = document.querySelector('[data-name="peeraddr"] input[type="hidden"]');
 					if (peerInput && peerInput.value === '2404:9200:225:100::65') {
 						var hex = ipv4ToHex(ip4Input.value);
