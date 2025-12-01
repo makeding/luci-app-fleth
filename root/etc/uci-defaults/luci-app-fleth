@@ -12,6 +12,7 @@ config fleth 'global'
 	option mtu '1460'
 	option prefer_slaac '1'
 	option tunnel_activation '1'
+	option upnp_auto_config '1'
 EOF
 else
     sed -i '/option ip6prefix_enabled/d' /etc/config/fleth
@@ -25,6 +26,11 @@ else
     # Add tunnel_activation option if not exists
     if ! grep -q "option tunnel_activation" /etc/config/fleth; then
         uci set fleth.global.tunnel_activation='1'
+        uci commit fleth
+    fi
+    # Add upnp_auto_config option if not exists
+    if ! grep -q "option upnp_auto_config" /etc/config/fleth; then
+        uci set fleth.global.upnp_auto_config='1'
         uci commit fleth
     fi
 fi

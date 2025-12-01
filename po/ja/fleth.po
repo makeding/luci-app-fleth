@@ -228,6 +228,27 @@ msgstr "ですが、MAP-E/IPIP6 を正常に動作させるには \"00\" で終�
 msgid "Please check your upstream router's prefix delegation settings."
 msgstr "上位ルーターのプレフィックス委譲設定を確認してください。"
 
+msgid "UPnP Config Status"
+msgstr "UPnP 設定状態"
+
+msgid "Auto Configure UPnP"
+msgstr "UPnP 自動設定"
+
+msgid "Automatically configure miniupnpd port rules for MAP-E available ports (DS-Lite not affected)"
+msgstr "MAP-E 利用可能ポートに対して miniupnpd ポート転送ルールを自動設定（DS-Lite は影響なし）"
+
+msgid "Not Installed"
+msgstr "未インストール"
+
+msgid "Disabled"
+msgstr "無効"
+
+msgid "Configured"
+msgstr "設定済み"
+
+msgid "Unconfigured"
+msgstr "未設定"
+
 msgid "Prefer SLAAC Address"
 msgstr "SLAAC アドレス優先"
 

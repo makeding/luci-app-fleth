@@ -55,11 +55,13 @@ return view.extend({
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_prefix_length"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mapsh_status"]), { stdout: "" }),
+      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["upnp_status"]), { stdout: "" }),
     ]).then(function (results) {
       const area = (results[0].stdout || "").trim();
       const mape_status = (results[1].stdout || "").split("\n");
       const prefix_length = (results[2].stdout || "").trim();
       const mapsh_status = (results[3].stdout || "").trim();
+      const upnp_status = (results[4].stdout || "").trim();
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
 
@@ -68,6 +70,7 @@ return view.extend({
         mape_status: mape_status,
         prefix_length: prefix_length || "UNKNOWN",
         mapIsPatched: mapsh_status === "patched",
+        upnpStatus: upnp_status || "UNKNOWN",
       };
 
       if (mape_status[0] === "NURO") areaValue = "UNKNOWN(NURO)";
@@ -174,6 +177,33 @@ return view.extend({
       return data.mape_status[0] || _("UNKNOWN");
     };
 
+    // Show UPnP configuration status
+    o = s.taboption("info", form.DummyValue, "upnp_config_status", _("UPnP Config Status"));
+    o.cfgvalue = function () {
+      var status = data.upnpStatus || "UNKNOWN";
+      var icon = "";
+      var text = "";
+
+      if (status === "NOT_INSTALLED") {
+        icon = "○";
+        text = _("Not Installed");
+      } else if (status === "DISABLED") {
+        icon = "○";
+        text = _("Disabled");
+      } else if (status === "CONFIGURED") {
+        icon = "✓";
+        text = _("Configured");
+      } else if (status === "UNCONFIGURED") {
+        icon = "✗";
+        text = _("Unconfigured");
+      } else {
+        icon = "?";
+        text = status;
+      }
+
+      return icon + " " + text;
+    };
+
     // Only show detailed MAP-E fields if we have valid data
     if (hasMapeData) {
       const mapeDetailFields = [
@@ -200,16 +230,21 @@ return view.extend({
             const portsString = data.mape_status[i + 1] || "";
             if (!portsString) return "";
 
-            // Split ports into individual numbers and highlight special ones
-            const ports = portsString.split(/\s+/).filter(p => p);
-            const viewContext = this;  // Save reference for use in arrow function
-            const highlightedPorts = ports.map(port => {
-              return viewContext._isSpecialPort(port) ?
-                '<span class="port-highlight">' + port + '</span>' :
-                port;
-            });
+            const ports = [];
+            // Expand port ranges (format: "6912-6927 11008-11023")
+            portsString.split(/\s+/).forEach(range => {
+              const parts = range.split('-');
+              if (parts.length === 2) {
+                for (let p = parseInt(parts[0]); p <= parseInt(parts[1]); p++) {
+                  ports.push(this._isSpecialPort(p.toString()) ?
+                    '<span class="port-highlight">' + p + '</span>' : p);
+                }
+              } else if (parts[0]) {
+                ports.push(parts[0]);
+              }
+            }.bind(this));
 
-            return highlightedPorts.join(' ');
+            return ports.join(' ');
           }.bind(this);
           // Override render to display as div instead of input
           o.render = function () {
@@ -296,6 +331,16 @@ return view.extend({
       "tunnel_activation",
       _("Auto Activate Tunnel"),
       _("Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly.")
+    );
+    o.rmempty = false;
+    o.default = "1";
+
+    o = s.taboption(
+      "general",
+      form.Flag,
+      "upnp_auto_config",
+      _("Auto Configure UPnP"),
+      _("Automatically configure miniupnpd port rules for MAP-E available ports (DS-Lite not affected)")
     );
     o.rmempty = false;
     o.default = "1";

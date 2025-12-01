@@ -44,6 +44,7 @@ r_IP6PREFIXLEN=""
 r_EALEN=""
 r_PSIDLEN=""
 r_OFFSET=""
+r_MAPE_PORTS=""
 
 
 e_AREA="UNKNOWN"
@@ -294,6 +295,73 @@ auto_configure_extendprefix() {
 }
 
 # https://ipv4.web.fc2.com/map-e.html
+# Check if miniupnpd is installed
+check_upnp_installed() {
+    [ -f /etc/config/upnpd ] && return 0
+    return 1
+}
+
+configure_upnp_rules() {
+    [ "$(uci get fleth.global.upnp_auto_config 2>/dev/null)" != "1" ] && return 0
+    [ "$r_TYPE" != "map-e" ] && return 0
+    check_upnp_installed || return 1
+    [ -z "$r_MAPE_PORTS" ] && return 1
+
+    # Remove old fleth rules and 1024-65535 defaults
+    local idx=$(($(uci show upnpd 2>/dev/null | grep -c "^upnpd.@perm_rule\[") - 1))
+    while [ $idx -ge 0 ]; do
+        local ext_ports=$(uci get upnpd.@perm_rule[$idx].ext_ports 2>/dev/null)
+        local comment=$(uci get upnpd.@perm_rule[$idx].comment 2>/dev/null)
+        if [ "$ext_ports" = "1024-65535" ] || echo "$comment" | grep -q "^fleth:"; then
+            uci delete upnpd.@perm_rule[$idx] 2>/dev/null
+        fi
+        idx=$((idx - 1))
+    done
+
+    # Add allow rules for MAP-E ports
+    local section_names="" reorder_pos=0
+    for range in $r_MAPE_PORTS; do
+        local section=$(uci add upnpd perm_rule)
+        uci batch <<EOF
+set upnpd.$section.action=allow
+set upnpd.$section.ext_ports=$range
+set upnpd.$section.int_addr=0.0.0.0/0
+set upnpd.$section.int_ports=1024-65535
+set upnpd.$section.comment=fleth:$range
+EOF
+        section_names="$section_names $section"
+    done
+
+    # Reorder to beginning
+    for section in $section_names; do
+        uci reorder "upnpd.$section=$reorder_pos"
+        reorder_pos=$((reorder_pos + 1))
+    done
+
+    # Ensure deny-all rule exists
+    local has_deny=0 idx=0 total=$(uci show upnpd 2>/dev/null | grep -c "^upnpd.@perm_rule\[")
+    while [ $idx -lt $total ]; do
+        [ "$(uci get upnpd.@perm_rule[$idx].action 2>/dev/null)" = "deny" ] && \
+        [ "$(uci get upnpd.@perm_rule[$idx].ext_ports 2>/dev/null)" = "0-65535" ] && has_deny=1 && break
+        idx=$((idx + 1))
+    done
+
+    if [ $has_deny -eq 0 ]; then
+        local deny_section=$(uci add upnpd perm_rule)
+        uci batch <<EOF
+set upnpd.$deny_section.action=deny
+set upnpd.$deny_section.ext_ports=0-65535
+set upnpd.$deny_section.int_addr=0.0.0.0/0
+set upnpd.$deny_section.int_ports=0-65535
+set upnpd.$deny_section.comment=fleth: Default deny
+EOF
+    fi
+
+    uci commit upnpd
+    /etc/init.d/miniupnpd enabled 2>/dev/null && /etc/init.d/miniupnpd restart 2>/dev/null
+    return 0
+}
+
 get_mape_provider() {
     # I can't rewritten calc logic with shell, asking lua for help
     t_DATA=$(lua /usr/sbin/fleth-map-e.lua calc "$ipv6_address")
@@ -313,6 +381,7 @@ get_mape_provider() {
                 8) r_EALEN=$line ;;
                 9) r_PSIDLEN=$line ;;
                 10) r_OFFSET=$line ;;
+                11) r_MAPE_PORTS=$line ;;
             esac
         done << EOF
 $t_DATA
@@ -433,6 +502,9 @@ EOF
             uci commit
             ifdown ${h_TUNNEL_INTERFACE}; sleep 2; ifup ${h_TUNNEL_INTERFACE}
             logger -t fleth "New map-e configuration committed ${h_TUNNEL_INTERFACE}=${r_PEERADDR}"
+
+            # Configure UPnP rules for MAP-E
+            configure_upnp_rules
         fi
     elif [ "$new_zone_index" != "$current_zone_index" ]; then
         uci del_list firewall.@zone[$current_zone_index].network="$h_TUNNEL_INTERFACE" 2>/dev/null
@@ -488,6 +560,24 @@ elif [ "$1" = "check_alignment" ]; then
     check_prefix_alignment "$2"
 elif [ "$1" = "auto_setup_ipv6" ]; then
     auto_setup_ipv6_mode
+elif [ "$1" = "upnp_status" ]; then
+    if ! check_upnp_installed; then
+        echo "NOT_INSTALLED"
+        exit 0
+    fi
+
+    h_UPNP_AUTO=$(uci get fleth.global.upnp_auto_config 2>/dev/null)
+    if [ "$h_UPNP_AUTO" != "1" ]; then
+        echo "DISABLED"
+        exit 0
+    fi
+
+    fleth_rules=$(uci show upnpd 2>/dev/null | grep -c "comment='fleth:")
+    if [ "$fleth_rules" -gt 0 ]; then
+        echo "CONFIGURED"
+    else
+        echo "UNCONFIGURED"
+    fi
 elif [ "$1" = "mapsh_status" ]; then
     # Check if map.sh is patched or original
     if [ ! -f "$MAPSH_BACKUP_PATH" ]; then

@@ -228,6 +228,27 @@ msgstr "，但必須以 \"00\" 結尾才能使 MAP-E/IPIP6 正常運作。"
 msgid "Please check your upstream router's prefix delegation settings."
 msgstr "請檢查上游路由器的前綴委派設定。"
 
+msgid "UPnP Config Status"
+msgstr "UPnP 配置狀態"
+
+msgid "Auto Configure UPnP"
+msgstr "自動配置 UPnP"
+
+msgid "Automatically configure miniupnpd port rules for MAP-E available ports (DS-Lite not affected)"
+msgstr "自動為 MAP-E 可用端口配置 miniupnpd 端口轉發規則（不影響 DS-Lite）"
+
+msgid "Not Installed"
+msgstr "未安裝"
+
+msgid "Disabled"
+msgstr "已禁用"
+
+msgid "Configured"
+msgstr "已配置"
+
+msgid "Unconfigured"
+msgstr "未配置"
+
 msgid "Prefer SLAAC Address"
 msgstr "優先 SLAAC 地址"
 

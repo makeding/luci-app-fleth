@@ -927,14 +927,12 @@ local function calc(prefix)
     end
 
 
-    local ports = {}
+    local port_ranges = {}
     local Amax = lshift(1, offset) - 1
     for A = 1, Amax do
-        local port = bor(lshift(A, 16 - offset), lshift(psid, 16 - offset - psidlen))
-        end_port = port + lshift(1, 16 - offset - psidlen) - 1
-        for port = port, end_port do
-            table.insert(ports, tostring(port))
-        end
+        local start_port = bor(lshift(A, 16 - offset), lshift(psid, 16 - offset - psidlen))
+        local end_port = start_port + lshift(1, 16 - offset - psidlen) - 1
+        table.insert(port_ranges, tostring(start_port) .. "-" .. tostring(end_port))
     end
 
     local hextet2 = {}
@@ -968,7 +966,7 @@ local function calc(prefix)
     print(psidlen)
     print(offset)
     -- print(psid)
-    print(table.concat(ports, " "))
+    print(table.concat(port_ranges, " "))
 end
 
 local function main(args)

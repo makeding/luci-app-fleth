@@ -18,10 +18,27 @@
     }
 
     // Get available ports from MAP-E status, or all ports if not using MAP-E
-    let ports =
-      mape_status.length > 10
-        ? mape_status[mape_status.length - 1].split(" ")
-        : new Array(65535).fill(1).map((_, i) => (i + 1).toString());
+    let ports = [];
+    if (mape_status.length > 10) {
+      // Parse port ranges (format: "1024-1088 2048-2112")
+      const portRanges = mape_status[mape_status.length - 1].split(" ");
+      portRanges.forEach(range => {
+        const parts = range.split("-");
+        if (parts.length === 2) {
+          const start = parseInt(parts[0]);
+          const end = parseInt(parts[1]);
+          for (let port = start; port <= end; port++) {
+            ports.push(port.toString());
+          }
+        } else if (parts.length === 1 && parts[0]) {
+          // Single port number
+          ports.push(parts[0]);
+        }
+      });
+    } else {
+      // No MAP-E, all ports available
+      ports = new Array(65535).fill(1).map((_, i) => (i + 1).toString());
+    }
     // Add port validation and random port button
     const dom_src_dport = document.querySelector('[data-name="src_dport"]');
     const dom_src_dport_input = dom_src_dport.querySelector("input");
