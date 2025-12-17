@@ -24,7 +24,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
     - 楽天ひかり（東日本 テスト済）
     - Tigers-net
 - `dslite.v6connect.net`
-    - ASAHIネット光
+    - ASAHIネット光（東日本 テスト済）
 ## MAP-E:
 - `BIGLOBE`
   - BIGLOBE（西日本 テスト済）
