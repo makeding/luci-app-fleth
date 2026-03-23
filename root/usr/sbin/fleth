@@ -178,6 +178,49 @@ get_uplink_prefix_length() {
     fi
 }
 
+get_uplink_device() {
+    local status
+    local dev=""
+
+    status=$(ifstatus ${h_UPLINK_INTERFACE} 2>/dev/null)
+    if [ -n "$status" ]; then
+        dev=$(echo "$status" | jsonfilter -e '@.l3_device' 2>/dev/null)
+        if [ -z "$dev" ]; then
+            dev=$(echo "$status" | jsonfilter -e '@.device' 2>/dev/null)
+        fi
+    fi
+
+    if [ -z "$dev" ]; then
+        dev=$(uci get network.${h_UPLINK_INTERFACE}.device 2>/dev/null)
+    fi
+    if [ -z "$dev" ]; then
+        dev=$(uci get network.${h_UPLINK_INTERFACE}.ifname 2>/dev/null)
+    fi
+
+    echo "$dev"
+}
+
+get_device_mac() {
+    local dev="$1"
+    local mac=""
+
+    if [ -z "$dev" ]; then
+        return 1
+    fi
+
+    mac=$(cat /sys/class/net/$dev/address 2>/dev/null)
+    if [ -n "$mac" ]; then
+        echo "$mac" | tr -d ':' | tr '[:lower:]' '[:upper:]'
+    fi
+}
+
+restart_uplink_interface() {
+    logger -t fleth "Restarting ${h_UPLINK_INTERFACE} interface"
+    ifdown ${h_UPLINK_INTERFACE} >/dev/null 2>&1
+    sleep 2
+    ifup ${h_UPLINK_INTERFACE} >/dev/null 2>&1
+}
+
 check_prefix_alignment() {
     # Check if IPv6 prefix is aligned for MAP-E/IPIP6 usage
     # Skips /56 (ISP-assigned, always aligned) and /64 (SLAAC mode)
@@ -596,6 +639,39 @@ EOF
 
     logger -t fleth "IPv6 PD configuration completed successfully"
     echo "SUCCESS"
+elif [ "$1" = "clear_dhcp6c_duid" ]; then
+    logger -t fleth "Clearing DHCPv6 default DUID (network.globals.dhcp_default_duid)"
+
+    uci -q delete network.globals.dhcp_default_duid
+    uci commit network
+
+    restart_uplink_interface
+
+    logger -t fleth "DHCPv6 default DUID cleared and ${h_UPLINK_INTERFACE} restarted"
+    echo "SUCCESS"
+elif [ "$1" = "set_wan6_clientid" ]; then
+    logger -t fleth "Setting uplink client ID for ${h_UPLINK_INTERFACE}"
+
+    uplink_dev=$(get_uplink_device)
+    if [ -z "$uplink_dev" ]; then
+        echo "ERROR: Unable to determine uplink device"
+        exit 1
+    fi
+
+    uplink_mac=$(get_device_mac "$uplink_dev")
+    if [ -z "$uplink_mac" ]; then
+        echo "ERROR: Unable to read MAC address for $uplink_dev"
+        exit 1
+    fi
+
+    clientid="00030001${uplink_mac}"
+    uci set network.${h_UPLINK_INTERFACE}.clientid="$clientid"
+    uci commit network
+
+    logger -t fleth "Set ${h_UPLINK_INTERFACE} clientid to $clientid (device: $uplink_dev)"
+    restart_uplink_interface
+
+    echo "SUCCESS"
 elif [ "$1" = "patch_map.sh" ]; then
     MAPSH_URL="https://raw.githubusercontent.com/fakemanhk/openwrt-jp-ipoe/345b1d9add58cf84c3eebe235f695607a78ebcd9/map.sh.new"
     EXPECTED_SHA256="d64b8018f9eda6dfb84089f7b2fb168c7e7c04ece0c33315422120cdcebdd0b4"
@@ -675,6 +751,8 @@ else
     echo "  auto_setup_ipv6       Auto-detect prefix and configure PD (/56) or SLAAC (/64) mode."
     echo "  setup_ipv6_slaac      Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa (/64)."
     echo "  setup_ipv6_pd         Configure IPv6 PD for CROSS(10Gbps) or with Hikari Denwa (/56)."
+    echo "  clear_dhcp6c_duid     Clear DHCPv6 DUID files and restart uplink."
+    echo "  set_wan6_clientid     Set uplink client ID to 00030001\$MAC and restart uplink."
     echo ""
     echo "File Patches:"
     echo "  patch_map.sh          Patch map.sh with fixed version (backup created if not exists)."

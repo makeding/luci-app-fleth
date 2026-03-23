@@ -201,6 +201,42 @@ msgstr "パッチする"
 msgid "Restore"
 msgstr "復元"
 
+msgid "Uplink Client ID Fix"
+msgstr "アップリンク クライアントID 修正"
+
+msgid "OpenWrt 25.10 and later dynamically generates the Default DUID. Because the format does not meet NGN requirements, IPv6 address assignment will fail. Choose one of the following fixes (either one is sufficient)."
+msgstr "OpenWrt 25.10 以降では Default DUID が動的に生成されます。形式が NGN の要件を満たさないため IPv6 アドレスの取得に失敗します。以下のいずれかの修正を選択してください（どちらか一方で十分です）。"
+
+msgid "Choose Fix"
+msgstr "修正方法を選択"
+
+msgid "Clear DHCPv6 DUID"
+msgstr "DHCPv6 DUID を削除"
+
+msgid "Set Uplink Client ID (00030001 + Interface MAC)"
+msgstr "アップリンク クライアントID を設定 (00030001 + インターフェース MAC)"
+
+msgid "Apply Selected Fix"
+msgstr "選択した修正を適用"
+
+msgid "Applying Fix"
+msgstr "修正を適用中"
+
+msgid "Clearing DHCPv6 DUID..."
+msgstr "DHCPv6 DUID を削除中..."
+
+msgid "Setting Uplink Client ID..."
+msgstr "アップリンク クライアントID を設定中..."
+
+msgid "Fix applied successfully. Uplink has been restarted."
+msgstr "修正が適用されました。アップリンクを再起動しました。"
+
+msgid "Failed to apply fix:"
+msgstr "修正の適用に失敗しました:"
+
+msgid "Error applying fix:"
+msgstr "修正の適用中にエラー:"
+
 msgid "Patching"
 msgstr "パッチ中"
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-chmod +x /usr/sbin/fleth /etc/init.d/fleth /etc/hotplug.d/iface/70-fleth
+chmod +x /usr/sbin/fleth /etc/init.d/fleth /lib/netifd/proto/ipip6h.sh
 
 if [ ! -f /etc/config/fleth ]; then
     cat <<EOF > /etc/config/fleth
@@ -28,5 +28,4 @@ else
         uci commit fleth
     fi
 fi
-fleth hook_none.js
 exit 0
