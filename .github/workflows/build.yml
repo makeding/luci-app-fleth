@@ -54,7 +54,6 @@ jobs:
         with:
           name: luci-app-fleth-${{ matrix.package_type }}
           path: bin/packages/x86_64/huggy/
-          archive: false
       # - name: 'Pack all packages'
       #   run: tar cf pack.tar bin/packages/x86_64/base/ds-lite* bin/packages/x86_64/base/ds-lite*
       - name: Release

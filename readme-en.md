@@ -6,7 +6,16 @@ luci-app-fleth is a helper that can automatically configure IPv4 over IPv6 tunne
 
 > Japan use only
 
+**If wan6 cannot obtain IPv6 on OpenWrt 25.10**
+Run the fix (delete) under “Uplink Client ID Fix” in Tools, or clear `Network → Interfaces → Default DUID`.
+
 [>>>>>> Download Here <<<<<<](https://github.com/makeding/luci-app-fleth/releases)
+# Installation (apk)
+If you are using OpenWrt 25.12 or newer, there is no signature yet, so `--allow-untrusted` is required.
+
+```
+apk add --allow-untrusted /tmp/luci-app-fleth_*.apk
+```
 # Supported ISPs
 https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d  
 
