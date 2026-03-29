@@ -12,6 +12,7 @@ jobs:
   build:
     name: Build ${{ matrix.package_type }}
     runs-on: ubuntu-24.04
+    environment: runner
     permissions:
       contents: write
     strategy:
