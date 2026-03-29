@@ -49,6 +49,24 @@ jobs:
           PACKAGES: luci-app-fleth
           FEEDNAME: huggy
           NO_REFRESH_CHECK: true
+      - name: Checkout apk-signer
+        if: matrix.package_type == 'apk'
+        uses: actions/checkout@v4
+        with:
+          repository: makeding/apk-remote-signer
+          path: apk-signer
+
+      - name: Sign APK
+        if: matrix.package_type == 'apk'
+        env:
+          APK_SIGNER_URL: ${{ secrets.APK_SIGNER_URL }}
+          APK_SIGNER_KEY: ${{ secrets.APK_SIGNER_KEY }}
+        run: |
+          for apk in bin/packages/x86_64/huggy/luci-app-fleth*.apk; do
+            python3 apk-signer/scripts/sign.py "$apk" "$apk.signed"
+            mv "$apk.signed" "$apk"
+          done
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
