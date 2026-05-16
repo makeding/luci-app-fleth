@@ -161,6 +161,12 @@ msgstr "客戶端 IPv4 地址"
 msgid "Gateway IPv4 Address"
 msgstr "閘道 IPv4 地址"
 
+msgid "Passthrough Device"
+msgstr "透傳裝置"
+
+msgid "Physical or VLAN device connected to the downstream client"
+msgstr "連接到下游客戶端的物理或 VLAN 裝置"
+
 msgid "Public IPv4 Address"
 msgstr "公網 IPv4 地址"
 
@@ -210,8 +216,38 @@ msgstr "取消勾選後不會配置預設路由"
 msgid "Use gateway metric"
 msgstr "使用閘道躍點值"
 
+msgid "IPv4 routing table"
+msgstr "IPv4 路由表"
+
+msgid "Routing table used by the source rule for the client IPv4 address"
+msgstr "客戶端 IPv4 地址的來源位址規則使用的路由表"
+
+msgid "IPv4 source rule priority"
+msgstr "IPv4 來源位址規則優先級"
+
 msgid "Use MTU on tunnel interface"
 msgstr "隧道介面使用的 MTU"
+
+msgid "Proxy ARP"
+msgstr "Proxy ARP"
+
+msgid "Reply to downstream ARP requests for routed IPv4 destinations"
+msgstr "回應下游對已路由 IPv4 目標的 ARP 請求"
+
+msgid "Allow passthrough forwarding"
+msgstr "允許透傳轉發"
+
+msgid "Install firewall rules to forward traffic between the downstream device and tunnel without masquerading"
+msgstr "安裝防火牆規則，在下游裝置與隧道之間轉發流量且不做地址偽裝"
+
+msgid "DNAT gateway address"
+msgstr "DNAT 閘道地址"
+
+msgid "Forward traffic addressed to the gateway IPv4 address to another IPv4 address"
+msgstr "將發往閘道 IPv4 地址的流量轉發到另一個 IPv4 地址"
+
+msgid "DNAT target address"
+msgstr "DNAT 目標地址"
 
 msgid "map.sh Management"
 msgstr "map.sh 管理"

@@ -20,18 +20,36 @@ return network.registerProtocol('ipip6hp', {
 		return 'luci-proto-ipip6hp';
 	},
 
+	getIPAddr: function () {
+		return this.get('ip4ifaddr') || null;
+	},
+
+	getIPAddrs: function () {
+		var ip4ifaddr = this.get('ip4ifaddr');
+		return ip4ifaddr ? [ip4ifaddr + '/32'] : [];
+	},
+
+	getNetmask: function () {
+		return this.get('ip4ifaddr') ? '255.255.255.255' : null;
+	},
+
+	getGatewayAddr: function () {
+		return this.get('gateway4') || null;
+	},
+
 	isFloating: function () {
 		return false;
 	},
 
 	isVirtual: function () {
-		return true;
+		return false;
 	},
 
 	containsDevice: function (ifname) {
 		var device = this.getDevice ? this.getDevice() : null;
+		var deviceName = device ? device.getName() : null;
 		ifname = network.getIfnameOf(ifname);
-		return (ifname == this.getIfname() || ifname == device);
+		return (ifname == this.getIfname() || ifname == deviceName);
 	},
 
 	renderFormOptions: function (s) {
@@ -71,6 +89,12 @@ return network.registerProtocol('ipip6hp', {
 		o.rmempty = false;
 		o.datatype = 'ip4addr("nomask")';
 		o.placeholder = '111.0.0.1';
+
+		o = s.taboption('general', widgets.DeviceSelect, 'device', _('Passthrough Device'),
+			_('Physical or VLAN device connected to the downstream client'));
+		o.nobridges = false;
+		o.optional = false;
+		o.exclude = '@' + s.section;
 
 		o = s.taboption('general', form.Value, 'interface_id', _('IPv6 Interface ID'));
 		o.placeholder = '006f:0000:0100:0000';
@@ -137,9 +161,36 @@ return network.registerProtocol('ipip6hp', {
 		o.datatype = 'uinteger';
 		o.depends('defaultroute', '1');
 
+		o = s.taboption('advanced', form.Value, 'ip4table', _('IPv4 routing table'),
+			_('Routing table used by the source rule for the client IPv4 address'));
+		o.placeholder = '100';
+		o.datatype = 'or(uinteger,uciname)';
+		o.depends('defaultroute', '1');
+
+		o = s.taboption('advanced', form.Value, 'ip4rule_priority', _('IPv4 source rule priority'));
+		o.placeholder = '10000';
+		o.datatype = 'uinteger';
+		o.depends('defaultroute', '1');
+
 		o = s.taboption('advanced', form.Value, 'mtu', _('Use MTU on tunnel interface'));
 		o.placeholder = '1460';
 		o.datatype = 'range(1280,1500)';
+
+		o = s.taboption('advanced', form.Flag, 'proxy_arp', _('Proxy ARP'),
+			_('Reply to downstream ARP requests for routed IPv4 destinations'));
+		o.default = o.enabled;
+
+		o = s.taboption('advanced', form.Flag, 'allow_forward', _('Allow passthrough forwarding'),
+			_('Install firewall rules to forward traffic between the downstream device and tunnel without masquerading'));
+		o.default = o.enabled;
+
+		o = s.taboption('advanced', form.Flag, 'dnat_gateway', _('DNAT gateway address'),
+			_('Forward traffic addressed to the gateway IPv4 address to another IPv4 address'));
+		o.default = o.disabled;
+
+		o = s.taboption('advanced', form.Value, 'dnat_target', _('DNAT target address'));
+		o.datatype = 'ip4addr("nomask")';
+		o.depends('dnat_gateway', '1');
 
 		setTimeout(function () {
 			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');

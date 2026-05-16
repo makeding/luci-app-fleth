@@ -161,6 +161,12 @@ msgstr "クライアント IPv4 アドレス"
 msgid "Gateway IPv4 Address"
 msgstr "ゲートウェイ IPv4 アドレス"
 
+msgid "Passthrough Device"
+msgstr "パススルーデバイス"
+
+msgid "Physical or VLAN device connected to the downstream client"
+msgstr "下流クライアントに接続する物理または VLAN デバイス"
+
 msgid "Public IPv4 Address"
 msgstr "パブリック IPv4 アドレス"
 
@@ -210,8 +216,38 @@ msgstr "チェックを外すとデフォルトルートは設定されません
 msgid "Use gateway metric"
 msgstr "ゲートウェイメトリックを使用"
 
+msgid "IPv4 routing table"
+msgstr "IPv4 ルーティングテーブル"
+
+msgid "Routing table used by the source rule for the client IPv4 address"
+msgstr "クライアント IPv4 アドレス用の送信元ルールで使用するルーティングテーブル"
+
+msgid "IPv4 source rule priority"
+msgstr "IPv4 送信元ルール優先度"
+
 msgid "Use MTU on tunnel interface"
 msgstr "トンネルインターフェースで使用する MTU"
+
+msgid "Proxy ARP"
+msgstr "Proxy ARP"
+
+msgid "Reply to downstream ARP requests for routed IPv4 destinations"
+msgstr "ルーティング対象の IPv4 宛先に対する下流側 ARP 要求に応答します"
+
+msgid "Allow passthrough forwarding"
+msgstr "パススルー転送を許可"
+
+msgid "Install firewall rules to forward traffic between the downstream device and tunnel without masquerading"
+msgstr "マスカレードせずに下流デバイスとトンネル間の通信を転送するファイアウォールルールを追加します"
+
+msgid "DNAT gateway address"
+msgstr "ゲートウェイアドレスを DNAT"
+
+msgid "Forward traffic addressed to the gateway IPv4 address to another IPv4 address"
+msgstr "ゲートウェイ IPv4 アドレス宛の通信を別の IPv4 アドレスへ転送します"
+
+msgid "DNAT target address"
+msgstr "DNAT 転送先アドレス"
 
 msgid "map.sh Management"
 msgstr "map.sh 管理"
