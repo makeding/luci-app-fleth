@@ -1,6 +1,6 @@
 #!/bin/sh
 
-chmod +x /usr/sbin/fleth /etc/init.d/fleth /lib/netifd/proto/ipip6h.sh /lib/netifd/proto/ipip6hp.sh
+chmod +x /usr/sbin/fleth /etc/init.d/fleth /lib/netifd/proto/ipip6h.sh /lib/netifd/proto/ipip6hp.sh /usr/share/fleth/firewall.include
 
 if [ ! -f /etc/config/fleth ]; then
     cat <<EOF > /etc/config/fleth
@@ -27,5 +27,14 @@ else
         uci set fleth.global.tunnel_activation='1'
         uci commit fleth
     fi
+fi
+
+if ! uci -q get firewall.fleth_ipip6hp >/dev/null; then
+    uci set firewall.fleth_ipip6hp='include'
+    uci set firewall.fleth_ipip6hp.enabled='1'
+    uci set firewall.fleth_ipip6hp.type='script'
+    uci set firewall.fleth_ipip6hp.path='/usr/share/fleth/firewall.include'
+    uci set firewall.fleth_ipip6hp.fw4_compatible='1'
+    uci commit firewall
 fi
 exit 0
