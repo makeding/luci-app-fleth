@@ -170,8 +170,8 @@ msgstr "下游客户端静态 IPv4 配置建议使用的前缀长度"
 msgid "Client Gateway IPv4 Address"
 msgstr "客户端网关 IPv4 地址"
 
-msgid "Address used by the downstream client as its default gateway; traffic to this address is routed through the tunnel"
-msgstr "下游客户端作为默认网关使用的地址；访问该地址的流量会通过隧道路由出去"
+msgid "Address used by the downstream client as its default gateway; the router answers ARP for this address"
+msgstr "下游客户端作为默认网关使用的地址；路由器会响应该地址的 ARP"
 
 msgid "Public IPv4 Address"
 msgstr "公网 IPv4 地址"

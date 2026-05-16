@@ -112,7 +112,7 @@ return network.registerProtocol('ipip6hp', {
 		o.datatype = 'range(1,32)';
 
 		o = s.taboption('general', form.Value, 'gateway4', _('Client Gateway IPv4 Address'),
-			_('Address used by the downstream client as its default gateway; traffic to this address is routed through the tunnel'));
+			_('Address used by the downstream client as its default gateway; the router answers ARP for this address'));
 		o.rmempty = false;
 		o.datatype = 'ip4addr("nomask")';
 		o.placeholder = '111.0.0.3';

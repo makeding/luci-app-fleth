@@ -170,8 +170,8 @@ msgstr "下流クライアントの静的 IPv4 設定に使用する推奨プレ
 msgid "Client Gateway IPv4 Address"
 msgstr "クライアントゲートウェイ IPv4 アドレス"
 
-msgid "Address used by the downstream client as its default gateway; traffic to this address is routed through the tunnel"
-msgstr "下流クライアントがデフォルトゲートウェイとして使用するアドレスです。このアドレス宛ての通信はトンネル経由でルーティングされます"
+msgid "Address used by the downstream client as its default gateway; the router answers ARP for this address"
+msgstr "下流クライアントがデフォルトゲートウェイとして使用するアドレスです。ルーターがこのアドレスの ARP に応答します"
 
 msgid "Public IPv4 Address"
 msgstr "パブリック IPv4 アドレス"
