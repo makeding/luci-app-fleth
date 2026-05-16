@@ -170,8 +170,8 @@ msgstr "下游客戶端靜態 IPv4 配置建議使用的前綴長度"
 msgid "Client Gateway IPv4 Address"
 msgstr "客戶端閘道 IPv4 地址"
 
-msgid "Address used by the downstream client as its default gateway; answered with proxy ARP only"
-msgstr "下游客戶端作為預設閘道使用的地址；僅透過 Proxy ARP 回應"
+msgid "Address used by the downstream client as its default gateway; traffic to this address is routed through the tunnel"
+msgstr "下游客戶端作為預設閘道使用的地址；訪問該地址的流量會透過隧道路由出去"
 
 msgid "Public IPv4 Address"
 msgstr "公網 IPv4 地址"
@@ -245,12 +245,6 @@ msgstr "Proxy ARP"
 
 msgid "Reply to downstream ARP requests for routed IPv4 destinations"
 msgstr "回應下游對已路由 IPv4 目標的 ARP 請求"
-
-msgid "Allow passthrough forwarding"
-msgstr "允許透傳轉發"
-
-msgid "Install firewall rules to forward traffic between the downstream device and tunnel without masquerading"
-msgstr "安裝防火牆規則，在下游設備和隧道之間轉發流量且不做位址偽裝"
 
 msgid "map.sh Management"
 msgstr "map.sh 管理"

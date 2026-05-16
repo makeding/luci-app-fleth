@@ -7,6 +7,56 @@ h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
 h_PREFER_SLAAC=$(uci get fleth.global.prefer_slaac 2>/dev/null)
 h_TUNNEL_ACTIVATION=$(uci get fleth.global.tunnel_activation 2>/dev/null)
 
+fleth_delete_nft_comment_rules() {
+    local chain="$1"
+    local comment="$2"
+    local handle
+
+    nft -a list chain inet fw4 "$chain" 2>/dev/null | grep "$comment" | sed -n 's/.* handle \([0-9][0-9]*\)$/\1/p' | while read -r handle; do
+        [ -n "$handle" ] && nft delete rule inet fw4 "$chain" handle "$handle" 2>/dev/null
+    done
+}
+
+fleth_apply_ipip6hp_forward_rules() {
+    local interface="$1"
+    local proto device link client4 comment
+
+    proto=$(uci get network.${interface}.proto 2>/dev/null)
+    [ "$proto" = "ipip6hp" ] || return
+
+    comment="fleth-ipip6hp-${interface}"
+    fleth_delete_nft_comment_rules forward "$comment"
+
+    command -v nft >/dev/null 2>&1 || return
+
+    device=$(uci get network.${interface}.device 2>/dev/null)
+    client4=$(uci get network.${interface}.ip4ifaddr 2>/dev/null)
+    link=$(ifstatus "$interface" 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)
+    [ -z "$link" ] && link="ipip6hp-${interface}"
+
+    [ -n "$device" ] && [ -n "$link" ] && [ -n "$client4" ] || {
+        logger -t fleth-hotplug "ipip6hp $interface missing nft forward parameters"
+        return
+    }
+
+    nft insert rule inet fw4 forward iifname "$device" oifname "$link" ip saddr "$client4" accept comment "$comment" 2>/dev/null
+    nft insert rule inet fw4 forward iifname "$link" oifname "$device" ip daddr "$client4" accept comment "$comment" 2>/dev/null
+    logger -t fleth-hotplug "Applied ipip6hp forward rules for $interface ($device <-> $link)"
+}
+
+# Get interface protocol type for interface-related operations
+if [ "$ACTION" = "ifup" ]; then
+    proto=$(uci get network.${INTERFACE}.proto 2>/dev/null)
+fi
+
+# Re-apply ipip6hp passthrough forward rules after fw4 reload on interface up.
+if [ "$ACTION" = "ifup" ] && [ "$proto" = "ipip6hp" ]; then
+    (
+        sleep 1
+        fleth_apply_ipip6hp_forward_rules "$INTERFACE"
+    ) &
+fi
+
 # Exit if fleth is not enabled or interface is not configured
 [ "$h_ENABLED" != "1" ] && exit 0
 [ -z "$h_UPLINK_INTERFACE" ] && exit 0
@@ -15,11 +65,6 @@ h_TUNNEL_ACTIVATION=$(uci get fleth.global.tunnel_activation 2>/dev/null)
 if [ "$INTERFACE" = "$h_UPLINK_INTERFACE" ] && [ "$ACTION" = "ifup" ]; then
     logger -t fleth-hotplug "Interface $INTERFACE up, running fleth auto"
     /usr/sbin/fleth auto &
-fi
-
-# Get interface protocol type for tunnel-related operations
-if [ "$ACTION" = "ifup" ]; then
-    proto=$(uci get network.${INTERFACE}.proto 2>/dev/null)
 fi
 
 # Connectivity test for tunnel interfaces

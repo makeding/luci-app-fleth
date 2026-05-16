@@ -112,7 +112,7 @@ return network.registerProtocol('ipip6hp', {
 		o.datatype = 'range(1,32)';
 
 		o = s.taboption('general', form.Value, 'gateway4', _('Client Gateway IPv4 Address'),
-			_('Address used by the downstream client as its default gateway; answered with proxy ARP only'));
+			_('Address used by the downstream client as its default gateway; traffic to this address is routed through the tunnel'));
 		o.rmempty = false;
 		o.datatype = 'ip4addr("nomask")';
 		o.placeholder = '111.0.0.3';
@@ -203,10 +203,6 @@ return network.registerProtocol('ipip6hp', {
 
 		o = s.taboption('advanced', form.Flag, 'proxy_arp', _('Proxy ARP'),
 			_('Reply to downstream ARP requests for routed IPv4 destinations'));
-		o.default = o.enabled;
-
-		o = s.taboption('advanced', form.Flag, 'allow_forward', _('Allow passthrough forwarding'),
-			_('Install firewall rules to forward traffic between the downstream device and tunnel without masquerading'));
 		o.default = o.enabled;
 
 		setTimeout(function () {

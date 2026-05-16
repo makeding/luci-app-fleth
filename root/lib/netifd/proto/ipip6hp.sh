@@ -16,7 +16,6 @@ proto_ipip6hp_init_config() {
 	proto_config_add_string "gateway4"
 	proto_config_add_boolean "allow_shared_device"
 	proto_config_add_boolean "proxy_arp"
-	proto_config_add_boolean "allow_forward"
 	proto_config_add_string "ip4table"
 	proto_config_add_int "ip4rule_priority"
 	proto_config_add_string "ip6addr"
@@ -76,28 +75,6 @@ ipip6hp_delete_nft_rules() {
 	done
 }
 
-ipip6hp_add_nft_rules() {
-	local cfg="$1"
-	local device="$2"
-	local link="$3"
-	local client4="$4"
-	local gateway4="$5"
-	local allow_forward="$6"
-	local comment="fleth-ipip6hp-${cfg}"
-
-	command -v nft >/dev/null 2>&1 || {
-		logger -t ipip6hp "[${cfg}] WARNING: nft not found, firewall passthrough rules were not installed"
-		return
-	}
-
-	ipip6hp_delete_nft_rules "$cfg"
-
-	if [ "$allow_forward" = "1" ]; then
-		nft insert rule inet fw4 forward iifname "$device" oifname "$link" ip saddr "$client4" accept comment "$comment" 2>/dev/null
-		nft insert rule inet fw4 forward iifname "$link" oifname "$device" ip daddr "$client4" accept comment "$comment" 2>/dev/null
-	fi
-}
-
 ipip6hp_delete_policy_route() {
 	local client4="$1"
 	local table="$2"
@@ -148,8 +125,8 @@ proto_ipip6hp_setup() {
 	local passthrough_device="$2"
 	local link="ipip6hp-$cfg"
 
-	local peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp allow_forward ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric
-	json_get_vars peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp allow_forward ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric
+	local peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric
+	json_get_vars peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric
 
 	logger -t ipip6hp "[${cfg}] Starting passthrough setup"
 	[ -z "$passthrough_device" ] && passthrough_device=$(uci get network.${cfg}.device 2>/dev/null)
@@ -272,7 +249,6 @@ proto_ipip6hp_setup() {
 	: ${ip4prefixlen:=31}
 	: ${allow_shared_device:=0}
 	: ${proxy_arp:=1}
-	: ${allow_forward:=1}
 	: ${ip4table:=100}
 	: ${ip4rule_priority:=10000}
 
@@ -325,7 +301,6 @@ proto_ipip6hp_setup() {
 		: ${metric:=0}
 		ipip6hp_add_policy_route "$cfg" "$link" "$ip4ifaddr" "$ip4table" "$ip4rule_priority" "$metric"
 	}
-	ipip6hp_add_nft_rules "$cfg" "$passthrough_device" "$link" "$ip4ifaddr" "$gateway4" "$allow_forward"
 
 	if [ -n "$interface_id" ] && [ -n "$ip6addr" ]; then
 		local parent_iface="${tunlink:-wan6}"

@@ -170,8 +170,8 @@ msgstr "下流クライアントの静的 IPv4 設定に使用する推奨プレ
 msgid "Client Gateway IPv4 Address"
 msgstr "クライアントゲートウェイ IPv4 アドレス"
 
-msgid "Address used by the downstream client as its default gateway; answered with proxy ARP only"
-msgstr "下流クライアントがデフォルトゲートウェイとして使用するアドレスです。Proxy ARP のみで応答します"
+msgid "Address used by the downstream client as its default gateway; traffic to this address is routed through the tunnel"
+msgstr "下流クライアントがデフォルトゲートウェイとして使用するアドレスです。このアドレス宛ての通信はトンネル経由でルーティングされます"
 
 msgid "Public IPv4 Address"
 msgstr "パブリック IPv4 アドレス"
@@ -245,12 +245,6 @@ msgstr "Proxy ARP"
 
 msgid "Reply to downstream ARP requests for routed IPv4 destinations"
 msgstr "ルーティング対象の IPv4 宛先に対する下流側 ARP 要求に応答します"
-
-msgid "Allow passthrough forwarding"
-msgstr "パススルー転送を許可"
-
-msgid "Install firewall rules to forward traffic between the downstream device and tunnel without masquerading"
-msgstr "下流デバイスとトンネル間の通信を、マスカレードせずに転送するファイアウォールルールを追加します"
 
 msgid "map.sh Management"
 msgstr "map.sh 管理"
