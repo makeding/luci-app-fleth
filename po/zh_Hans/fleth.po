@@ -204,26 +204,14 @@ msgstr "恢复"
 msgid "Uplink Client ID Fix"
 msgstr "Uplink Client ID 修复"
 
-msgid "OpenWrt 25.10 and later dynamically generates the Default DUID. Because the format does not meet NGN requirements, IPv6 address assignment will fail. Choose one of the following fixes (either one is sufficient)."
-msgstr "在 OpenWrt 25.10 及以后，会动态生成 Default DUID。由于格式不符合 NGN 要求，将无法获取 IPv6 地址。请选择以下任一修复方案（任选其一即可）。"
+msgid "OpenWrt 25.12 and later use the Default DUID as a randomized DHCPv6 client identifier. This does not meet NGN requirements."
+msgstr "在 OpenWrt 25.12 及以后，Default DUID 会作为随机化的 DHCPv6 客户端标识使用，这不符合 NGN 要求。"
 
-msgid "Choose Fix"
-msgstr "选择修复方案"
-
-msgid "Clear DHCPv6 DUID"
-msgstr "清除 DHCPv6 DUID"
-
-msgid "Set Uplink Client ID (00030001 + Interface MAC)"
-msgstr "设置 Uplink Client ID（00030001 + 接口 MAC）"
-
-msgid "Apply Selected Fix"
-msgstr "应用所选修复"
+msgid "Fix"
+msgstr "修复"
 
 msgid "Applying Fix"
 msgstr "正在应用修复"
-
-msgid "Clearing DHCPv6 DUID..."
-msgstr "正在清除 DHCPv6 DUID..."
 
 msgid "Setting Uplink Client ID..."
 msgstr "正在设置 Uplink Client ID..."

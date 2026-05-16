@@ -103,7 +103,6 @@ return view.extend({
 
   render: async function (data) {
     let m, s, o;
-    let wan6FixMode;
 
     // Show notification for pending service status (fiber construction completed but ISP setup not ready)
     if (data.isPending) {
@@ -344,24 +343,15 @@ return view.extend({
     o = s.taboption("tools", form.DummyValue, "_wan6_clientid_fix_desc");
     o.title = _("Uplink Client ID Fix");
     o.cfgvalue = function () {
-      return _("OpenWrt 25.10 and later dynamically generates the Default DUID. Because the format does not meet NGN requirements, IPv6 address assignment will fail. Choose one of the following fixes (either one is sufficient).");
+      return _("OpenWrt 25.12 and later use the Default DUID as a randomized DHCPv6 client identifier. This does not meet NGN requirements.");
     };
-
-    wan6FixMode = s.taboption("tools", form.ListValue, "_wan6_clientid_fix_mode", _("Choose Fix"));
-    wan6FixMode.value("clear_duid", _("Clear DHCPv6 DUID"));
-    wan6FixMode.value("set_clientid", _("Set Uplink Client ID (00030001 + Interface MAC)"));
-    wan6FixMode.default = "clear_duid";
-    wan6FixMode.write = function () {};
 
     o = s.taboption("tools", form.Button, "_apply_wan6_clientid_fix");
     o.title = "&#160;";
-    o.inputtitle = _("Apply Selected Fix");
+    o.inputtitle = _("Fix");
     o.inputstyle = "cbi-button-apply";
     o.onclick = L.bind(function (m) {
-      const mode = wan6FixMode.formvalue("global") || "clear_duid";
-      const command = mode === "set_clientid" ? "set_wan6_clientid" : "clear_dhcp6c_duid";
-      const busyText = mode === "set_clientid" ? _("Setting Uplink Client ID...") : _("Clearing DHCPv6 DUID...");
-      return this.applyWan6ClientIdFix(m, command, busyText);
+      return this.applyWan6ClientIdFix(m);
     }, this, m);
 
     // map.sh Management section in Tools tab
@@ -489,15 +479,15 @@ return view.extend({
     return this.setupIPv6Config(mapObj, 'pd');
   },
 
-  applyWan6ClientIdFix: function (mapObj, command, busyText) {
+  applyWan6ClientIdFix: function (mapObj) {
     return new Promise(function (resolve, reject) {
       mapObj.save()
         .then(function () {
           ui.showModal(_('Applying Fix'), [
-            E('p', { 'class': 'spinning' }, busyText)
+            E('p', { 'class': 'spinning' }, _('Setting Uplink Client ID...'))
           ]);
 
-          return fs.exec('/usr/sbin/fleth', [command]);
+          return fs.exec('/usr/sbin/fleth', ['set_wan6_clientid']);
         })
         .then(function (result) {
           ui.hideModal();
