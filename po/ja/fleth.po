@@ -149,6 +149,18 @@ msgstr "工事完了後は通常夕方頃にサービスが開通いたします
 msgid "IPv4 over IPv6 (fleth edition)"
 msgstr "IPv4 over IPv6 (fleth edition)"
 
+msgid "IPv4 over IPv6 passthrough (fleth edition)"
+msgstr "IPv4 over IPv6 パススルー (fleth edition)"
+
+msgid "AFTR/BR IPv6 Address"
+msgstr "AFTR/BR IPv6 アドレス"
+
+msgid "Client IPv4 Address"
+msgstr "クライアント IPv4 アドレス"
+
+msgid "Gateway IPv4 Address"
+msgstr "ゲートウェイ IPv4 アドレス"
+
 msgid "Public IPv4 Address"
 msgstr "パブリック IPv4 アドレス"
 
@@ -179,6 +191,27 @@ msgstr "IPv4から変換"
 
 msgid "Use IPv4 → Hex"
 msgstr "IPv4 → 16進数"
+
+msgid "Tunnel Link"
+msgstr "トンネルリンク"
+
+msgid "Encapsulation limit"
+msgstr "カプセル化制限"
+
+msgid "ignore"
+msgstr "無視"
+
+msgid "Default gateway"
+msgstr "デフォルトゲートウェイ"
+
+msgid "If unchecked, no default route is configured"
+msgstr "チェックを外すとデフォルトルートは設定されません"
+
+msgid "Use gateway metric"
+msgstr "ゲートウェイメトリックを使用"
+
+msgid "Use MTU on tunnel interface"
+msgstr "トンネルインターフェースで使用する MTU"
 
 msgid "map.sh Management"
 msgstr "map.sh 管理"

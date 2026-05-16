@@ -1,6 +1,6 @@
 #!/bin/sh
 
-chmod +x /usr/sbin/fleth /etc/init.d/fleth /lib/netifd/proto/ipip6h.sh
+chmod +x /usr/sbin/fleth /etc/init.d/fleth /lib/netifd/proto/ipip6h.sh /lib/netifd/proto/ipip6hp.sh
 
 if [ ! -f /etc/config/fleth ]; then
     cat <<EOF > /etc/config/fleth

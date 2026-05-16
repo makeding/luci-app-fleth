@@ -64,7 +64,7 @@ if [ "$h_PREFER_SLAAC" = "1" ]; then
     # Check on tunnel interface ifup or wan6 ifupdate
     if [ "$ACTION" = "ifup" ]; then
         case "$proto" in
-            map|ipip6|ipip6h)
+            map|ipip6|ipip6h|ipip6hp)
                 should_check=1
                 ;;
         esac

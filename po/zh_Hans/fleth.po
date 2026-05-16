@@ -149,6 +149,18 @@ msgstr "建议将 MTU 设置为 1460。"
 msgid "IPv4 over IPv6 (fleth edition)"
 msgstr "IPv4 over IPv6 (fleth edition)"
 
+msgid "IPv4 over IPv6 passthrough (fleth edition)"
+msgstr "IPv4 over IPv6 透传 (fleth edition)"
+
+msgid "AFTR/BR IPv6 Address"
+msgstr "AFTR/BR IPv6 地址"
+
+msgid "Client IPv4 Address"
+msgstr "客户端 IPv4 地址"
+
+msgid "Gateway IPv4 Address"
+msgstr "网关 IPv4 地址"
+
 msgid "Public IPv4 Address"
 msgstr "公网 IPv4 地址"
 
@@ -179,6 +191,27 @@ msgstr "从 IPv4 转换"
 
 msgid "Use IPv4 → Hex"
 msgstr "使用 IPv4 → 十六进制"
+
+msgid "Tunnel Link"
+msgstr "隧道链路"
+
+msgid "Encapsulation limit"
+msgstr "封装限制"
+
+msgid "ignore"
+msgstr "忽略"
+
+msgid "Default gateway"
+msgstr "默认网关"
+
+msgid "If unchecked, no default route is configured"
+msgstr "取消勾选后不会配置默认路由"
+
+msgid "Use gateway metric"
+msgstr "使用网关跃点值"
+
+msgid "Use MTU on tunnel interface"
+msgstr "隧道接口使用的 MTU"
 
 msgid "map.sh Management"
 msgstr "map.sh 管理"

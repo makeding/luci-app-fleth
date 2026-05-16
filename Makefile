@@ -15,7 +15,8 @@ LUCI_DEPENDS:=+luci-base +lua +luci-proto-ipv6 \
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_MAP \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_DSLITE \
-	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H
+	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H \
+	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6HP
 
 define Package/luci-app-fleth/config
 	config PACKAGE_$(PKG_NAME)_INCLUDE_MAP
@@ -36,6 +37,13 @@ define Package/luci-app-fleth/config
 		help
 		  Include custom IPv4 over IPv6 tunnel protocol support.
 		  This adds the ipip6h protocol handler and LuCI interface.
+
+	config PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6HP
+		bool "Include luci-proto-ipip6hp"
+		default y
+		help
+		  Include custom IPv4 over IPv6 passthrough protocol support.
+		  This adds the ipip6hp protocol handler and LuCI interface.
 endef
 
 include $(TOPDIR)/feeds/luci/luci.mk
@@ -49,6 +57,13 @@ else
 	# Remove IPIP6H files if not selected
 	rm -f $(PKG_BUILD_DIR)/htdocs/luci-static/resources/protocol/ipip6h.js
 	rm -f $(PKG_BUILD_DIR)/root/lib/netifd/proto/ipip6h.sh
+endif
+ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_IPIP6HP
+	# IPIP6HP support is included
+else
+	# Remove IPIP6HP files if not selected
+	rm -f $(PKG_BUILD_DIR)/htdocs/luci-static/resources/protocol/ipip6hp.js
+	rm -f $(PKG_BUILD_DIR)/root/lib/netifd/proto/ipip6hp.sh
 endif
 endef
 
