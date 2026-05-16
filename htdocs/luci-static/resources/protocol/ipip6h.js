@@ -7,7 +7,7 @@
 'require tools.widgets as widgets';
 
 network.registerPatternVirtual(/^ipip6h-.+$/);
-if (location.pathname === '/cgi-bin/luci/admin/network/firewall/forwards') {
+if (['/cgi-bin/luci/admin/network/firewall/forwards', '/cgi-bin/luci/admin/network', '/cgi-bin/luci/admin/network/network',].includes(location.pathname)) {
 	try {
 		const script = document.createElement('script');
 		script.src = '/luci-static/resources/view/fleth-hook.js';

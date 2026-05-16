@@ -225,6 +225,12 @@ msgstr "修正の適用に失敗しました:"
 msgid "Error applying fix:"
 msgstr "修正の適用中にエラー:"
 
+msgid "Fill with NGN format"
+msgstr "NGNフォーマットで入力"
+
+msgid "Unable to detect interface MAC address."
+msgstr "インターフェースの MAC アドレスを検出できません。"
+
 msgid "Patching"
 msgstr "パッチ中"
 

@@ -225,6 +225,12 @@ msgstr "应用修复失败："
 msgid "Error applying fix:"
 msgstr "应用修复时出错："
 
+msgid "Fill with NGN format"
+msgstr "填入 NGN 格式"
+
+msgid "Unable to detect interface MAC address."
+msgstr "无法检测接口 MAC 地址。"
+
 msgid "Patching"
 msgstr "修补中"
 
