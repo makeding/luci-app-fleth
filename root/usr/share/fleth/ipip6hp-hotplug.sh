@@ -19,6 +19,7 @@ fleth_remove_ipip6hp_rules() {
     command -v nft >/dev/null 2>&1 || return
     fleth_delete_nft_comment_rules input "$comment"
     fleth_delete_nft_comment_rules forward "$comment"
+    fleth_delete_nft_comment_rules mangle_forward "$comment"
 }
 
 fleth_collect_ipip6hp_zone() {
@@ -46,9 +47,26 @@ fleth_get_ipip6hp_zones() {
     echo "$fleth_zone_matches"
 }
 
+fleth_get_ipip6hp_mss() {
+    local interface="$1"
+    local mtu mss
+
+    mtu=$(uci get network.${interface}.mtu 2>/dev/null)
+    case "$mtu" in
+        ''|*[!0-9]*)
+            mtu=1460
+            ;;
+    esac
+
+    mss=$((mtu - 40))
+    [ "$mss" -lt 536 ] && mss=536
+
+    echo "$mss"
+}
+
 fleth_apply_ipip6hp_rules() {
     local interface="$1"
-    local proto device link client4 comment zones zone input_chain forward_chain
+    local proto device link client4 comment zones zone input_chain forward_chain mss
 
     proto=$(uci get network.${interface}.proto 2>/dev/null)
     [ "$proto" = "ipip6hp" ] || return
@@ -66,15 +84,22 @@ fleth_apply_ipip6hp_rules() {
     }
 
     zones=$(fleth_get_ipip6hp_zones "$interface")
+    mss=$(fleth_get_ipip6hp_mss "$interface")
 
     command -v nft >/dev/null 2>&1 || return
     nft list chain inet fw4 forward >/dev/null 2>&1 || return
 
     fleth_delete_nft_comment_rules input "$comment"
     fleth_delete_nft_comment_rules forward "$comment"
+    fleth_delete_nft_comment_rules mangle_forward "$comment"
 
     nft insert rule inet fw4 forward iifname "$device" oifname "$link" ip saddr "$client4" accept comment "$comment" 2>/dev/null
     nft insert rule inet fw4 forward iifname "$link" oifname "$device" ip daddr "$client4" accept comment "$comment" 2>/dev/null
+
+    if nft list chain inet fw4 mangle_forward >/dev/null 2>&1; then
+        nft insert rule inet fw4 mangle_forward iifname "$device" oifname "$link" tcp flags syn tcp option maxseg size set "$mss" comment "$comment" 2>/dev/null
+        nft insert rule inet fw4 mangle_forward iifname "$link" oifname "$device" tcp flags syn tcp option maxseg size set "$mss" comment "$comment" 2>/dev/null
+    fi
 
     for zone in $zones; do
         input_chain="input_${zone}"
@@ -87,7 +112,7 @@ fleth_apply_ipip6hp_rules() {
             nft insert rule inet fw4 forward iifname "$device" ip saddr "$client4" jump "$forward_chain" comment "$comment" 2>/dev/null
     done
 
-    logger -t fleth-hotplug "Applied ipip6hp rules for $interface ($device <-> $link, zones:${zones:- none})"
+    logger -t fleth-hotplug "Applied ipip6hp rules for $interface ($device <-> $link, mss: $mss, zones:${zones:- none})"
 }
 
 fleth_apply_all_ipip6hp_rules() {

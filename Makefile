@@ -64,6 +64,8 @@ else
 	# Remove IPIP6HP files if not selected
 	rm -f $(PKG_BUILD_DIR)/htdocs/luci-static/resources/protocol/ipip6hp.js
 	rm -f $(PKG_BUILD_DIR)/root/lib/netifd/proto/ipip6hp.sh
+	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/ipip6hp-hotplug.sh
+	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/firewall.include
 endif
 endef
 
