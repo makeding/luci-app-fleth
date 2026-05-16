@@ -24,11 +24,11 @@ jobs:
             arch: x86_64-25.12.1
     steps:
       - name: Fetch luci-app-fleth code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: 'huggy/luci-app-fleth'
       - name: Fetch po2lmo code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: 'openwrt-dev/po2lmo'
           ref: 'db656750ab032f3056d329c5e727a10af9ba15dd'
@@ -52,7 +52,7 @@ jobs:
           NO_REFRESH_CHECK: true
       # - name: Checkout apk-signer
       #   if: matrix.package_type == 'apk'
-      #   uses: actions/checkout@v4
+      #   uses: actions/checkout@v6
       #   with:
       #     repository: makeding/apk-remote-signer
       #     path: apk-signer
@@ -76,7 +76,7 @@ jobs:
       #   run: tar cf pack.tar bin/packages/x86_64/base/ds-lite* bin/packages/x86_64/base/ds-lite*
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           # draft: true
           make_latest: true
