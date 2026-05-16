@@ -152,20 +152,26 @@ msgstr "IPv4 over IPv6 (fleth edition)"
 msgid "IPv4 over IPv6 passthrough (fleth edition)"
 msgstr "IPv4 over IPv6 透传 (fleth edition)"
 
-msgid "AFTR/BR IPv6 Address"
-msgstr "AFTR/BR IPv6 地址"
+msgid "BR Address"
+msgstr "BR 地址"
+
+msgid "Border Relay IPv6 address"
+msgstr "Border Relay IPv6 地址"
 
 msgid "Client IPv4 Address"
 msgstr "客户端 IPv4 地址"
 
-msgid "Gateway IPv4 Address"
-msgstr "网关 IPv4 地址"
+msgid "Client IPv4 CIDR prefix length"
+msgstr "客户端 IPv4 CIDR 前缀长度"
 
-msgid "Passthrough Device"
-msgstr "透传设备"
+msgid "Suggested prefix length for the downstream client static IPv4 configuration"
+msgstr "下游客户端静态 IPv4 配置建议使用的前缀长度"
 
-msgid "Physical or VLAN device connected to the downstream client"
-msgstr "连接到下游客户端的物理或 VLAN 设备"
+msgid "Client Gateway IPv4 Address"
+msgstr "客户端网关 IPv4 地址"
+
+msgid "Address used by the downstream client as its default gateway; answered with proxy ARP only"
+msgstr "下游客户端作为默认网关使用的地址；仅通过 Proxy ARP 响应"
 
 msgid "Public IPv4 Address"
 msgstr "公网 IPv4 地址"
@@ -228,6 +234,12 @@ msgstr "IPv4 源地址规则优先级"
 msgid "Use MTU on tunnel interface"
 msgstr "隧道接口使用的 MTU"
 
+msgid "Allow shared passthrough device"
+msgstr "允许共享透传设备"
+
+msgid "Allow the selected device to already have another IPv4 address"
+msgstr "允许所选设备已经配置其他 IPv4 地址"
+
 msgid "Proxy ARP"
 msgstr "Proxy ARP"
 
@@ -238,16 +250,7 @@ msgid "Allow passthrough forwarding"
 msgstr "允许透传转发"
 
 msgid "Install firewall rules to forward traffic between the downstream device and tunnel without masquerading"
-msgstr "安装防火墙规则，在下游设备与隧道之间转发流量且不做地址伪装"
-
-msgid "DNAT gateway address"
-msgstr "DNAT 网关地址"
-
-msgid "Forward traffic addressed to the gateway IPv4 address to another IPv4 address"
-msgstr "将发往网关 IPv4 地址的流量转发到另一个 IPv4 地址"
-
-msgid "DNAT target address"
-msgstr "DNAT 目标地址"
+msgstr "安装防火墙规则，在下游设备和隧道之间转发流量且不做地址伪装"
 
 msgid "map.sh Management"
 msgstr "map.sh 管理"

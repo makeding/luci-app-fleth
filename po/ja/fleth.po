@@ -152,20 +152,26 @@ msgstr "IPv4 over IPv6 (fleth edition)"
 msgid "IPv4 over IPv6 passthrough (fleth edition)"
 msgstr "IPv4 over IPv6 パススルー (fleth edition)"
 
-msgid "AFTR/BR IPv6 Address"
-msgstr "AFTR/BR IPv6 アドレス"
+msgid "BR Address"
+msgstr "BR アドレス"
+
+msgid "Border Relay IPv6 address"
+msgstr "Border Relay IPv6 アドレス"
 
 msgid "Client IPv4 Address"
 msgstr "クライアント IPv4 アドレス"
 
-msgid "Gateway IPv4 Address"
-msgstr "ゲートウェイ IPv4 アドレス"
+msgid "Client IPv4 CIDR prefix length"
+msgstr "クライアント IPv4 CIDR プレフィックス長"
 
-msgid "Passthrough Device"
-msgstr "パススルーデバイス"
+msgid "Suggested prefix length for the downstream client static IPv4 configuration"
+msgstr "下流クライアントの静的 IPv4 設定に使用する推奨プレフィックス長"
 
-msgid "Physical or VLAN device connected to the downstream client"
-msgstr "下流クライアントに接続する物理または VLAN デバイス"
+msgid "Client Gateway IPv4 Address"
+msgstr "クライアントゲートウェイ IPv4 アドレス"
+
+msgid "Address used by the downstream client as its default gateway; answered with proxy ARP only"
+msgstr "下流クライアントがデフォルトゲートウェイとして使用するアドレスです。Proxy ARP のみで応答します"
 
 msgid "Public IPv4 Address"
 msgstr "パブリック IPv4 アドレス"
@@ -228,6 +234,12 @@ msgstr "IPv4 送信元ルール優先度"
 msgid "Use MTU on tunnel interface"
 msgstr "トンネルインターフェースで使用する MTU"
 
+msgid "Allow shared passthrough device"
+msgstr "パススルーデバイスの共有を許可"
+
+msgid "Allow the selected device to already have another IPv4 address"
+msgstr "選択したデバイスに他の IPv4 アドレスが既に設定されていることを許可します"
+
 msgid "Proxy ARP"
 msgstr "Proxy ARP"
 
@@ -238,16 +250,7 @@ msgid "Allow passthrough forwarding"
 msgstr "パススルー転送を許可"
 
 msgid "Install firewall rules to forward traffic between the downstream device and tunnel without masquerading"
-msgstr "マスカレードせずに下流デバイスとトンネル間の通信を転送するファイアウォールルールを追加します"
-
-msgid "DNAT gateway address"
-msgstr "ゲートウェイアドレスを DNAT"
-
-msgid "Forward traffic addressed to the gateway IPv4 address to another IPv4 address"
-msgstr "ゲートウェイ IPv4 アドレス宛の通信を別の IPv4 アドレスへ転送します"
-
-msgid "DNAT target address"
-msgstr "DNAT 転送先アドレス"
+msgstr "下流デバイスとトンネル間の通信を、マスカレードせずに転送するファイアウォールルールを追加します"
 
 msgid "map.sh Management"
 msgstr "map.sh 管理"

@@ -33,10 +33,6 @@ return network.registerProtocol('ipip6hp', {
 		return this.get('ip4ifaddr') ? '255.255.255.255' : null;
 	},
 
-	getGatewayAddr: function () {
-		return this.get('gateway4') || null;
-	},
-
 	isFloating: function () {
 		return false;
 	},
@@ -73,7 +69,31 @@ return network.registerProtocol('ipip6hp', {
 			return '00' + hexParts[0] + ':' + hexParts[1] + hexParts[2] + ':' + hexParts[3] + '00:0000';
 		}
 
-		o = s.taboption('general', form.Value, 'peeraddr', _('AFTR/BR IPv6 Address'));
+		function ipv4Peer31(ipv4) {
+			if (!ipv4) return '';
+
+			var octets = ipv4.split('.');
+			if (octets.length !== 4)
+				return '';
+
+			var peer = [];
+			for (var i = 0; i < 4; i++) {
+				if (!/^\d+$/.test(octets[i]))
+					return '';
+
+				var num = parseInt(octets[i], 10);
+				if (num < 0 || num > 255)
+					return '';
+
+				peer.push(num);
+			}
+
+			peer[3] = peer[3] ^ 1;
+			return peer.join('.');
+		}
+
+		o = s.taboption('general', form.Value, 'peeraddr', _('BR Address'),
+			_('Border Relay IPv6 address'));
 		o.value('2404:9200:225:100::65', '2404:9200:225:100::65 (v6plus)');
 		o.value('2400:2000:4:0:a000::1999', '2400:2000:4:0:a000::1999 (SoftBank 10G)');
 		o.default = '2404:9200:225:100::65';
@@ -85,16 +105,17 @@ return network.registerProtocol('ipip6hp', {
 		o.datatype = 'ip4addr("nomask")';
 		o.placeholder = '111.0.0.2';
 
-		o = s.taboption('general', form.Value, 'gateway4', _('Gateway IPv4 Address'));
+		o = s.taboption('general', form.Value, 'ip4prefixlen', _('Client IPv4 CIDR prefix length'),
+			_('Suggested prefix length for the downstream client static IPv4 configuration'));
+		o.default = '31';
+		o.placeholder = '31';
+		o.datatype = 'range(1,32)';
+
+		o = s.taboption('general', form.Value, 'gateway4', _('Client Gateway IPv4 Address'),
+			_('Address used by the downstream client as its default gateway; answered with proxy ARP only'));
 		o.rmempty = false;
 		o.datatype = 'ip4addr("nomask")';
-		o.placeholder = '111.0.0.1';
-
-		o = s.taboption('general', widgets.DeviceSelect, 'device', _('Passthrough Device'),
-			_('Physical or VLAN device connected to the downstream client'));
-		o.nobridges = false;
-		o.optional = false;
-		o.exclude = '@' + s.section;
+		o.placeholder = '111.0.0.3';
 
 		o = s.taboption('general', form.Value, 'interface_id', _('IPv6 Interface ID'));
 		o.placeholder = '006f:0000:0100:0000';
@@ -176,6 +197,10 @@ return network.registerProtocol('ipip6hp', {
 		o.placeholder = '1460';
 		o.datatype = 'range(1280,1500)';
 
+		o = s.taboption('advanced', form.Flag, 'allow_shared_device', _('Allow shared passthrough device'),
+			_('Allow the selected device to already have another IPv4 address'));
+		o.default = o.disabled;
+
 		o = s.taboption('advanced', form.Flag, 'proxy_arp', _('Proxy ARP'),
 			_('Reply to downstream ARP requests for routed IPv4 destinations'));
 		o.default = o.enabled;
@@ -184,20 +209,35 @@ return network.registerProtocol('ipip6hp', {
 			_('Install firewall rules to forward traffic between the downstream device and tunnel without masquerading'));
 		o.default = o.enabled;
 
-		o = s.taboption('advanced', form.Flag, 'dnat_gateway', _('DNAT gateway address'),
-			_('Forward traffic addressed to the gateway IPv4 address to another IPv4 address'));
-		o.default = o.disabled;
-
-		o = s.taboption('advanced', form.Value, 'dnat_target', _('DNAT target address'));
-		o.datatype = 'ip4addr("nomask")';
-		o.depends('dnat_gateway', '1');
-
 		setTimeout(function () {
 			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
+			var prefixInput = document.querySelector('[data-name="ip4prefixlen"] input');
+			var gatewayInput = document.querySelector('[data-name="gateway4"] input');
 			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
+			var currentPeer = (ip4Input && prefixInput && prefixInput.value === '31') ? ipv4Peer31(ip4Input.value) : '';
+			var lastAutoGateway = (gatewayInput && gatewayInput.value === currentPeer) ? gatewayInput.value : '';
 
 			if (ip4Input && ifIdInput) {
+				if (gatewayInput) {
+					gatewayInput.addEventListener('input', function () {
+						if (gatewayInput.value !== lastAutoGateway)
+							lastAutoGateway = '';
+					});
+				}
+
+				function updateAutoGateway() {
+					if (gatewayInput) {
+						var gateway = (prefixInput && prefixInput.value === '31') ? ipv4Peer31(ip4Input.value) : '';
+						if (gateway && (!gatewayInput.value || gatewayInput.value === lastAutoGateway)) {
+							gatewayInput.value = gateway;
+							lastAutoGateway = gateway;
+							gatewayInput.dispatchEvent(new Event('change', { bubbles: true }));
+						}
+					}
+				}
+
 				ip4Input.addEventListener('input', function () {
+					updateAutoGateway();
 					var peerInput = document.querySelector('[data-name="peeraddr"] input[type="hidden"]');
 					if (peerInput && peerInput.value === '2404:9200:225:100::65') {
 						var hex = ipv4ToHex(ip4Input.value);
@@ -207,6 +247,9 @@ return network.registerProtocol('ipip6hp', {
 						}
 					}
 				});
+
+				if (prefixInput)
+					prefixInput.addEventListener('input', updateAutoGateway);
 			}
 		}, 100);
 	}
