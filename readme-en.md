@@ -2,12 +2,12 @@
 # luci-app-fleth
 [Japanese](./readme.md) || [Chinese Simplified](./readme-zhs.md)
 
-luci-app-fleth is a helper that can automatically configure IPv4 over IPv6 tunnels. Supports DS-Lite, MAP-E, and IPIP6 tunnels (Dedicated IP).
+luci-app-fleth is a helper that can automatically configure IPv4 over IPv6 tunnels. Supports DS-Lite, MAP-E, IPIP6H tunnels (Dedicated IP), and IPIP6HP passthrough.
 
 > Japan use only
 
 **If wan6 cannot obtain IPv6 on OpenWrt 25.12**
-Run the fix (delete) under “Uplink Client ID Fix” in Tools, or clear `Network → Interfaces → Default DUID`.
+If you need connectivity before installing this package, clear `Network → Interfaces → Default DUID`.
 
 [>>>>>> Download Here <<<<<<](https://github.com/makeding/luci-app-fleth/releases)
 # Installation (apk)
@@ -58,6 +58,15 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
   - 1Gbps
   - 10Gbps (Eastern Japan Tested)
 
+## IPIP6HP Passthrough
+IPIP6HP is a protocol for handing an independent IPv4 address to a dedicated downstream device without NAT on the OpenWrt router. It is intended for servers, existing routers, firewall appliances, or any device that should own the public IPv4 address directly.
+
+- Configure the downstream client IPv4 address, CIDR prefix length, and client gateway IPv4 address from LuCI.
+- For `/31` setups, the client gateway IPv4 address is auto-filled from the downstream client IPv4 address.
+- Use the IPv4-to-Interface-ID helper buttons for v6plus and SoftBank 10G configurations.
+- A dedicated passthrough device is recommended. Enable “Allow shared passthrough device” only when you intentionally share the device.
+- Proxy ARP, source policy routing, fw4 nft rules, and TCP MSS adjustment are applied automatically.
+
 # Screenshots
 ![information](./screenshots/luci-information-3.jpeg)  
 ![configuration](./screenshots/luci-configuration-3.jpeg)  
@@ -78,4 +87,4 @@ i18n:
 po2lmo po/ja/fleth.po root/usr/lib/lua/luci/i18n/fleth.ja.lmo
 ```
 # License
-MIT + GPL2 (If the `luci-proto-ipip6h` component is included in the build)
+MIT + GPL2 (If the `luci-proto-ipip6h` or `luci-proto-ipip6hp` component is included in the build)

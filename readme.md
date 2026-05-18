@@ -2,12 +2,12 @@
 # luci-app-fleth
 [English](./readme-en.md) || [Chinese Simplified](./readme-zhs.md)  
 
-luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘルパーです。DS-Lite、MAP-E、および IPIP6 トンネル（独立IP）に対応しています。
+luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘルパーです。DS-Lite、MAP-E、IPIP6H トンネル（独立IP）、および IPIP6HP パススルーに対応しています。
 
 > 日本向け
 
 **OpenWrt 25.12 で wan6 が IPv6 を取得できない場合**
-Tools で「Uplink Client ID Fix」の修復（削除）を実行するか、`Network → Interfaces → Default DUID` を空にしてください。
+インストール前に接続が必要な場合は、`Network → Interfaces → Default DUID` を空にしてください。
 
 [＞＞＞＞＞＞ダウンロードはこちら＜＜＜＜＜＜＜](https://github.com/makeding/luci-app-fleth/releases)
 # インストール (apk)
@@ -58,6 +58,15 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
   - 1Gbps
   - 10Gbps（東日本 テスト済）
 
+## IPIP6HP パススルー
+IPIP6HP は、独立 IPv4 を OpenWrt ルーターで NAT せず、専用の下流デバイスへ渡すためのプロトコルです。サーバー、既存ルーター、ファイアウォール機器など、公開 IPv4 を直接持たせたい機器向けです。
+
+- 下流クライアント IPv4、CIDR プレフィックス長、クライアント用ゲートウェイ IPv4 を LuCI から設定できます。
+- `/31` 構成では、下流クライアント IPv4 からゲートウェイ IPv4 を自動補完します。
+- v6プラス / SoftBank 10G 向けに、IPv4 から Interface ID を補完するボタンを利用できます。
+- パススルーデバイスは専用利用を推奨します。必要な場合のみ「Allow shared passthrough device」を有効にしてください。
+- Proxy ARP、送信元ポリシールーティング、fw4 用 nft ルール、TCP MSS 調整を自動で適用します。
+
 # スクリーンショット
 ![information](./screenshots/luci-information-3.jpeg)  
 ![configuration](./screenshots/luci-configuration-3.jpeg)  
@@ -79,4 +88,4 @@ i18n:
 po2lmo po/ja/fleth.po root/usr/lib/lua/luci/i18n/fleth.ja.lmo
 ```
 # License
-MIT + GPL2(If the `luci-proto-ipip6h` component is included in the build)
+MIT + GPL2(If the `luci-proto-ipip6h` or `luci-proto-ipip6hp` component is included in the build)
