@@ -3,7 +3,7 @@
 [ -n "$INCLUDE_ONLY" ] || {
 	. /lib/functions.sh
 	. /lib/functions/network.sh
-	. /lib/netifd/netifd-proto.sh
+	. ../netifd-proto.sh
 	init_proto "$@"
 }
 
@@ -264,7 +264,7 @@ proto_ipip6hp_setup() {
 	fi
 	ip addr del "${gateway4}/32" dev "$passthrough_device" 2>/dev/null
 	ip neigh replace proxy "$gateway4" dev "$passthrough_device" 2>/dev/null || ip neigh add proxy "$gateway4" dev "$passthrough_device" 2>/dev/null
-	ip route replace "${ip4ifaddr}/32" dev "$passthrough_device" 2>/dev/null
+	ip route replace "${ip4ifaddr}/32" dev "$passthrough_device" scope link table main 2>/dev/null
 	[ "$proxy_arp" = "1" ] && {
 		ipip6hp_save_and_set_sysctl "$cfg" "$passthrough_device" proxy_arp 1
 		ipip6hp_save_and_set_sysctl "$cfg" "$passthrough_device" proxy_arp_pvlan 1
