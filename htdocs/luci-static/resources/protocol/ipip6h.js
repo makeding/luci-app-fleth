@@ -132,6 +132,32 @@ return network.registerProtocol('ipip6h', {
 			}
 		};
 
+		o = s.taboption('general', form.Flag, 'activation_enabled', _('Activation request'),
+			_('Run one HTTP request after the virtual interface is created'));
+		o.default = o.disabled;
+
+		o = s.taboption('general', form.Value, 'activation_url', _('Activation URL'),
+			_('The backend will call this URL with curl after the ipip6h virtual interface is created'));
+		o.placeholder = 'https://example.com/activate';
+		o.depends('activation_enabled', '1');
+		o.validate = function (_section_id, value) {
+			if (!value)
+				return true;
+
+			if (!/^https?:\/\/\S+$/i.test(value))
+				return _('Activation URL must start with http:// or https://');
+
+			return true;
+		};
+
+		o = s.taboption('general', form.DummyValue, '_activation_curl_hint', _('curl package'));
+		o.titleref = L.url('admin', 'system', 'package-manager');
+		o.rawhtml = true;
+		o.depends('activation_enabled', '1');
+		o.cfgvalue = function () {
+			return _('This option requires the curl package. Install curl from Software before enabling it.');
+		};
+
 		o = s.taboption('advanced', widgets.NetworkSelect, 'tunlink', _('Tunnel Link'));
 		o.default = 'wan6';
 		o.exclude = s.section;
@@ -155,7 +181,6 @@ return network.registerProtocol('ipip6h', {
 		o = s.taboption('advanced', form.Value, 'mtu', _('Use MTU on tunnel interface'));
 		o.placeholder = '1460';
 		o.datatype = 'range(1280,1500)';
-
 
 		setTimeout(function () {
 			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');

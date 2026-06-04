@@ -25,6 +25,52 @@ proto_ipip6h_init_config() {
 	proto_config_add_boolean "defaultroute"
 	proto_config_add_int "metric"
 	proto_config_add_boolean "weakif"
+	proto_config_add_boolean "activation_enabled"
+	proto_config_add_string "activation_url"
+}
+
+ipip6h_schedule_activation() {
+	local cfg="$1"
+	local enabled="$2"
+	local url="$3"
+	local ip6addr="$4"
+
+	[ "$enabled" = "1" ] || return 0
+
+	if [ -z "$url" ]; then
+		logger -t ipip6h "[${cfg}] Activation request enabled but activation URL is empty"
+		return 0
+	fi
+
+	case "$url" in
+		http://*|https://*) ;;
+		*)
+			logger -t ipip6h "[${cfg}] Activation URL must start with http:// or https://"
+			return 0
+			;;
+	esac
+
+	if ! command -v curl >/dev/null 2>&1; then
+		logger -t ipip6h "[${cfg}] Activation request skipped: curl package is not installed"
+		return 0
+	fi
+
+	(
+		sleep 2
+		attempt=1
+		max_attempts=5
+		while [ "$attempt" -le "$max_attempts" ]; do
+			curl_output=$(curl --fail --silent --show-error --max-time 15 --interface "$ip6addr" "$url" -o /dev/null 2>&1)
+			if [ "$?" -eq 0 ]; then
+				logger -t ipip6h "[${cfg}] Activation request completed"
+				exit 0
+			fi
+
+			logger -t ipip6h "[${cfg}] Activation request failed, attempt ${attempt}/${max_attempts}: $curl_output"
+			attempt=$((attempt + 1))
+			[ "$attempt" -le "$max_attempts" ] && sleep 3
+		done
+	) &
 }
 
 proto_ipip6h_setup() {
@@ -32,8 +78,8 @@ proto_ipip6h_setup() {
 	local iface="$2"
 	local link="ipip6h-$cfg"
 
-	local peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric weakif
-	json_get_vars peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric weakif
+	local peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric weakif activation_enabled activation_url
+	json_get_vars peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric weakif activation_enabled activation_url
 
 	logger -t ipip6h "[${cfg}] Starting setup"
 	logger -t ipip6h "[${cfg}]   peeraddr=$peeraddr ip4ifaddr=$ip4ifaddr"
@@ -179,7 +225,11 @@ proto_ipip6h_setup() {
 		json_add_string "" "${ip6addr}/128"
 		json_close_array
 		json_close_object
-		ubus call network add_dynamic "$(json_dump)"
+		if ubus call network add_dynamic "$(json_dump)" >/dev/null 2>&1; then
+			ipip6h_schedule_activation "$cfg" "$activation_enabled" "$activation_url" "$ip6addr"
+		else
+			logger -t ipip6h "[${cfg}] ERROR: Failed to create dynamic interface ${cfg}_"
+		fi
 
 		# Deprecate static address if prefer_slaac is enabled
 		local prefer_slaac=$(uci get fleth.global.prefer_slaac 2>/dev/null)

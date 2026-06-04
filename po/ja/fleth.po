@@ -246,6 +246,30 @@ msgstr "Proxy ARP"
 msgid "Reply to downstream ARP requests for routed IPv4 destinations"
 msgstr "ルーティング対象の IPv4 宛先に対する下流側 ARP 要求に応答します"
 
+msgid "Activation request"
+msgstr "有効化リクエスト"
+
+msgid "Run one HTTP request after the virtual interface is created"
+msgstr "仮想インターフェースの作成後に HTTP リクエストを 1 回実行します"
+
+msgid "Activation URL"
+msgstr "有効化 URL"
+
+msgid "The backend will call this URL with curl after the ipip6h virtual interface is created"
+msgstr "ipip6h 仮想インターフェースの作成後、バックエンドが curl でこの URL を呼び出します"
+
+msgid "The backend will call this URL with curl after the ipip6hp virtual interface is created"
+msgstr "ipip6hp 仮想インターフェースの作成後、バックエンドが curl でこの URL を呼び出します"
+
+msgid "Activation URL must start with http:// or https://"
+msgstr "有効化 URL は http:// または https:// で始まる必要があります"
+
+msgid "curl package"
+msgstr "curl パッケージ"
+
+msgid "This option requires the curl package. Install curl from Software before enabling it."
+msgstr "このオプションには curl パッケージが必要です。有効化する前にソフトウェアから curl をインストールしてください。"
+
 msgid "map.sh Management"
 msgstr "map.sh 管理"
 

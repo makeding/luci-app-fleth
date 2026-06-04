@@ -246,6 +246,30 @@ msgstr "Proxy ARP"
 msgid "Reply to downstream ARP requests for routed IPv4 destinations"
 msgstr "响应下游对已路由 IPv4 目标的 ARP 请求"
 
+msgid "Activation request"
+msgstr "激活请求"
+
+msgid "Run one HTTP request after the virtual interface is created"
+msgstr "虚拟接口创建后执行一次 HTTP 请求"
+
+msgid "Activation URL"
+msgstr "激活 URL"
+
+msgid "The backend will call this URL with curl after the ipip6h virtual interface is created"
+msgstr "ipip6h 虚拟接口创建后，后端会用 curl 调用这个 URL"
+
+msgid "The backend will call this URL with curl after the ipip6hp virtual interface is created"
+msgstr "ipip6hp 虚拟接口创建后，后端会用 curl 调用这个 URL"
+
+msgid "Activation URL must start with http:// or https://"
+msgstr "激活 URL 必须以 http:// 或 https:// 开头"
+
+msgid "curl package"
+msgstr "curl 软件包"
+
+msgid "This option requires the curl package. Install curl from Software before enabling it."
+msgstr "此选项需要 curl 软件包。启用前请先在软件包管理中安装 curl。"
+
 msgid "map.sh Management"
 msgstr "map.sh 管理"
 

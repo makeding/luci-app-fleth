@@ -27,6 +27,8 @@ proto_ipip6hp_init_config() {
 	proto_config_add_string "zone"
 	proto_config_add_boolean "defaultroute"
 	proto_config_add_int "metric"
+	proto_config_add_boolean "activation_enabled"
+	proto_config_add_string "activation_url"
 }
 
 ipip6hp_sysctl_path() {
@@ -120,13 +122,57 @@ ipip6hp_has_other_ipv4() {
 	'
 }
 
+ipip6hp_schedule_activation() {
+	local cfg="$1"
+	local enabled="$2"
+	local url="$3"
+	local ip6addr="$4"
+
+	[ "$enabled" = "1" ] || return 0
+
+	if [ -z "$url" ]; then
+		logger -t ipip6hp "[${cfg}] Activation request enabled but activation URL is empty"
+		return 0
+	fi
+
+	case "$url" in
+		http://*|https://*) ;;
+		*)
+			logger -t ipip6hp "[${cfg}] Activation URL must start with http:// or https://"
+			return 0
+			;;
+	esac
+
+	if ! command -v curl >/dev/null 2>&1; then
+		logger -t ipip6hp "[${cfg}] Activation request skipped: curl package is not installed"
+		return 0
+	fi
+
+	(
+		sleep 2
+		attempt=1
+		max_attempts=5
+		while [ "$attempt" -le "$max_attempts" ]; do
+			curl_output=$(curl --fail --silent --show-error --max-time 15 --interface "$ip6addr" "$url" -o /dev/null 2>&1)
+			if [ "$?" -eq 0 ]; then
+				logger -t ipip6hp "[${cfg}] Activation request completed"
+				exit 0
+			fi
+
+			logger -t ipip6hp "[${cfg}] Activation request failed, attempt ${attempt}/${max_attempts}: $curl_output"
+			attempt=$((attempt + 1))
+			[ "$attempt" -le "$max_attempts" ] && sleep 3
+		done
+	) &
+}
+
 proto_ipip6hp_setup() {
 	local cfg="$1"
 	local passthrough_device="$2"
 	local link="ipip6hp-$cfg"
 
-	local peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric
-	json_get_vars peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric
+	local peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric activation_enabled activation_url
+	json_get_vars peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric activation_enabled activation_url
 
 	logger -t ipip6hp "[${cfg}] Starting passthrough setup"
 	[ -z "$passthrough_device" ] && passthrough_device=$(uci get network.${cfg}.device 2>/dev/null)
@@ -313,7 +359,11 @@ proto_ipip6hp_setup() {
 		json_add_string "" "${ip6addr}/128"
 		json_close_array
 		json_close_object
-		ubus call network add_dynamic "$(json_dump)"
+		if ubus call network add_dynamic "$(json_dump)" >/dev/null 2>&1; then
+			ipip6hp_schedule_activation "$cfg" "$activation_enabled" "$activation_url" "$ip6addr"
+		else
+			logger -t ipip6hp "[${cfg}] ERROR: Failed to create dynamic interface ${cfg}_"
+		fi
 	fi
 
 	logger -t ipip6hp "[${cfg}] Passthrough setup completed"
