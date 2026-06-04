@@ -190,11 +190,11 @@ fleth_apply_ipip6hp_rules() {
 
     zones=$(fleth_get_ipip6hp_zones "$interface")
     mss=$(fleth_get_ipip6hp_mss "$interface")
-    fleth_apply_ipip6hp_policy_rules "$interface" "$device" "$client4"
 
     command -v nft >/dev/null 2>&1 || return
     nft list chain inet fw4 forward >/dev/null 2>&1 || return
 
+    fleth_remove_ipip6hp_policy_rules "$interface"
     fleth_delete_nft_comment_rules_all "$comment"
 
     nft insert rule inet fw4 forward iifname "$device" oifname "$link" ip saddr "$client4" accept comment "$comment" 2>/dev/null
@@ -204,6 +204,8 @@ fleth_apply_ipip6hp_rules() {
         nft insert rule inet fw4 mangle_forward iifname "$device" oifname "$link" tcp flags syn tcp option maxseg size set "$mss" comment "$comment" 2>/dev/null
         nft insert rule inet fw4 mangle_forward iifname "$link" oifname "$device" tcp flags syn tcp option maxseg size set "$mss" comment "$comment" 2>/dev/null
     fi
+
+    [ -n "$zones" ] && fleth_apply_ipip6hp_policy_rules "$interface" "$device" "$client4"
 
     for zone in $zones; do
         input_chain="input_${zone}"
