@@ -85,7 +85,7 @@ get_pending_status(){
             echo "EAST_pending"
             return
         # West: 2001:d70::/30, 2001:a000::/21
-        elif echo "$ipv6" | grep -qE '^2001:d7[0-3]:|^2001:a0[0-7]'; then
+        elif echo "$ipv6" | grep -qE '^2001:d7[0-3]:|^2001:a[0-7][0-9a-f]{2}:'; then
             logger -t fleth "Detected West IPv6 address in pending state: $ipv6"
             echo "WEST_pending"
             return
