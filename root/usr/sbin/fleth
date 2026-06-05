@@ -147,7 +147,44 @@ verify_sha256() {
 }
 
 get_uplink_interface_ipv6() {
-    ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | grep '"address"' | awk -F '"' '{print $4}' | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
+    local uplink_dev
+
+    ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | jsonfilter -e '@["ipv6-address"][@.preferred > 0].address' 2>/dev/null | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
+    if [ -z "$ipv6_address" ]; then
+        uplink_dev=$(get_uplink_device)
+        if [ -n "$uplink_dev" ]; then
+            ipv6_address=$(ip -6 addr show dev "$uplink_dev" scope global 2>/dev/null | awk '
+                !/ deprecated / {
+                    for (i = 1; i <= NF; i++) {
+                        if ($i == "inet6") {
+                            split($(i + 1), addr, "/")
+                            print addr[1]
+                            exit
+                        }
+                    }
+                }
+            ')
+        fi
+    fi
+    if [ -z "$ipv6_address" ]; then
+        ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | jsonfilter -e '@["ipv6-address"][*].address' 2>/dev/null | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
+    fi
+    if [ -z "$ipv6_address" ]; then
+        [ -n "$uplink_dev" ] || uplink_dev=$(get_uplink_device)
+        if [ -n "$uplink_dev" ]; then
+            ipv6_address=$(ip -6 addr show dev "$uplink_dev" scope global 2>/dev/null | awk '
+                {
+                    for (i = 1; i <= NF; i++) {
+                        if ($i == "inet6") {
+                            split($(i + 1), addr, "/")
+                            print addr[1]
+                            exit
+                        }
+                    }
+                }
+            ')
+        fi
+    fi
     echo $ipv6_address
 }
 
@@ -364,6 +401,29 @@ EOF
     fi
 }
 
+get_mape_psid() {
+    local ipv6="$1"
+    local psidlen="$2"
+    local fourth_hextet
+    local high_byte
+    local psid
+
+    fourth_hextet=$(echo "$ipv6" | sed 's/%.*$//' | cut -d: -f4)
+    high_byte=$(printf "%04x" "0x$fourth_hextet" 2>/dev/null | sed 's/..$//')
+    [ -n "$high_byte" ] || return 1
+
+    psid=$(printf "%d" "0x$high_byte" 2>/dev/null)
+    [ -n "$psid" ] || return 1
+
+    if [ "$psidlen" = "6" ]; then
+        psid=$((psid & 63))
+    elif [ "$psidlen" != "8" ]; then
+        return 1
+    fi
+
+    echo "$psid"
+}
+
 # https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 get_dslite_provider(){
     # check type with DS-LITE
@@ -439,16 +499,23 @@ EOF
         current_ealen=$(uci get network.${h_TUNNEL_INTERFACE}.ealen 2>/dev/null)
         current_psidlen=$(uci get network.${h_TUNNEL_INTERFACE}.psidlen 2>/dev/null)
         current_offset=$(uci get network.${h_TUNNEL_INTERFACE}.offset 2>/dev/null)
+        current_maptype=$(uci get network.${h_TUNNEL_INTERFACE}.maptype 2>/dev/null)
+        current_legacymap=$(uci get network.${h_TUNNEL_INTERFACE}.legacymap 2>/dev/null)
+        current_psid=$(uci get network.${h_TUNNEL_INTERFACE}.psid 2>/dev/null)
+        r_PSID=$(get_mape_psid "$ipv6_address" "$r_PSIDLEN")
         if [ "$current_peeraddr" != "$r_PEERADDR" ] ||
             [ "$current_tunlink" != "$h_UPLINK_INTERFACE" ] ||
             [ "$current_proto" != 'map' ] ||
             [ "$current_mtu" != "$h_TUNNEL_INTERFACE_MTU" ] ||
+            [ "$current_maptype" != 'map-e' ] ||
+            [ "$current_legacymap" != '1' ] ||
             [ "$current_ipaddr" != "$r_IPADDR" ] ||
             [ "$current_ip4prefixlen" != "$r_IP4PREFIXLEN" ] ||
             [ "$current_ip6prefix" != "$r_IP6PREFIX" ] ||
             [ "$current_ip6prefixlen" != "$r_IP6PREFIXLEN" ] ||
             [ "$current_ealen" != "$r_EALEN" ] ||
             [ "$current_psidlen" != "$r_PSIDLEN" ] ||
+            [ "$current_psid" != "$r_PSID" ] ||
             [ "$current_offset" != "$r_OFFSET" ]; then
             uci batch <<EOF
 set network.${h_TUNNEL_INTERFACE}=interface
@@ -461,6 +528,7 @@ set network.${h_TUNNEL_INTERFACE}.ip6prefix='${r_IP6PREFIX}'
 set network.${h_TUNNEL_INTERFACE}.ip6prefixlen='${r_IP6PREFIXLEN}'
 set network.${h_TUNNEL_INTERFACE}.ealen='${r_EALEN}'
 set network.${h_TUNNEL_INTERFACE}.psidlen='${r_PSIDLEN}'
+set network.${h_TUNNEL_INTERFACE}.psid='${r_PSID}'
 set network.${h_TUNNEL_INTERFACE}.offset='${r_OFFSET}'
 
 set network.${h_TUNNEL_INTERFACE}.tunlink='${h_UPLINK_INTERFACE}'
