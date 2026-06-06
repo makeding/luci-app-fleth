@@ -336,14 +336,20 @@ msgstr "操作完成！请手动重启网络接口。"
 msgid "Prefix Alignment Warning"
 msgstr "前缀对齐警告"
 
-msgid "Your IPv6 prefix is not aligned for MAP-E/IPIP6 tunnels."
-msgstr "您的 IPv6 前缀未对齐，无法用于 MAP-E/IPIP6 隧道。"
+msgid "The detected IPv6 prefix is not aligned for MAP-E or Independent IP."
+msgstr "检测到的 IPv6 前缀不满足 MAP-E 或独立 IP 的对齐要求。"
 
 msgid "The 4th hextet is"
 msgstr "第 4 段为"
 
-msgid "but it must end with \"00\" for MAP-E/IPIP6 to work properly."
-msgstr "，但必须以 \"00\" 结尾才能使 MAP-E/IPIP6 正常工作。"
+msgid "but these tunnel types require a /64 network whose 4th hextet ends with \"00\"."
+msgstr "但这些隧道类型需要第 4 段以 \"00\" 结尾的 /64 网络。"
+
+msgid "Example:"
+msgstr "示例："
+
+msgid "When using MAP-E or Independent IP, IPv4 over IPv6 connectivity may not work properly."
+msgstr "使用 MAP-E 或独立 IP 时，IPv4 over IPv6 可能无法正常联网。"
 
 msgid "Please check your upstream router's prefix delegation settings."
 msgstr "请检查上游路由器的前缀委派设置。"

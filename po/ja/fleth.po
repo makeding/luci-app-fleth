@@ -336,14 +336,20 @@ msgstr "操作が完了しました！手動でネットワークインターフ
 msgid "Prefix Alignment Warning"
 msgstr "プレフィックス配置警告"
 
-msgid "Your IPv6 prefix is not aligned for MAP-E/IPIP6 tunnels."
-msgstr "IPv6 プレフィックスが MAP-E/IPIP6 トンネルに対応していません。"
+msgid "The detected IPv6 prefix is not aligned for MAP-E or Independent IP."
+msgstr "検出された IPv6 プレフィックスは、MAP-E または固定IP向けに配置が揃っていません。"
 
 msgid "The 4th hextet is"
 msgstr "第4セグメントは"
 
-msgid "but it must end with \"00\" for MAP-E/IPIP6 to work properly."
-msgstr "ですが、MAP-E/IPIP6 を正常に動作させるには \"00\" で終わる必要があります。"
+msgid "but these tunnel types require a /64 network whose 4th hextet ends with \"00\"."
+msgstr "ですが、これらのトンネル方式では第4セグメントが \"00\" で終わる /64 ネットワークが必要です。"
+
+msgid "Example:"
+msgstr "例："
+
+msgid "When using MAP-E or Independent IP, IPv4 over IPv6 connectivity may not work properly."
+msgstr "MAP-E または固定IPを利用する場合、IPv4 over IPv6 で正常に通信できない可能性があります。"
 
 msgid "Please check your upstream router's prefix delegation settings."
 msgstr "上位ルーターのプレフィックス委譲設定を確認してください。"

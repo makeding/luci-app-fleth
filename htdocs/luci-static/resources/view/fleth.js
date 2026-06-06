@@ -115,13 +115,16 @@ return view.extend({
     // Show warning for prefix alignment issues
     if (data.alignment_check && data.alignment_check.startsWith('NOT_ALIGNED:')) {
       const hextet = data.alignment_check.split(':')[1];
+      const alignedHextet = hextet.substring(0, 2) + '00';
       ui.addNotification(_('Prefix Alignment Warning'), E('div', [
-        E('p', _('Your IPv6 prefix is not aligned for MAP-E/IPIP6 tunnels.')),
+        E('p', _('The detected IPv6 prefix is not aligned for MAP-E or Independent IP.')),
         E('p', { style: 'font-size: 0.9em;' },
           _('The 4th hextet is') + ' ' + hextet + ', ' +
-          _('but it must end with "00" for MAP-E/IPIP6 to work properly.')
+          _('but these tunnel types require a /64 network whose 4th hextet ends with "00".') + ' ' +
+          _('Example:') + ' ' + alignedHextet + '::/64'
         ),
         E('p', { style: 'font-size: 0.9em;' },
+          _('When using MAP-E or Independent IP, IPv4 over IPv6 connectivity may not work properly.') + ' ' +
           _('Please check your upstream router\'s prefix delegation settings.')
         )
       ]), 'warning');
