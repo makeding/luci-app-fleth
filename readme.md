@@ -36,13 +36,13 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
     - ASAHIネット光（東日本 テスト済）
 ## MAP-E:
 - `BIGLOBE`
-  - BIGLOBE（西日本 テスト済）
+  - BIGLOBE（東/西日本 テスト済）
   - おてがる光（東日本 テスト済）
   - BB.excite光 10Gbps MAP-E PLAN（東日本 テスト済）
 - `JPNE（v6プラス）`
     - DMM光
     - GMOとくとくBB
-    - enひかり（東日本 テスト済）
+    - enひかり（東/西日本 テスト済）
     - ic-net光コース
     - おてがる光（東日本 テスト済）
     - So-net
@@ -51,9 +51,9 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 - `OCN` (R.I.P.)（東日本 テスト済）
 - `NURO`
 
-## 独立IP
+## 固定IP
 - `JPNE（v6プラス）`
-  - enひかり（東日本 テスト済）
+  - enひかり（東/西日本 テスト済）
 - `SoftBank 光`
   - 1Gbps
   - 10Gbps（東日本 テスト済）

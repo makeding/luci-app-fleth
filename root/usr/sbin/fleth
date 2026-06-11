@@ -11,6 +11,7 @@ LOCK_FD=200
 # MAP.sh paths
 MAPSH_PATH="/lib/netifd/proto/map.sh"
 MAPSH_BACKUP_PATH="/lib/netifd/proto/map.sh.flethbak"
+FLETH_MAPSH_PATH="/usr/share/fleth/map.sh"
 
 # Commands that don't require UCI configuration
 if [ "$1" = "hook_none.js" ] || [ "$1" = "restore_none.js" ]; then
@@ -731,8 +732,6 @@ elif [ "$1" = "set_wan6_clientid" ]; then
 
     echo "SUCCESS"
 elif [ "$1" = "patch_map.sh" ]; then
-    MAPSH_URL="https://raw.githubusercontent.com/fakemanhk/openwrt-jp-ipoe/345b1d9add58cf84c3eebe235f695607a78ebcd9/map.sh.new"
-    EXPECTED_SHA256="d64b8018f9eda6dfb84089f7b2fb168c7e7c04ece0c33315422120cdcebdd0b4"
     if [ ! -f "$MAPSH_BACKUP_PATH" ]; then
         cp "$MAPSH_PATH" "$MAPSH_BACKUP_PATH"
         if [ $? -ne 0 ]; then
@@ -740,29 +739,14 @@ elif [ "$1" = "patch_map.sh" ]; then
             exit 1
         fi
     fi
-    TEMP_FILE=$(mktemp)
-    if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to create temporary file"
-        exit 1
-    fi
-    wget --timeout=10 -q -O "$TEMP_FILE" "$MAPSH_URL"
-    if [ $? -ne 0 ]; then
-        rm -f "$TEMP_FILE"
-        echo "ERROR: Failed to download"
+
+    if [ ! -f "$FLETH_MAPSH_PATH" ]; then
+        echo "ERROR: fleth map.sh not found"
         exit 1
     fi
 
-    # Verify downloaded file integrity
-    if ! verify_sha256 "$TEMP_FILE" "$EXPECTED_SHA256"; then
-        rm -f "$TEMP_FILE"
-        echo "ERROR: Security check failed - checksum mismatch"
-        exit 1
-    fi
-
-    # Replace the file
-    mv "$TEMP_FILE" "$MAPSH_PATH"
+    cp "$FLETH_MAPSH_PATH" "$MAPSH_PATH"
     if [ $? -ne 0 ]; then
-        rm -f "$TEMP_FILE"
         echo "ERROR: Failed to replace file"
         exit 1
     fi
