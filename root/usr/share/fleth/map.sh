@@ -29,7 +29,7 @@ fleth_map_fix_explicit_psid() {
 	local k="$1"
 	local portsets=""
 	local amax block a start end
-	local addr pd pd4 fixed_addr
+	local addr raw_psid max_raw_psid fixed_suffix fixed_addr
 
 	[ "$maptype" = "map-e" ] || return 0
 	[ -n "$psid" ] && [ -n "$psidlen" ] && [ -n "$offset" ] || return 0
@@ -38,23 +38,28 @@ fleth_map_fix_explicit_psid() {
 		*[!0-9:]*|::*|*::*) return 0 ;;
 	esac
 
+	max_raw_psid=$((1 << psidlen))
+	if [ "$psid" -lt "$max_raw_psid" ]; then
+		raw_psid="$psid"
+	else
+		raw_psid=$((psid >> (16 - psidlen)))
+	fi
+
 	block=$((1 << (16 - offset - psidlen)))
 	amax=$(((1 << offset) - 1))
 	a=1
 	while [ "$a" -le "$amax" ]; do
-		start=$(((a << (16 - offset)) | (psid << (16 - offset - psidlen))))
+		start=$(((a << (16 - offset)) | (raw_psid << (16 - offset - psidlen))))
 		end=$((start + block - 1))
 		portsets="${portsets}${start}-${end} "
 		a=$((a + 1))
 	done
 	eval "RULE_${k}_PORTSETS='$portsets'"
 
-	pd="$(eval "echo \${RULE_${k}_IPV6PD}")"
 	addr="$(eval "echo \${RULE_${k}_IPV6ADDR}")"
-	pd4="$(echo "$pd" | cut -d: -f4)"
-
-	if [ -n "$pd4" ] && [ -n "$addr" ]; then
-		fixed_addr="$(echo "$addr" | sed "s/:[0-9a-fA-F]*$/:$pd4/")"
+	if [ "$psid" -lt "$max_raw_psid" ] && [ "$legacymap" = "1" ] && [ -n "$addr" ]; then
+		fixed_suffix=$(printf "%x" "$((raw_psid << 8))")
+		fixed_addr="$(echo "$addr" | sed "s/:[0-9a-fA-F]*$/:$fixed_suffix/")"
 		eval "RULE_${k}_IPV6ADDR='$fixed_addr'"
 	fi
 }

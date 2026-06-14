@@ -67,6 +67,7 @@ return view.extend({
       const baseData = {
         mape_status: mape_status,
         prefix_length: prefix_length || "UNKNOWN",
+        mapshStatus: mapsh_status,
         mapIsPatched: mapsh_status === "patched",
       };
 
@@ -372,9 +373,12 @@ return view.extend({
       let icon = "";
       let text = "";
 
-      if (data.mapIsPatched) {
+      if (data.mapshStatus === "patched") {
         icon = "✓";
         text = _("Patched version");
+      } else if (data.mapshStatus === "unknown") {
+        icon = "?";
+        text = _("Unknown modified version");
       } else {
         icon = "⚠";
         text = _("Original version");

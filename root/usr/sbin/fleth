@@ -124,6 +124,10 @@ check_interface_proto_invalid() {
     fi
 }
 
+filter_global_ipv6() {
+    grep -viE '^(fe80|fc[0-9a-f][0-9a-f]|fd[0-9a-f][0-9a-f]|::|::1|::ffff:0:0|::/96)' | head -n 1
+}
+
 # Verify file SHA256 checksum
 # Usage: verify_sha256 <file_path> <expected_hash>
 # Returns: 0 if match, 1 if mismatch or sha256sum not available
@@ -149,8 +153,11 @@ verify_sha256() {
 
 get_uplink_interface_ipv6() {
     local uplink_dev
+    local status
 
-    ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | jsonfilter -e '@["ipv6-address"][@.preferred > 0].address' 2>/dev/null | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
+    status=$(ifstatus ${h_UPLINK_INTERFACE} 2>/dev/null)
+
+    ipv6_address=$(echo "$status" | jsonfilter -e '@["ipv6-address"][@.preferred > 0].address' 2>/dev/null | filter_global_ipv6)
     if [ -z "$ipv6_address" ]; then
         uplink_dev=$(get_uplink_device)
         if [ -n "$uplink_dev" ]; then
@@ -168,7 +175,7 @@ get_uplink_interface_ipv6() {
         fi
     fi
     if [ -z "$ipv6_address" ]; then
-        ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} | jsonfilter -e '@["ipv6-address"][*].address' 2>/dev/null | grep -vE '^(fe80|fc00|fd00|fd50|::|::1|::ffff:0:0|::/96)' | head -n 1)
+        ipv6_address=$(echo "$status" | jsonfilter -e '@["ipv6-address"][*].address' 2>/dev/null | filter_global_ipv6)
     fi
     if [ -z "$ipv6_address" ]; then
         [ -n "$uplink_dev" ] || uplink_dev=$(get_uplink_device)
@@ -186,7 +193,18 @@ get_uplink_interface_ipv6() {
             ')
         fi
     fi
-    echo $ipv6_address
+    if [ -z "$ipv6_address" ]; then
+        # PD-only uplinks often have no address in ipv6-address; use the delegated
+        # prefix as MAP-E/IPIP6 calculation input.
+        ipv6_address=$(echo "$status" | jsonfilter -e '@["ipv6-prefix"][@.preferred > 0].address' 2>/dev/null | filter_global_ipv6)
+    fi
+    if [ -z "$ipv6_address" ]; then
+        ipv6_address=$(echo "$status" | jsonfilter -e '@["ipv6-prefix"][*].address' 2>/dev/null | filter_global_ipv6)
+    fi
+    if [ -z "$ipv6_address" ]; then
+        ipv6_address=$(echo "$status" | jsonfilter -e '@.route[*].source' 2>/dev/null | sed 's#/.*##' | filter_global_ipv6)
+    fi
+    echo "$ipv6_address"
 }
 
 get_uplink_prefix_length() {
@@ -209,7 +227,7 @@ get_uplink_prefix_length() {
     fi
 
     # Try 3: Fallback to route info
-    prefix_len=$(echo "$status" | jsonfilter -e '@.route[0].mask' 2>/dev/null)
+    prefix_len=$(echo "$status" | jsonfilter -e '@.route[*].source' 2>/dev/null | grep -viE '^(fe80|fc[0-9a-f][0-9a-f]|fd[0-9a-f][0-9a-f]|::)' | sed -n 's#^.*/\([0-9][0-9]*\)$#\1#p' | head -n 1)
     if [ -n "$prefix_len" ]; then
         echo "$prefix_len"
         return
@@ -417,8 +435,10 @@ get_mape_psid() {
     [ -n "$psid" ] || return 1
 
     if [ "$psidlen" = "6" ]; then
-        psid=$((psid & 63))
-    elif [ "$psidlen" != "8" ]; then
+        psid=$(((psid & 63) << 10))
+    elif [ "$psidlen" = "8" ]; then
+        psid=$((psid << 8))
+    else
         return 1
     fi
 
@@ -601,13 +621,15 @@ elif [ "$1" = "check_alignment" ]; then
 elif [ "$1" = "auto_setup_ipv6" ]; then
     auto_setup_ipv6_mode
 elif [ "$1" = "mapsh_status" ]; then
-    # Check if map.sh is patched or original
-    if [ ! -f "$MAPSH_BACKUP_PATH" ]; then
+    # Check if map.sh is fleth patched, original backup, or an unknown third-party version
+    if [ -f "$FLETH_MAPSH_PATH" ] && cmp -s "$MAPSH_PATH" "$FLETH_MAPSH_PATH"; then
+        echo "patched"
+    elif [ -f "$MAPSH_BACKUP_PATH" ] && cmp -s "$MAPSH_PATH" "$MAPSH_BACKUP_PATH"; then
         echo "original"
-    elif cmp -s "$MAPSH_PATH" "$MAPSH_BACKUP_PATH"; then
+    elif [ ! -f "$MAPSH_BACKUP_PATH" ]; then
         echo "original"
     else
-        echo "patched"
+        echo "unknown"
     fi
 elif [ "$1" = "hook_none.js" || "$1" = "restore_none.js" ]; then
     if grep -q "fleth-hook.js" /www/luci-static/resources/protocol/none.js 2>/dev/null; then
@@ -787,7 +809,7 @@ else
     echo "  mape_status           Show the current MAP-E provider details."
     echo "  get_prefix_length     Show the detected IPv6 prefix length (/56 or /64)."
     echo "  check_alignment [ip]  Check if prefix is aligned for MAP-E/IPIP6 (4th hextet ends with 00)."
-    echo "  mapsh_status          Show if map.sh is patched or original."
+    echo "  mapsh_status          Show if map.sh is patched, original, or unknown."
     echo ""
     echo "IPv6 Configuration Commands:"
     echo "  auto_setup_ipv6       Auto-detect prefix and configure PD (/56) or SLAAC (/64) mode."
@@ -805,5 +827,5 @@ else
     echo "uci commit"
     echo ""
     echo "For more details, consult the documentation:"
-    echo "https://fleth.huggy.moe/"
+    echo "https://fleth.link/"
 fi

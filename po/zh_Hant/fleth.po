@@ -67,6 +67,9 @@ msgstr "自動配置隧道介面"
 msgid "IPv6 Interface"
 msgstr "IPv6 介面"
 
+msgid "Uplink interface"
+msgstr "上行介面"
+
 msgid "Uplink Interface"
 msgstr "上行介面"
 
@@ -284,6 +287,9 @@ msgstr "已打修補檔版本"
 
 msgid "Original version"
 msgstr "原始版本"
+
+msgid "Unknown modified version"
+msgstr "未知修改版本"
 
 msgid "Patch"
 msgstr "修補"

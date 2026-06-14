@@ -17,7 +17,7 @@ msgid "WEST"
 msgstr "西日本"
 
 msgid "DS-Lite Provider"
-msgstr "DS-Lite プロバイダ"
+msgstr "DS-Lite プロバイダー"
 
 msgid "UNKNOWN"
 msgstr "不明"
@@ -29,13 +29,13 @@ msgid "Failed to load"
 msgstr "読み込みに失敗しました"
 
 msgid "MAP-E Provider"
-msgstr "MAP-E プロバイダ"
+msgstr "MAP-E プロバイダー"
 
 msgid "IP Address"
 msgstr "IP アドレス"
 
 msgid "Peer Address"
-msgstr "ピア アドレス"
+msgstr "ピアアドレス"
 
 msgid "IPv4 prefix"
 msgstr "IPv4 プレフィックス"
@@ -62,34 +62,37 @@ msgid "Available ports"
 msgstr "利用可能なポート"
 
 msgid "Auto Configure tunnel Interface"
-msgstr "トンネル インターフェースを自動的に設定"
+msgstr "トンネル自動設定"
 
 msgid "IPv6 Interface"
 msgstr "IPv6 インターフェース"
 
+msgid "Uplink interface"
+msgstr "アップリンク側インターフェース"
+
 msgid "Uplink Interface"
-msgstr "アップリンク インターフェース"
+msgstr "アップリンクインターフェース"
 
 msgid "Tunnel Interface"
-msgstr "トンネル インターフェース"
+msgstr "トンネルインターフェース"
 
 msgid "Tunnel Interface MTU"
-msgstr "トンネル インターフェース MTU"
+msgstr "トンネルインターフェース MTU"
 
 msgid "We recommend setting MTU to 1460 in MAP-E and DS-Lite."
-msgstr "※MAP-EおよびDS-Liteユーザー：MTUを1460に設定することをお勧めします。"
+msgstr "MAP-E および DS-Lite では、MTU を 1460 に設定することをお勧めします。"
 
 msgid "We recommend setting MTU to 1460."
 msgstr "MTU を 1460 に設定することをお勧めします。"
 
 msgid "Tunnel Interface Firewall Zone"
-msgstr "トンネル インターフェース ファイアウォール ゾーン"
+msgstr "トンネルインターフェースのファイアウォールゾーン"
 
 msgid "Random Port"
 msgstr "ランダムポート"
 
 msgid "You can't access this port from MAP-E interface"
-msgstr "このポートにはMAP-Eインターフェースからアクセスできません"
+msgstr "MAP-E インターフェースからこのポートにはアクセスできません"
 
 msgid "(Service Pending)"
 msgstr "(回線プロバイダー開通待ち)"
@@ -113,10 +116,10 @@ msgid "Unable to detect IPv6 prefix"
 msgstr "IPv6 プレフィックスを検出できません"
 
 msgid "Configure SLAAC (/64)"
-msgstr "SLAAC を設定 (/64)"
+msgstr "SLAAC (/64)"
 
 msgid "Configure PD (/56)"
-msgstr "PD を設定 (/56)"
+msgstr "PD (/56)"
 
 msgid "Configuring LAN IPv6"
 msgstr "LAN IPv6 設定中"
@@ -128,7 +131,7 @@ msgid "Applying PD configuration..."
 msgstr "PD 設定を適用中..."
 
 msgid "Configuration applied successfully!"
-msgstr "設定が正常に適用されました！"
+msgstr "設定を適用しました。"
 
 msgid "Failed to apply configuration:"
 msgstr "設定の適用に失敗しました："
@@ -140,44 +143,44 @@ msgid "Service Status"
 msgstr "サービス状況"
 
 msgid "Optical line construction completed, provider configuration in progress. Please wait patiently."
-msgstr "現在光回線プロバイダー工事中です。しばらくお待ちください。"
+msgstr "光回線の工事は完了していますが、プロバイダー側の設定が進行中です。しばらくお待ちください。"
 
 msgid "Service typically becomes available in the evening after construction is completed."
-msgstr "工事完了後は通常夕方頃にサービスが開通いたします。"
+msgstr "通常、工事完了日の夕方頃にサービスが利用可能になります。"
 
 # IPIP6H Protocol - Custom additions only
 msgid "IPv4 over IPv6 (fleth edition)"
-msgstr "IPv4 over IPv6 (fleth edition)"
+msgstr "IPv4 over IPv6 (fleth 版)"
 
 msgid "IPv4 over IPv6 passthrough (fleth edition)"
-msgstr "IPv4 over IPv6 パススルー (fleth edition)"
+msgstr "IPv4 over IPv6 パススルー (fleth 版)"
 
 msgid "BR Address"
 msgstr "BR アドレス"
 
 msgid "Border Relay IPv6 address"
-msgstr "Border Relay IPv6 アドレス"
+msgstr "BR (Border Relay) の IPv6 アドレス"
 
 msgid "Client IPv4 Address"
 msgstr "クライアント IPv4 アドレス"
 
 msgid "Client IPv4 CIDR prefix length"
-msgstr "クライアント IPv4 CIDR プレフィックス長"
+msgstr "クライアント IPv4 プレフィックス長"
 
 msgid "Suggested prefix length for the downstream client static IPv4 configuration"
-msgstr "下流クライアントの静的 IPv4 設定に使用する推奨プレフィックス長"
+msgstr "下流クライアントの静的 IPv4 設定に使用する推奨プレフィックス長です"
 
 msgid "Client Gateway IPv4 Address"
 msgstr "クライアントゲートウェイ IPv4 アドレス"
 
 msgid "Address used by the downstream client as its default gateway; the router answers ARP for this address"
-msgstr "下流クライアントがデフォルトゲートウェイとして使用するアドレスです。ルーターがこのアドレスの ARP に応答します"
+msgstr "下流クライアントがデフォルトゲートウェイとして使用するアドレスです。ルーターはこのアドレスへの ARP に応答します"
 
 msgid "Public IPv4 Address"
 msgstr "パブリック IPv4 アドレス"
 
 msgid "Your public IPv4 address for the tunnel interface"
-msgstr "トンネルインターフェース用のパブリック IPv4 アドレス"
+msgstr "トンネルインターフェースで使用するパブリック IPv4 アドレス"
 
 msgid "IPv6 Interface ID"
 msgstr "IPv6 インターフェース ID"
@@ -187,22 +190,22 @@ msgid "IPv6 Interface ID is required"
 msgstr "IPv6 インターフェース ID は必須です"
 
 msgid "IPv6 Interface ID is required for v6plus and SoftBank 10G"
-msgstr "v6plus と SoftBank 10G では IPv6 インターフェース ID が必須です"
+msgstr "v6プラス と SoftBank 10G では IPv6 インターフェース ID が必須です"
 
 msgid "Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000"
-msgstr "無効な IPv6 インターフェース識別子形式。例：0011:4514:1b00:0000"
+msgstr "IPv6 インターフェース ID の形式が正しくありません。例：0011:4514:1b00:0000"
 
 msgid "Fill with 1 (Softbank)"
-msgstr "1で埋める (Softbank)"
+msgstr "SoftBank 用"
 
 msgid "1111:1111:1111:1111"
 msgstr "1111:1111:1111:1111"
 
 msgid "Fill from IPv4"
-msgstr "IPv4から変換"
+msgstr "IPv4 変換"
 
 msgid "Use IPv4 → Hex"
-msgstr "IPv4 → 16進数"
+msgstr "IPv4 から入力"
 
 msgid "Tunnel Link"
 msgstr "トンネルリンク"
@@ -220,7 +223,7 @@ msgid "If unchecked, no default route is configured"
 msgstr "チェックを外すとデフォルトルートは設定されません"
 
 msgid "Use gateway metric"
-msgstr "ゲートウェイメトリックを使用"
+msgstr "ゲートウェイメトリック"
 
 msgid "IPv4 routing table"
 msgstr "IPv4 ルーティングテーブル"
@@ -232,28 +235,28 @@ msgid "IPv4 source rule priority"
 msgstr "IPv4 送信元ルール優先度"
 
 msgid "Use MTU on tunnel interface"
-msgstr "トンネルインターフェースで使用する MTU"
+msgstr "トンネル MTU"
 
 msgid "Allow shared passthrough device"
-msgstr "パススルーデバイスの共有を許可"
+msgstr "共有デバイスを許可"
 
 msgid "Allow the selected device to already have another IPv4 address"
-msgstr "選択したデバイスに他の IPv4 アドレスが既に設定されていることを許可します"
+msgstr "選択したデバイスに別の IPv4 アドレスが既に設定されていても使用を許可します"
 
 msgid "Proxy ARP"
 msgstr "Proxy ARP"
 
 msgid "Reply to downstream ARP requests for routed IPv4 destinations"
-msgstr "ルーティング対象の IPv4 宛先に対する下流側 ARP 要求に応答します"
+msgstr "ルーティング対象の IPv4 宛先に対する下流側からの ARP 要求に応答します"
 
 msgid "Activation request"
-msgstr "有効化リクエスト"
+msgstr "アクティベーション"
 
 msgid "Run one HTTP request after the virtual interface is created"
-msgstr "仮想インターフェースの作成後に HTTP リクエストを 1 回実行します"
+msgstr "仮想インターフェース作成後に HTTP リクエストを 1 回実行します"
 
 msgid "Activation URL"
-msgstr "有効化 URL"
+msgstr "アクティベーション URL"
 
 msgid "The backend will call this URL with curl after the ipip6h virtual interface is created"
 msgstr "ipip6h 仮想インターフェースの作成後、バックエンドが curl でこの URL を呼び出します"
@@ -262,7 +265,7 @@ msgid "The backend will call this URL with curl after the ipip6hp virtual interf
 msgstr "ipip6hp 仮想インターフェースの作成後、バックエンドが curl でこの URL を呼び出します"
 
 msgid "Activation URL must start with http:// or https://"
-msgstr "有効化 URL は http:// または https:// で始まる必要があります"
+msgstr "アクティベーション URL は http:// または https:// で始まる必要があります"
 
 msgid "curl package"
 msgstr "curl パッケージ"
@@ -274,7 +277,7 @@ msgid "map.sh Management"
 msgstr "map.sh 管理"
 
 msgid "OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version."
-msgstr "OpenWrt の map.sh にバグがあり、最初のポートグループしか使えず、ICMP も動作しません。修正版への置き換えをお勧めします。"
+msgstr "OpenWrt の map.sh には、最初のポートグループしか使えず ICMP も動作しない不具合があります。下のボタンから修正版に置き換えられます。"
 
 msgid "See more"
 msgstr "詳細を見る"
@@ -285,17 +288,20 @@ msgstr "パッチ版"
 msgid "Original version"
 msgstr "オリジナル版"
 
+msgid "Unknown modified version"
+msgstr "野良版"
+
 msgid "Patch"
-msgstr "パッチする"
+msgstr "パッチ適用"
 
 msgid "Restore"
 msgstr "復元"
 
 msgid "Uplink Client ID Fix"
-msgstr "アップリンク クライアントID 修正"
+msgstr "アップリンクのクライアント ID 修正"
 
 msgid "OpenWrt 25.12 and later use the Default DUID as a randomized DHCPv6 client identifier. This does not meet NGN requirements."
-msgstr "OpenWrt 25.12 以降では、Default DUID がランダム化された DHCPv6 クライアント識別子として使用されます。これは NGN の要件を満たしません。"
+msgstr "OpenWrt 25.12 以降では、Default DUID がランダム化された DHCPv6 クライアント ID として使われます。これは NGN の要件を満たしません。"
 
 msgid "Fix"
 msgstr "修正"
@@ -304,10 +310,10 @@ msgid "Applying Fix"
 msgstr "修正を適用中"
 
 msgid "Setting Uplink Client ID..."
-msgstr "アップリンク クライアントID を設定中..."
+msgstr "アップリンクのクライアント ID を設定中..."
 
 msgid "Fix applied successfully. Uplink has been restarted."
-msgstr "修正が適用されました。アップリンクを再起動しました。"
+msgstr "修正を適用しました。アップリンクを再起動しました。"
 
 msgid "Failed to apply fix:"
 msgstr "修正の適用に失敗しました:"
@@ -316,13 +322,13 @@ msgid "Error applying fix:"
 msgstr "修正の適用中にエラー:"
 
 msgid "Fill with NGN format"
-msgstr "NGNフォーマットで入力"
+msgstr "NGN 形式で入力"
 
 msgid "Unable to detect interface MAC address."
 msgstr "インターフェースの MAC アドレスを検出できません。"
 
 msgid "Patching"
-msgstr "パッチ中"
+msgstr "パッチ適用中"
 
 msgid "Downloading..."
 msgstr "ダウンロード中..."
@@ -331,37 +337,37 @@ msgid "Restoring..."
 msgstr "復元中..."
 
 msgid "Operation completed successfully! Please restart the network interface manually."
-msgstr "操作が完了しました！手動でネットワークインターフェースを再起動してください。"
+msgstr "操作が完了しました。ネットワークインターフェースを手動で再起動してください。"
 
 msgid "Prefix Alignment Warning"
-msgstr "プレフィックス配置警告"
+msgstr "プレフィックスアラインメント警告"
 
 msgid "The detected IPv6 prefix is not aligned for MAP-E or Independent IP."
-msgstr "検出された IPv6 プレフィックスは、MAP-E または固定IP向けに配置が揃っていません。"
+msgstr "検出された IPv6 プレフィックスは、MAP-E または固定 IP に必要な条件を満たしていません。"
 
 msgid "The 4th hextet is"
-msgstr "第4セグメントは"
+msgstr "第4ヘクステットは"
 
 msgid "but these tunnel types require a /64 network whose 4th hextet ends with \"00\"."
-msgstr "ですが、これらのトンネル方式では第4セグメントが \"00\" で終わる /64 ネットワークが必要です。"
+msgstr "ですが、これらのトンネル方式では第4ヘクステットが \"00\" で終わる /64 ネットワークが必要です。"
 
 msgid "Example:"
 msgstr "例："
 
 msgid "When using MAP-E or Independent IP, IPv4 over IPv6 connectivity may not work properly."
-msgstr "MAP-E または固定IPを利用する場合、IPv4 over IPv6 で正常に通信できない可能性があります。"
+msgstr "MAP-E または固定 IP を利用する場合、IPv4 over IPv6 が正常に通信できない可能性があります。"
 
 msgid "Please check your upstream router's prefix delegation settings."
-msgstr "上位ルーターのプレフィックス委譲設定を確認してください。"
+msgstr "上位ルーターのプレフィックス委任設定を確認してください。"
 
 msgid "Prefer SLAAC Address"
 msgstr "SLAAC アドレス優先"
 
 msgid "Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses"
-msgstr "ルーターの送信接続は MAP-E/ipip6h 静的アドレスより SLAAC アドレスを優先します"
+msgstr "ルーター自身の送信接続では、MAP-E/ipip6h の静的アドレスより SLAAC アドレスを優先します"
 
 msgid "Auto Activate Tunnel"
-msgstr "トンネル自動有効化"
+msgstr "トンネルの自動アクティベーション"
 
 msgid "Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly."
-msgstr "トンネルを有効化するために自動的に Ping を送信します。トラフィックがない場合、一部のトンネルは正常に接続を確立できない場合があります。"
+msgstr "トンネルを有効化するため、自動的に ping を送信します。トラフィックがない場合、一部のトンネルは正常に接続できないことがあります。"
