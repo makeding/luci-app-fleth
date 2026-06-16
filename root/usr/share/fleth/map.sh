@@ -112,9 +112,9 @@ proto_map_setup() {
 	local iface="$2"
 	local link="map-$cfg"
 
-	local maptype type legacymap mtu ttl tunlink zone encaplimit
+	local maptype type legacymap mtu ttl tunlink zone encaplimit defaultroute metric
 	local rule ipaddr ip4prefixlen ip6prefix ip6prefixlen peeraddr ealen psidlen psid offset
-	json_get_vars maptype type legacymap mtu ttl tunlink zone encaplimit
+	json_get_vars maptype type legacymap mtu ttl tunlink zone encaplimit defaultroute metric
 	json_get_vars rule ipaddr ip4prefixlen ip6prefix ip6prefixlen peeraddr ealen psidlen psid offset
 
 	[ "$zone" = "-" ] && zone=""
@@ -217,7 +217,11 @@ proto_map_setup() {
 		proto_block_restart "$cfg"
 	fi
 
-	proto_add_ipv4_route "0.0.0.0" 0
+	: ${defaultroute:=1}
+	[ "$defaultroute" -eq 1 ] && {
+		: ${metric:=0}
+		proto_add_ipv4_route "0.0.0.0" 0 "" "" "$metric"
+	}
 	proto_add_data
 	[ -n "$zone" ] && json_add_string zone "$zone"
 
@@ -319,6 +323,8 @@ proto_map_init_config() {
 	proto_config_add_int "ttl"
 	proto_config_add_string "zone"
 	proto_config_add_string "encaplimit"
+	proto_config_add_boolean "defaultroute"
+	proto_config_add_int "metric"
 }
 
 [ -n "$INCLUDE_ONLY" ] || {
