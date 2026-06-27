@@ -12,9 +12,17 @@ fleth_style.innerHTML = `
   .cbi-value-title { padding-top: 6px !important; }
   .port-highlight {
     background-color: rgb(207, 226, 255);
+    color: #1f2937;
     padding: 1px 4px;
     border-radius: 3px;
     font-weight: 500;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .port-highlight {
+      background-color: rgb(59, 130, 246);
+      color: #f8fafc;
+    }
   }
 `;
 document.head.appendChild(fleth_style);
