@@ -125,7 +125,7 @@ check_interface_proto_invalid() {
 }
 
 filter_global_ipv6() {
-    grep -viE '^(fe80|fc[0-9a-f][0-9a-f]|fd[0-9a-f][0-9a-f]|::|::1|::ffff:0:0|::/96)' | head -n 1
+    grep -viE '^(fe80|f[cd][0-9a-f][0-9a-f]|::|::1|::ffff:0:0|::/96)' | head -n 1
 }
 
 # Verify file SHA256 checksum
@@ -152,59 +152,8 @@ verify_sha256() {
 }
 
 get_uplink_interface_ipv6() {
-    local uplink_dev
-    local status
-
-    status=$(ifstatus ${h_UPLINK_INTERFACE} 2>/dev/null)
-
-    ipv6_address=$(echo "$status" | jsonfilter -e '@["ipv6-address"][@.preferred > 0].address' 2>/dev/null | filter_global_ipv6)
-    if [ -z "$ipv6_address" ]; then
-        uplink_dev=$(get_uplink_device)
-        if [ -n "$uplink_dev" ]; then
-            ipv6_address=$(ip -6 addr show dev "$uplink_dev" scope global 2>/dev/null | awk '
-                !/ deprecated / {
-                    for (i = 1; i <= NF; i++) {
-                        if ($i == "inet6") {
-                            split($(i + 1), addr, "/")
-                            print addr[1]
-                            exit
-                        }
-                    }
-                }
-            ')
-        fi
-    fi
-    if [ -z "$ipv6_address" ]; then
-        ipv6_address=$(echo "$status" | jsonfilter -e '@["ipv6-address"][*].address' 2>/dev/null | filter_global_ipv6)
-    fi
-    if [ -z "$ipv6_address" ]; then
-        [ -n "$uplink_dev" ] || uplink_dev=$(get_uplink_device)
-        if [ -n "$uplink_dev" ]; then
-            ipv6_address=$(ip -6 addr show dev "$uplink_dev" scope global 2>/dev/null | awk '
-                {
-                    for (i = 1; i <= NF; i++) {
-                        if ($i == "inet6") {
-                            split($(i + 1), addr, "/")
-                            print addr[1]
-                            exit
-                        }
-                    }
-                }
-            ')
-        fi
-    fi
-    if [ -z "$ipv6_address" ]; then
-        # PD-only uplinks often have no address in ipv6-address; use the delegated
-        # prefix as MAP-E/IPIP6 calculation input.
-        ipv6_address=$(echo "$status" | jsonfilter -e '@["ipv6-prefix"][@.preferred > 0].address' 2>/dev/null | filter_global_ipv6)
-    fi
-    if [ -z "$ipv6_address" ]; then
-        ipv6_address=$(echo "$status" | jsonfilter -e '@["ipv6-prefix"][*].address' 2>/dev/null | filter_global_ipv6)
-    fi
-    if [ -z "$ipv6_address" ]; then
-        ipv6_address=$(echo "$status" | jsonfilter -e '@.route[*].source' 2>/dev/null | sed 's#/.*##' | filter_global_ipv6)
-    fi
-    echo "$ipv6_address"
+    ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} 2>/dev/null | grep '"address"' | awk -F '"' '{print $4}' | filter_global_ipv6)
+    echo $ipv6_address
 }
 
 get_uplink_prefix_length() {
