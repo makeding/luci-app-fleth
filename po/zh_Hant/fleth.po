@@ -150,10 +150,16 @@ msgstr "建議將 MTU 設定為 1460。"
 
 # IPIP6H Protocol - Custom additions only
 msgid "IPv4 over IPv6 (fleth edition)"
-msgstr "IPv4 over IPv6 (fleth edition)"
+msgstr "IPv4 over IPv6 (Flet'h)"
+
+msgid "IPv4 over IPv6 (Flet'h)"
+msgstr "IPv4 over IPv6 (Flet'h)"
 
 msgid "IPv4 over IPv6 passthrough (fleth edition)"
-msgstr "IPv4 over IPv6 透傳 (fleth edition)"
+msgstr "IPv4 over IPv6 透傳 (Flet'h)"
+
+msgid "IPv4 over IPv6 passthrough (Flet'h)"
+msgstr "IPv4 over IPv6 透傳 (Flet'h)"
 
 msgid "BR Address"
 msgstr "BR 地址"
@@ -373,7 +379,7 @@ msgid "Automatically send ping to activate tunnel. Without traffic, some tunnels
 msgstr "自動傳送 ping 以啟動隧道。如果沒有流量，某些隧道可能無法正常建立連線。"
 
 msgid "Flet'h automatic IPv4 over IPv6"
-msgstr "Flet'h 自動 IPv4 over IPv6"
+msgstr "IPv4 over IPv6 (Flet'h)"
 
 msgid "Not installed"
 msgstr "未安裝"

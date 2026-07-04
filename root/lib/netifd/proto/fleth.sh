@@ -177,6 +177,37 @@ fleth_map_portsets_from_psid() {
 	echo "$portsets"
 }
 
+fleth_get_mape_raw_psid() {
+	local psid="$1"
+	local psidlen="$2"
+	local max_raw_psid
+
+	case "$psid:$psidlen" in
+		*[!0-9:]*|::*|*::*) return 1 ;;
+	esac
+
+	max_raw_psid=$((1 << psidlen))
+	if [ "$psid" -lt "$max_raw_psid" ]; then
+		echo "$psid"
+	else
+		echo $((psid >> (16 - psidlen)))
+	fi
+}
+
+fleth_get_mape_local_ipv6() {
+	local ipv6="$1"
+	local psid="$2"
+	local psidlen="$3"
+	local raw_psid suffix prefix_part
+
+	raw_psid=$(fleth_get_mape_raw_psid "$psid" "$psidlen") || return 1
+	suffix=$(printf "%x" "$((raw_psid << 8))")
+	prefix_part=$(echo "$ipv6" | sed 's/%.*$//' | cut -d: -f1-4)
+	[ -n "$prefix_part" ] || return 1
+
+	echo "${prefix_part}::${suffix}"
+}
+
 fleth_iptables_chain() {
 	echo "FLETH_${1}" | tr -c 'A-Za-z0-9_' '_' | cut -c 1-28
 }
@@ -255,7 +286,7 @@ fleth_apply_nft_snat() {
 proto_fleth_setup_mape() {
 	local cfg="$1"
 	local link="fleth-$cfg"
-	local portsets
+	local portsets local_ipv6
 
 	portsets=$(fleth_map_portsets_from_psid "$FLETH_PSID" "$FLETH_PSIDLEN" "$FLETH_OFFSET")
 	[ -n "$portsets" ] || {
@@ -263,8 +294,14 @@ proto_fleth_setup_mape() {
 		proto_block_restart "$cfg"
 		return
 	}
+	local_ipv6=$(fleth_get_mape_local_ipv6 "$FLETH_IPV6ADDR" "$FLETH_PSID" "$FLETH_PSIDLEN")
+	[ -n "$local_ipv6" ] || {
+		proto_notify_error "$cfg" "INVALID_LOCAL_IPV6"
+		proto_block_restart "$cfg"
+		return
+	}
 
-	echo "type=map-e provider=$FLETH_PROVIDER peeraddr=$FLETH_PEERADDR ipv4=$FLETH_IPV4ADDR ports='$portsets'" > "/tmp/fleth-$cfg.rules"
+	echo "type=map-e provider=$FLETH_PROVIDER peeraddr=$FLETH_PEERADDR ipv4=$FLETH_IPV4ADDR local=$local_ipv6 ports='$portsets'" > "/tmp/fleth-$cfg.rules"
 
 	proto_init_update "$link" 1
 	proto_add_ipv4_address "$FLETH_IPV4ADDR" "" "" ""
@@ -278,7 +315,7 @@ proto_fleth_setup_mape() {
 	json_add_string mode ipip6
 	json_add_int mtu "${mtu:-1460}"
 	json_add_int ttl "${ttl:-64}"
-	json_add_string local "$FLETH_IPV6ADDR"
+	json_add_string local "$local_ipv6"
 	json_add_string remote "$FLETH_PEERADDR"
 	[ -n "$tunlink" ] && json_add_string link "$tunlink"
 	json_add_object "data"
@@ -288,7 +325,6 @@ proto_fleth_setup_mape() {
 
 	proto_add_data
 	[ -n "$zone" ] && json_add_string zone "$zone"
-	json_close_object 2>/dev/null
 	proto_close_data
 	proto_send_update "$cfg"
 
@@ -297,7 +333,7 @@ proto_fleth_setup_mape() {
 	json_add_string ifname "@${tunlink:-wan6}"
 	json_add_string proto "static"
 	json_add_array ip6addr
-	json_add_string "" "${FLETH_IPV6ADDR}/128"
+	json_add_string "" "${local_ipv6}/128"
 	json_close_array
 	json_close_object
 	ubus call network add_dynamic "$(json_dump)" >/dev/null 2>&1

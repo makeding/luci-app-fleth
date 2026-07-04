@@ -8,7 +8,7 @@ network.registerPatternVirtual(/^fleth-.+$/);
 
 return network.registerProtocol('fleth', {
 	getI18n: function () {
-		return _("Flet'h automatic IPv4 over IPv6");
+		return _("IPv4 over IPv6 (Flet'h)");
 	},
 
 	getIfname: function () {

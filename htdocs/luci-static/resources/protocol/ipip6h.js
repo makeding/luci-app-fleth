@@ -18,7 +18,7 @@ if (['/cgi-bin/luci/admin/network/firewall/forwards', '/cgi-bin/luci/admin/netwo
 }
 return network.registerProtocol('ipip6h', {
 	getI18n: function () {
-		return _('IPv4 over IPv6 (fleth edition)');
+		return _("IPv4 over IPv6 (Flet'h)");
 	},
 
 	getIfname: function () {

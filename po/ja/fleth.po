@@ -150,10 +150,16 @@ msgstr "通常、工事完了日の夕方頃にサービスが利用可能にな
 
 # IPIP6H Protocol - Custom additions only
 msgid "IPv4 over IPv6 (fleth edition)"
-msgstr "IPv4 over IPv6 (fleth 版)"
+msgstr "IPv4 over IPv6 (Flet'h)"
+
+msgid "IPv4 over IPv6 (Flet'h)"
+msgstr "IPv4 over IPv6 (Flet'h)"
 
 msgid "IPv4 over IPv6 passthrough (fleth edition)"
-msgstr "IPv4 over IPv6 パススルー (fleth 版)"
+msgstr "IPv4 over IPv6 パススルー (Flet'h)"
+
+msgid "IPv4 over IPv6 passthrough (Flet'h)"
+msgstr "IPv4 over IPv6 パススルー (Flet'h)"
 
 msgid "BR Address"
 msgstr "BR アドレス"
@@ -373,7 +379,7 @@ msgid "Automatically send ping to activate tunnel. Without traffic, some tunnels
 msgstr "トンネルを有効化するため、自動的に ping を送信します。トラフィックがない場合、一部のトンネルは正常に接続できないことがあります。"
 
 msgid "Flet'h automatic IPv4 over IPv6"
-msgstr "Flet'h 自動 IPv4 over IPv6"
+msgstr "IPv4 over IPv6 (Flet'h)"
 
 msgid "Not installed"
 msgstr "未インストール"

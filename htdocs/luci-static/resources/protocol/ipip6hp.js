@@ -9,7 +9,7 @@ network.registerPatternVirtual(/^ipip6hp-.+$/);
 
 return network.registerProtocol('ipip6hp', {
 	getI18n: function () {
-		return _('IPv4 over IPv6 passthrough (fleth edition)');
+		return _("IPv4 over IPv6 passthrough (Flet'h)");
 	},
 
 	getIfname: function () {
