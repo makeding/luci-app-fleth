@@ -5,6 +5,7 @@
 	. /lib/functions/network.sh
 	[ -f /usr/share/fleth/common.sh ] && . /usr/share/fleth/common.sh
 	[ -f /usr/share/fleth/ipip6h-common.sh ] && . /usr/share/fleth/ipip6h-common.sh
+	[ -f /usr/share/fleth/ipip6hp-hotplug.sh ] && . /usr/share/fleth/ipip6hp-hotplug.sh
 	. ../netifd-proto.sh
 	init_proto "$@"
 }
@@ -234,6 +235,7 @@ proto_ipip6hp_setup() {
 	}
 
 	fleth_ipip6_add_dynamic_address "$cfg" ipip6hp "$tunlink" "$interface_id" "$ip6addr" "$activation_enabled" "$activation_url" "$prefer_slaac"
+	type fleth_apply_ipip6hp_rules >/dev/null 2>&1 && fleth_apply_ipip6hp_rules "$cfg"
 
 	logger -t ipip6hp "[${cfg}] Passthrough setup completed"
 }
@@ -250,7 +252,11 @@ proto_ipip6hp_teardown() {
 
 	type fleth_cancel_ping_activation >/dev/null 2>&1 && fleth_cancel_ping_activation "$cfg"
 	local passthrough_device=$(uci get network.${cfg}.device 2>/dev/null)
-	ipip6hp_delete_nft_rules "$cfg"
+	if type fleth_remove_ipip6hp_rules >/dev/null 2>&1; then
+		fleth_remove_ipip6hp_rules "$cfg"
+	else
+		ipip6hp_delete_nft_rules "$cfg"
+	fi
 	[ -n "$ip4ifaddr" ] && ipip6hp_delete_policy_route "$ip4ifaddr" "$ip4table" "$ip4rule_priority" "$link"
 	[ -n "$passthrough_device" ] && [ -n "$ip4ifaddr" ] && ip route del "${ip4ifaddr}/32" dev "$passthrough_device" 2>/dev/null
 	[ -n "$passthrough_device" ] && [ -n "$gateway4" ] && {

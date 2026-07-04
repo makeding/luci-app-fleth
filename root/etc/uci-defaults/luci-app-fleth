@@ -18,6 +18,7 @@ if [ -d /usr/share/luci/menu.d ]; then
 fi
 
 rm -f /etc/config/fleth
+rm -f /etc/hotplug.d/iface/70-fleth
 
 if [ -f /usr/share/fleth/firewall.include ] && ! uci -q get firewall.fleth_ipip6hp >/dev/null; then
     uci set firewall.fleth_ipip6hp='include'
