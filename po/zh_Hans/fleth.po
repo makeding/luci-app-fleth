@@ -282,30 +282,6 @@ msgstr "curl 软件包"
 msgid "This option requires the curl package. Install curl from Software before enabling it."
 msgstr "此选项需要 curl 软件包。启用前请先在软件包管理中安装 curl。"
 
-msgid "map.sh Management"
-msgstr "map.sh 管理"
-
-msgid "OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version."
-msgstr "OpenWrt 的 map.sh 存在 bug：仅第一组端口可用且 ICMP 无法工作。点击下方按钮替换为修复版。"
-
-msgid "See more"
-msgstr "查看详情"
-
-msgid "Patched version"
-msgstr "已打补丁版本"
-
-msgid "Original version"
-msgstr "原始版本"
-
-msgid "Unknown modified version"
-msgstr "未知修改版本"
-
-msgid "Patch"
-msgstr "修补"
-
-msgid "Restore"
-msgstr "恢复"
-
 msgid "Uplink Client ID Fix"
 msgstr "Uplink Client ID 修复"
 
@@ -335,18 +311,6 @@ msgstr "填入 NGN 格式"
 
 msgid "Unable to detect interface MAC address."
 msgstr "无法检测接口 MAC 地址。"
-
-msgid "Patching"
-msgstr "修补中"
-
-msgid "Downloading..."
-msgstr "下载中..."
-
-msgid "Restoring..."
-msgstr "恢复中..."
-
-msgid "Operation completed successfully! Please restart the network interface manually."
-msgstr "操作完成！请手动重启网络接口。"
 
 msgid "Prefix Alignment Warning"
 msgstr "前缀对齐警告"

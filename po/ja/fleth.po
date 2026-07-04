@@ -282,30 +282,6 @@ msgstr "curl パッケージ"
 msgid "This option requires the curl package. Install curl from Software before enabling it."
 msgstr "このオプションには curl パッケージが必要です。有効化する前にソフトウェアから curl をインストールしてください。"
 
-msgid "map.sh Management"
-msgstr "map.sh 管理"
-
-msgid "OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version."
-msgstr "OpenWrt の map.sh には、最初のポートグループしか使えず ICMP も動作しない不具合があります。下のボタンから修正版に置き換えられます。"
-
-msgid "See more"
-msgstr "詳細を見る"
-
-msgid "Patched version"
-msgstr "パッチ版"
-
-msgid "Original version"
-msgstr "オリジナル版"
-
-msgid "Unknown modified version"
-msgstr "野良版"
-
-msgid "Patch"
-msgstr "パッチ適用"
-
-msgid "Restore"
-msgstr "復元"
-
 msgid "Uplink Client ID Fix"
 msgstr "アップリンクのクライアント ID 修正"
 
@@ -335,18 +311,6 @@ msgstr "NGN 形式で入力"
 
 msgid "Unable to detect interface MAC address."
 msgstr "インターフェースの MAC アドレスを検出できません。"
-
-msgid "Patching"
-msgstr "パッチ適用中"
-
-msgid "Downloading..."
-msgstr "ダウンロード中..."
-
-msgid "Restoring..."
-msgstr "復元中..."
-
-msgid "Operation completed successfully! Please restart the network interface manually."
-msgstr "操作が完了しました。ネットワークインターフェースを手動で再起動してください。"
 
 msgid "Prefix Alignment Warning"
 msgstr "プレフィックスアラインメント警告"
