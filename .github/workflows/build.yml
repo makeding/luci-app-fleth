@@ -113,4 +113,4 @@ jobs:
         with:
           # draft: true
           make_latest: true
-          files: dist/luci-app-fleth-${{ matrix.variant }}_*
+          files: dist/luci-app-fleth-${{ matrix.variant }}*
