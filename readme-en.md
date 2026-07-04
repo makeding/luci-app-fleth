@@ -10,6 +10,9 @@ luci-app-fleth is a helper that can automatically configure IPv4 over IPv6 tunne
 If you need connectivity before installing this package, clear `Network → Interfaces → Default DUID`.
 
 [>>>>>> Download Here <<<<<<](https://github.com/makeding/luci-app-fleth/releases)
+
+> v0.24 is the last release with `map` / `ds-lite` dependencies. See the [v0.24 release note](https://github.com/makeding/luci-app-fleth/releases/tag/v0.24).
+
 # Installation (apk)
 If you are using OpenWrt 25.12 or newer, there is no signature yet, so `--allow-untrusted` is required.
 

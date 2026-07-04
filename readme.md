@@ -10,6 +10,9 @@ luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘル�
 インストール前に接続が必要な場合は、`Network → Interfaces → Default DUID` を空にしてください。
 
 [＞＞＞＞＞＞ダウンロードはこちら＜＜＜＜＜＜＜](https://github.com/makeding/luci-app-fleth/releases)
+
+> v0.24 は `map` / `ds-lite` 依存関係を含む最後のリリースです。詳細は [v0.24 リリースノート](https://github.com/makeding/luci-app-fleth/releases/tag/v0.24) を参照してください。
+
 # インストール (apk)
 OpenWrt 25.12 以降を使用する場合、署名がまだ無いので `--allow-untrusted` が必要です。
 

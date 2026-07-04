@@ -10,6 +10,9 @@ luci-app-fleth 是一个可以自动配置 IPv4 over IPv6 隧道的辅助工具�
 如果需要在安装本插件前先恢复连接，请清空 `Network → Interfaces → Default DUID`。
 
 [>>>>>> 点击此处下载 <<<<<<](https://github.com/makeding/luci-app-fleth/releases)
+
+> v0.24 是最后一个包含 `map` / `ds-lite` 依赖的版本。详情请参见 [v0.24 release note](https://github.com/makeding/luci-app-fleth/releases/tag/v0.24)。
+
 # 安装（apk）
 如果使用 OpenWrt 25.12 或更新版本，目前没有签名，需要 `--allow-untrusted`。
 
