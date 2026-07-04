@@ -374,3 +374,6 @@ msgstr "自动发送 ping 以激活隧道。如果没有流量，某些隧道可
 
 msgid "Flet'h automatic IPv4 over IPv6"
 msgstr "Flet'h 自动 IPv4 over IPv6"
+
+msgid "Not installed"
+msgstr "未安装"

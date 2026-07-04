@@ -127,7 +127,9 @@ fleth_legacy_auto() {
 }
 
 fleth_legacy_mapsh_status() {
-    if [ -f "$FLETH_MAPSH_PATH" ] && cmp -s "$MAPSH_PATH" "$FLETH_MAPSH_PATH"; then
+    if [ ! -f "$FLETH_MAPSH_PATH" ]; then
+        echo "unavailable"
+    elif cmp -s "$MAPSH_PATH" "$FLETH_MAPSH_PATH"; then
         echo "patched"
     elif [ -f "$MAPSH_BACKUP_PATH" ] && cmp -s "$MAPSH_PATH" "$MAPSH_BACKUP_PATH"; then
         echo "original"

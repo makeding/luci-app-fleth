@@ -67,7 +67,7 @@ return view.extend({
       const area = (results[0].stdout || "").trim();
       const mape_status = (results[1].stdout || "").split("\n");
       const prefix_length = (results[2].stdout || "").trim();
-      const mapsh_status = (results[3].stdout || "").trim();
+      const mapsh_status = (results[3].stdout || "").trim() || "unavailable";
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
 
@@ -366,37 +366,40 @@ return view.extend({
       return this.applyWan6ClientIdFix(m);
     }, this, m);
 
+    // map.sh Management section in Tools tab
+    o = s.taboption("tools", form.DummyValue, "_mapsh_description");
+    o.title = _("map.sh Management");
+    o.cfgvalue = function () {
+      return _("OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version.") +
+        ' <a href="https://github.com/fakemanhk/openwrt-jp-ipoe/tree/main" target="_blank" style="color: #0088cc;">(' + _("See more") + ')</a>';
+    };
+    o.rawhtml = true;
+
+    o = s.taboption("tools", form.DummyValue, "_mapsh_status");
+    o.title = "&#160;";
+    o.cfgvalue = function () {
+      let icon = "";
+      let text = "";
+
+      if (data.mapshStatus === "patched") {
+        icon = "✓";
+        text = _("Patched version");
+      } else if (data.mapshStatus === "unknown") {
+        icon = "?";
+        text = _("Unknown modified version");
+      } else if (data.mapshStatus === "unavailable") {
+        icon = "⚠";
+        text = _("Not installed");
+      } else {
+        icon = "⚠";
+        text = _("Original version");
+      }
+
+      return '<span style="color: #0088cc; font-weight: bold;">' + icon + ' ' + text + '</span>';
+    };
+    o.rawhtml = true;
+
     if (data.mapshStatus !== "unavailable") {
-      // map.sh Management section in Tools tab
-      o = s.taboption("tools", form.DummyValue, "_mapsh_description");
-      o.title = _("map.sh Management");
-      o.cfgvalue = function () {
-        return _("OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version.") +
-          ' <a href="https://github.com/fakemanhk/openwrt-jp-ipoe/tree/main" target="_blank" style="color: #0088cc;">(' + _("See more") + ')</a>';
-      };
-      o.rawhtml = true;
-
-      o = s.taboption("tools", form.DummyValue, "_mapsh_status");
-      o.title = "&#160;";
-      o.cfgvalue = function () {
-        let icon = "";
-        let text = "";
-
-        if (data.mapshStatus === "patched") {
-          icon = "✓";
-          text = _("Patched version");
-        } else if (data.mapshStatus === "unknown") {
-          icon = "?";
-          text = _("Unknown modified version");
-        } else {
-          icon = "⚠";
-          text = _("Original version");
-        }
-
-        return '<span style="color: #0088cc; font-weight: bold;">' + icon + ' ' + text + '</span>';
-      };
-      o.rawhtml = true;
-
       o = s.taboption("tools", form.Button, "_patch_mapsh");
       o.title = "&#160;";
       o.inputtitle = _("Patch");
