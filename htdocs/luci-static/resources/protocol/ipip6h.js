@@ -7,15 +7,7 @@
 'require tools.widgets as widgets';
 
 network.registerPatternVirtual(/^ipip6h-.+$/);
-if (['/cgi-bin/luci/admin/network/firewall/forwards', '/cgi-bin/luci/admin/network', '/cgi-bin/luci/admin/network/network',].includes(location.pathname)) {
-	try {
-		const script = document.createElement('script');
-		script.src = '/luci-static/resources/view/fleth-hook.js';
-		document.head.appendChild(script);
-	} catch (error) {
-		console.warn(error);
-	}
-}
+
 return network.registerProtocol('ipip6h', {
 	getI18n: function () {
 		return _("IPv4 over IPv6 (Flet'h)");
