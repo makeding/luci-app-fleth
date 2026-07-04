@@ -50,37 +50,15 @@ return network.registerProtocol("fleth", {
 
     o = s.taboption(
       "general",
-      form.Flag,
-      "custom_aftr_enabled",
-      _("Custom AFTR"),
-      _("Use a custom DS-Lite AFTR endpoint instead of automatic detection."),
-    );
-    o.default = o.disabled;
-
-    o = s.taboption(
-      "general",
-      form.ListValue,
-      "custom_aftr_preset",
-      _("AFTR preset"),
-    );
-    o.value("", _("None"));
-    o.value("wtd01-aftr01-ngnintf.i.open.ad.jp", "SDCC - 1 (wtd01-aftr01-ngnintf.i.open.ad.jp)");
-    o.value("ksk01-aftr01-ngnintf.i.open.ad.jp", "SDCC - Port Forward (ksk01-aftr01-ngnintf.i.open.ad.jp)");
-    o.default = "";
-    o.rmempty = true;
-    o.description = _("SDCC presets are only shown in EAST area.");
-    o.depends("custom_aftr_enabled", "1");
-
-    o = s.taboption(
-      "general",
       form.Value,
       "custom_aftr",
       _("AFTR endpoint"),
-      _("Optional. Leave empty to use the selected preset."),
+      _("Optional. Leave empty to use automatic detection."),
     );
+    o.value("wtd01-aftr01-ngnintf.i.open.ad.jp", "SDCC - 1 (wtd01-aftr01-ngnintf.i.open.ad.jp)");
+    o.value("ksk01-aftr01-ngnintf.i.open.ad.jp", "SDCC - Port Forward (ksk01-aftr01-ngnintf.i.open.ad.jp)");
     o.placeholder = "aftr.example.net";
     o.datatype = 'or(hostname,ip6addr("nomask"))';
-    o.depends("custom_aftr_enabled", "1");
 
     o = s.taboption(
       "general",
@@ -89,7 +67,6 @@ return network.registerProtocol("fleth", {
       "&#160;",
     );
     o.rawhtml = true;
-    o.depends("custom_aftr_enabled", "1");
     o.cfgvalue = function () {
       return '<a href="https://wiki.s.sdconw.com/68adeceb59b31226a3736ddb" target="_blank" rel="noreferrer noopener">' + _("Learn more") + '</a>';
     };

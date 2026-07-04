@@ -79,13 +79,12 @@ fleth_get_dslite_provider() {
 
 	fleth_get_area
 
-	if [ "$custom_aftr_enabled" = "1" ]; then
-		if [ -n "$custom_aftr" ]; then
-			fleth_set_dslite_provider "$custom_aftr" && return 0
-		fi
-		if [ "$DNS" = "$DNS_E" ] && [ -n "$custom_aftr_preset" ]; then
-			fleth_set_dslite_provider "$custom_aftr_preset" && return 0
-		fi
+	if [ -n "$custom_aftr" ]; then
+		fleth_set_dslite_provider "$custom_aftr" && return 0
+	fi
+
+	if [ "$custom_aftr_enabled" = "1" ] && [ "$DNS" = "$DNS_E" ] && [ -n "$custom_aftr_preset" ]; then
+		fleth_set_dslite_provider "$custom_aftr_preset" && return 0
 	fi
 
 	transix=$(fleth_get_aaaa_record "gw.transix.jp")

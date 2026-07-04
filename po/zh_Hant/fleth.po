@@ -352,6 +352,9 @@ msgstr "AFTR 端點"
 msgid "Optional. Leave empty to use the selected preset."
 msgstr "可選。留空則使用選取的預設。"
 
+msgid "Optional. Leave empty to use automatic detection."
+msgstr "可選。留空則使用自動偵測。"
+
 msgid "Learn more"
 msgstr "了解更多"
 
@@ -372,6 +375,9 @@ msgstr "Flet'H 固定IP（透傳）"
 
 msgid "Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H IPoE, Flet'H Static IP, or Flet'H Static IP (Passthrough)."
 msgstr "開啟 Network → Interfaces，編輯目標介面，然後選擇需要的 Flet'H 家族協定：Flet'H IPoE、Flet'H 固定IP 或 Flet'H 固定IP（透傳）。"
+
+msgid "Open Network → Interfaces, edit the target interface, then choose one of these Flet'H family protocols:"
+msgstr "開啟 Network → Interfaces，編輯目標介面，然後選擇下面的 Flet'H 家族協定之一："
 
 
 msgid "Flet'H Tools"
