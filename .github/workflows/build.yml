@@ -23,13 +23,13 @@ jobs:
             arch: x86_64-22.03.2
             variant: legacy
           - package_type: apk
-            arch: x86_64-25.12.4
+            arch: x86_64-25.12.1
             variant: legacy
           - package_type: ipk
             arch: x86_64-22.03.2
             variant: proto
           - package_type: apk
-            arch: x86_64-25.12.4
+            arch: x86_64-25.12.1
             variant: proto
     steps:
       - name: Fetch luci-app-fleth code
