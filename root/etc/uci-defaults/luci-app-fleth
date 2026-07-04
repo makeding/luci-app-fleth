@@ -30,4 +30,10 @@ if [ -f /usr/share/fleth/firewall.include ] && ! uci -q get firewall.fleth_ipip6
     uci set firewall.fleth_ipip6hp.fw4_compatible='1'
     uci commit firewall
 fi
+
+if [ -x /etc/init.d/network ] && ! ubus call network get_proto_handlers 2>/dev/null | grep -q '"fleth"'; then
+    logger -t luci-app-fleth "Flet'H proto handlers are not loaded; restarting network"
+    /etc/init.d/network restart
+fi
+
 exit 0
