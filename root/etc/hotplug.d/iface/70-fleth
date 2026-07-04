@@ -39,7 +39,7 @@ fi
 # Connectivity test for tunnel interfaces
 if [ "$h_TUNNEL_ACTIVATION" = "1" ] && [ "$ACTION" = "ifup" ]; then
     case "$proto" in
-        map|dslite|ipip6|ipip6h)
+        fleth|map|dslite|ipip6|ipip6h)
             # Kill previous waiting process if exists
             PID_FILE="/var/run/fleth-tunnel-${INTERFACE}.pid"
             if [ -f "$PID_FILE" ]; then
@@ -78,7 +78,7 @@ if [ "$h_PREFER_SLAAC" = "1" ]; then
     # Check on tunnel interface ifup or wan6 ifupdate
     if [ "$ACTION" = "ifup" ]; then
         case "$proto" in
-            map|ipip6|ipip6h|ipip6hp)
+            fleth|map|ipip6|ipip6h|ipip6hp)
                 should_check=1
                 ;;
         esac

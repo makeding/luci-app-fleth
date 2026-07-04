@@ -371,3 +371,6 @@ msgstr "トンネルの自動アクティベーション"
 
 msgid "Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly."
 msgstr "トンネルを有効化するため、自動的に ping を送信します。トラフィックがない場合、一部のトンネルは正常に接続できないことがあります。"
+
+msgid "Flet'h automatic IPv4 over IPv6"
+msgstr "Flet'h 自動 IPv4 over IPv6"

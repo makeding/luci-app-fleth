@@ -9,11 +9,18 @@ PKG_RELEASE:=1
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+luci-base +lua +luci-proto-ipv6 \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO:map \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO:ds-lite
+	+PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO:ds-lite \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH:kmod-ip6-tunnel \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH:resolveip \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH:jsonfilter \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH:iptables \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH:iptables-mod-conntrack-extra \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH:kmod-nat46
 
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO \
+	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6HP
 
@@ -21,9 +28,18 @@ define Package/luci-app-fleth/config
 	config PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO
 		bool "Include legacy MAP-E/DS-Lite auto configuration"
 		default y
+		depends on !PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH
 		help
 		  Include the legacy auto-configuration helper that writes
 		  OpenWrt's map and dslite protocols into UCI.
+
+	config PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH
+		bool "Include luci-proto-fleth"
+		default n
+		depends on !PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO
+		help
+		  Include the native fleth netifd protocol handler.
+		  This does not depend on OpenWrt's map or ds-lite packages.
 
 	config PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H
 		bool "Include luci-proto-ipip6h"
@@ -51,6 +67,14 @@ else
 	# Remove legacy invasive auto-configuration files if not selected
 	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/legacy-auto.sh
 	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/map.sh
+endif
+ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_PROTO_FLETH
+	# Native fleth protocol is included
+else
+	# Remove native fleth protocol files if not selected
+	rm -f $(PKG_BUILD_DIR)/htdocs/luci-static/resources/protocol/fleth.js
+	rm -f $(PKG_BUILD_DIR)/root/lib/netifd/proto/fleth.sh
+	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/proto-auto.sh
 endif
 ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_IPIP6H
 	# IPIP6H support is included

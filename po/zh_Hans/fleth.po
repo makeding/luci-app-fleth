@@ -371,3 +371,6 @@ msgstr "自动激活隧道"
 
 msgid "Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly."
 msgstr "自动发送 ping 以激活隧道。如果没有流量，某些隧道可能无法正常建立连接。"
+
+msgid "Flet'h automatic IPv4 over IPv6"
+msgstr "Flet'h 自动 IPv4 over IPv6"

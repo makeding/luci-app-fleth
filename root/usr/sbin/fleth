@@ -10,6 +10,8 @@ LOCK_FD=200
 
 FLETH_LEGACY_AUTO_PATH="/usr/share/fleth/legacy-auto.sh"
 [ -f "$FLETH_LEGACY_AUTO_PATH" ] && . "$FLETH_LEGACY_AUTO_PATH"
+FLETH_PROTO_AUTO_PATH="/usr/share/fleth/proto-auto.sh"
+[ -f "$FLETH_PROTO_AUTO_PATH" ] && . "$FLETH_PROTO_AUTO_PATH"
 
 # Commands that don't require UCI configuration
 if [ "$1" = "hook_none.js" ] || [ "$1" = "restore_none.js" ]; then
@@ -424,10 +426,12 @@ get_dslite_provider(){
 }
 
 if [ "$1" = "auto" ]; then
-    if type fleth_legacy_auto >/dev/null 2>&1; then
+    if type fleth_proto_auto >/dev/null 2>&1; then
+        fleth_proto_auto
+    elif type fleth_legacy_auto >/dev/null 2>&1; then
         fleth_legacy_auto
     else
-        echo "ERROR: legacy auto configuration is not installed"
+        echo "ERROR: auto configuration backend is not installed"
         exit 1
     fi
 
