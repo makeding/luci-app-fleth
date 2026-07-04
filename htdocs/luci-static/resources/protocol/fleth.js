@@ -1,4 +1,4 @@
-// Native automatic Flet'H protocol.
+// Native automatic Flet'H IPoE protocol.
 "use strict";
 "require form";
 "require network";
@@ -8,7 +8,7 @@ network.registerPatternVirtual(/^fleth-.+$/);
 
 return network.registerProtocol("fleth", {
   getI18n: function () {
-    return _("Flet'H");
+    return _("Flet'H IPoE");
   },
 
   getIfname: function () {

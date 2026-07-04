@@ -361,21 +361,21 @@ msgstr "協定設定"
 msgid "Automatic tunnel configuration has been removed from this page."
 msgstr "此頁面已移除隧道自動設定功能。"
 
-msgid "Flet'H"
-msgstr "Flet'H"
-
-msgid "Flet'H 固定IP"
-msgstr "Flet'H 固定IP"
-
-msgid "Flet'H 固定IP（透传）"
-msgstr "Flet'H 固定IP（透传）"
-
-msgid "Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H, Flet'H 固定IP, or Flet'H 固定IP（透传）."
-msgstr "開啟 Network → Interfaces，編輯目標介面，然後選擇需要的 Flet'H 家族協定：Flet'H、Flet'H 固定IP 或 Flet'H 固定IP（透传）。"
-
-
 msgid "Flet'H Configuration"
 msgstr "Flet'H 設定"
 
 msgid "Flet'H provides LuCI protocol helpers for IPv4 over IPv6 tunnels."
 msgstr "Flet'H 提供 IPv4 over IPv6 隧道用的 LuCI 協定輔助元件。"
+
+msgid "Flet'H IPoE"
+msgstr "Flet'H IPoE"
+
+
+msgid "Flet'H Static IP"
+msgstr "Flet'H 固定IP"
+
+msgid "Flet'H Static IP (Passthrough)"
+msgstr "Flet'H 固定IP（透传）"
+
+msgid "Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H IPoE, Flet'H Static IP, or Flet'H Static IP (Passthrough)."
+msgstr "開啟 Network → Interfaces，編輯目標介面，然後選擇需要的 Flet'H 家族協定：Flet'H IPoE、Flet'H 固定IP 或 Flet'H 固定IP（透传）。"

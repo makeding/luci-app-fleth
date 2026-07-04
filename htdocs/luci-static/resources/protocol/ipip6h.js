@@ -54,7 +54,7 @@ function fillInterfaceIdFromIPv4() {
 
 return network.registerProtocol('ipip6h', {
 	getI18n: function () {
-		return _("Flet'H 固定IP");
+		return _("Flet'H Static IP");
 	},
 
 	getIfname: function () {

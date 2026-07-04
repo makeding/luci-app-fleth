@@ -11,7 +11,7 @@ o = s:option(DummyValue, "_protocol_setup", translate("Protocol Setup"))
 o.rawhtml = true
 function o.cfgvalue()
 	return "<p>" .. translate("Automatic tunnel configuration has been removed from this page.") .. "</p>" ..
-		"<p>" .. translate("Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H, Flet'H 固定IP, or Flet'H 固定IP（透传）.") .. "</p>"
+		"<p>" .. translate("Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H IPoE, Flet'H Static IP, or Flet'H Static IP (Passthrough).") .. "</p>"
 end
 
 return m

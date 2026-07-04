@@ -243,7 +243,7 @@ return view.extend({
     o.rawhtml = true;
     o.cfgvalue = function () {
       return '<p>' + _("Automatic tunnel configuration has been removed from this page.") + '</p>' +
-        '<p>' + _("Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H, Flet'H 固定IP, or Flet'H 固定IP（透传）.") + '</p>';
+        '<p>' + _("Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H IPoE, Flet'H Static IP, or Flet'H Static IP (Passthrough).") + '</p>';
     };
 
     // LAN IPv6 Configuration section in Tools tab
