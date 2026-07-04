@@ -1,6 +1,6 @@
 {
 	"admin/network/fleth": {
-		"title": "Flet'H Configuration",
+		"title": "Flet'H",
 		"order": 90,
 		"action": {
 			"type": "view",

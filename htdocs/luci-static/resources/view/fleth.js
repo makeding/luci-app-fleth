@@ -135,9 +135,9 @@ return view.extend({
 
     m = new form.JSONMap(
       { global: {} },
-      _("Flet'H Configuration"),
+      _("Flet'H Tools"),
       _(
-        "Flet'H provides LuCI protocol helpers for IPv4 over IPv6 tunnels."
+        "Flet'H provides diagnostics and helper tools for IPv4 over IPv6 tunnels."
       )
     );
 
@@ -225,8 +225,8 @@ return view.extend({
             return E('div', { 'class': 'cbi-value' }, [
               E('label', { 'class': 'cbi-value-title' }, _(fieldLabel)),
               E('div', { 'class': 'cbi-value-field' }, [
-                E('div', { 'class': 'cbi-value-description' }, _('Highlighted ports are easier to remember.')),
-                contentDiv
+                contentDiv,
+                E('div', { 'class': 'cbi-value-description' }, _('Highlighted ports are easier to remember.'))
               ])
             ]);
           }.bind(o);

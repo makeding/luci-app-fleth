@@ -1,7 +1,7 @@
 local m, s, o
 
-m = SimpleForm("fleth", translate("Flet'H Configuration"),
-	translate("Flet'H provides LuCI protocol helpers for IPv4 over IPv6 tunnels."))
+m = SimpleForm("fleth", translate("Flet'H Tools"),
+	translate("Flet'H provides diagnostics and helper tools for IPv4 over IPv6 tunnels."))
 m.reset = false
 m.submit = false
 
