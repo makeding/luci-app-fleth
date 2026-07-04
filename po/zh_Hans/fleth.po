@@ -61,6 +61,9 @@ msgstr "偏移量"
 msgid "Available ports"
 msgstr "可用端口"
 
+msgid "Highlighted ports are easier to remember."
+msgstr "高亮端口是比较好记的候选。"
+
 msgid "Auto Configure tunnel Interface"
 msgstr "自动配置隧道接口"
 

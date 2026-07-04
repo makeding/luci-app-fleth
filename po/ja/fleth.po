@@ -61,6 +61,9 @@ msgstr "オフセット"
 msgid "Available ports"
 msgstr "利用可能なポート"
 
+msgid "Highlighted ports are easier to remember."
+msgstr "ハイライトされたポートは覚えやすい候補です。"
+
 msgid "Auto Configure tunnel Interface"
 msgstr "トンネル自動設定"
 

@@ -230,7 +230,10 @@ return view.extend({
             contentDiv.innerHTML = value;
             return E('div', { 'class': 'cbi-value' }, [
               E('label', { 'class': 'cbi-value-title' }, _(fieldLabel)),
-              E('div', { 'class': 'cbi-value-field' }, contentDiv)
+              E('div', { 'class': 'cbi-value-field' }, [
+                E('div', { 'class': 'cbi-value-description' }, _('Highlighted ports are easier to remember.')),
+                contentDiv
+              ])
             ]);
           }.bind(o);
         } else {
