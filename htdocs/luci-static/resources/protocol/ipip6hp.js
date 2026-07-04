@@ -223,6 +223,10 @@ return network.registerProtocol('ipip6hp', {
 		o.placeholder = '1460';
 		o.datatype = 'range(1280,1500)';
 
+		o = s.taboption('advanced', form.Flag, 'prefer_slaac', _('Prefer SLAAC Address'),
+			_('Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses'));
+		o.default = o.enabled;
+
 		o = s.taboption('advanced', form.Flag, 'allow_shared_device', _('Allow shared passthrough device'),
 			_('Allow the selected device to already have another IPv4 address'));
 		o.default = o.disabled;

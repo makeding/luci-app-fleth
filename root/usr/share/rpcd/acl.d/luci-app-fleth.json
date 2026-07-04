@@ -4,11 +4,7 @@
 		"read": {
 			"file": {
 				"/usr/sbin/fleth": [ "exec" ]
-			},
-			"uci": [ "fleth" ]
-		},
-		"write": {
-            "uci": [ "fleth" ]
+			}
 		}
 	}
 }

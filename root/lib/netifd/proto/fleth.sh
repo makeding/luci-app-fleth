@@ -8,6 +8,7 @@ DONT_SNAT_TO="${DONT_SNAT_TO:-0}"
 [ -n "$INCLUDE_ONLY" ] || {
 	. /lib/functions.sh
 	. /lib/functions/network.sh
+	[ -f /usr/share/fleth/common.sh ] && . /usr/share/fleth/common.sh
 	. ../netifd-proto.sh
 	init_proto "$@"
 }
@@ -306,7 +307,10 @@ proto_fleth_setup_mape() {
 	json_add_string "" "${local_ipv6}/128"
 	json_close_array
 	json_close_object
-	ubus call network add_dynamic "$(json_dump)" >/dev/null 2>&1
+	if ubus call network add_dynamic "$(json_dump)" >/dev/null 2>&1; then
+		type fleth_prefer_slaac_address >/dev/null 2>&1 && fleth_prefer_slaac_address "$cfg" "${tunlink:-wan6}" "$local_ipv6" "$prefer_slaac"
+	fi
+	type fleth_schedule_ping_activation >/dev/null 2>&1 && fleth_schedule_ping_activation "$cfg" "$link"
 
 	if ! fleth_apply_nft_snat "$cfg" "$link" "$FLETH_IPV4ADDR" "$portsets"; then
 		if ! fleth_apply_iptables_snat "$cfg" "$link" "$FLETH_IPV4ADDR" "$portsets"; then
@@ -356,6 +360,7 @@ proto_fleth_setup_dslite() {
 	[ -n "$zone" ] && json_add_string zone "$zone"
 	proto_close_data
 	proto_send_update "$cfg"
+	type fleth_schedule_ping_activation >/dev/null 2>&1 && fleth_schedule_ping_activation "$cfg" "$link"
 
 	echo "type=dslite aftr=$FLETH_AFTR_DOMAIN remote=$FLETH_AFTR" > "/tmp/fleth-$cfg.rules"
 }
@@ -364,7 +369,7 @@ proto_fleth_setup() {
 	local cfg="$1"
 	local iface="$2"
 
-	json_get_vars tunlink mtu ttl encaplimit zone defaultroute metric
+	json_get_vars tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac
 	[ "$zone" = "-" ] && zone=""
 	tunlink="${tunlink:-wan6}"
 
@@ -412,6 +417,7 @@ proto_fleth_init_config() {
 	proto_config_add_string "encaplimit"
 	proto_config_add_boolean "defaultroute"
 	proto_config_add_int "metric"
+	proto_config_add_boolean "prefer_slaac"
 }
 
 [ -n "$INCLUDE_ONLY" ] || {

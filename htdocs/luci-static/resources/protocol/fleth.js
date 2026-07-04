@@ -6,25 +6,6 @@
 
 network.registerPatternVirtual(/^fleth-.+$/);
 
-if (
-  [
-    "/cgi-bin/luci/admin/network/firewall/forwards",
-    "/cgi-bin/luci/admin/network",
-    "/cgi-bin/luci/admin/network/network",
-  ].includes(location.pathname)
-) {
-  try {
-    if (!document.getElementById("fleth-hook-script")) {
-      var script = document.createElement("script");
-      script.id = "fleth-hook-script";
-      script.src = "/luci-static/resources/view/fleth-hook.js";
-      document.head.appendChild(script);
-    }
-  } catch (error) {
-    console.warn(error);
-  }
-}
-
 return network.registerProtocol("fleth", {
   getI18n: function () {
     return _("IPv4 over IPv6 (Flet'h)");
@@ -101,5 +82,14 @@ return network.registerProtocol("fleth", {
     );
     o.placeholder = "1460";
     o.datatype = "range(1280,1500)";
+
+    o = s.taboption(
+      "advanced",
+      form.Flag,
+      "prefer_slaac",
+      _("Prefer SLAAC Address"),
+      _("Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses"),
+    );
+    o.default = o.enabled;
   },
 });

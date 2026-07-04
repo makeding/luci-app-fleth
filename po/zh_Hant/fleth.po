@@ -386,3 +386,15 @@ msgstr "IPv4 over IPv6 (Flet'h)"
 
 msgid "Not installed"
 msgstr "未安裝"
+
+msgid "Flet'h provides LuCI protocol helpers for IPv4 over IPv6 tunnels."
+msgstr "Flet'h 提供 IPv4 over IPv6 隧道用的 LuCI 協定輔助元件。"
+
+msgid "Protocol Setup"
+msgstr "協定設定"
+
+msgid "Automatic tunnel configuration has been removed from this page."
+msgstr "此頁面已移除隧道自動設定功能。"
+
+msgid "Open Network → Interfaces, edit the target interface, then choose the required protocol: Flet'h automatic IPv4 over IPv6, IPv4 over IPv6 (Flet'h), or IPv4 over IPv6 passthrough (Flet'h)."
+msgstr "開啟 Network → Interfaces，編輯目標介面，然後選擇需要的協定：Flet'h automatic IPv4 over IPv6、IPv4 over IPv6 (Flet'h) 或 IPv4 over IPv6 passthrough (Flet'h)。"

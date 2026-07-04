@@ -1,10 +1,8 @@
 "use strict";
 "require view";
 "require fs";
-"require uci";
 "require form";
 "require ui";
-"require tools.widgets as widgets";
 
 // fix css paading (kusa
 const fleth_style = document.createElement("style");
@@ -62,12 +60,10 @@ return view.extend({
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_prefix_length"]), { stdout: "" }),
-      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mapsh_status"]), { stdout: "" }),
     ]).then(function (results) {
       const area = (results[0].stdout || "").trim();
       const mape_status = (results[1].stdout || "").split("\n");
       const prefix_length = (results[2].stdout || "").trim();
-      const mapsh_status = (results[3].stdout || "").trim() || "unavailable";
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
 
@@ -75,8 +71,6 @@ return view.extend({
       const baseData = {
         mape_status: mape_status,
         prefix_length: prefix_length || "UNKNOWN",
-        mapshStatus: mapsh_status,
-        mapIsPatched: mapsh_status === "patched",
       };
 
       if (mape_status[0] === "NURO") areaValue = "UNKNOWN(NURO)";
@@ -139,11 +133,11 @@ return view.extend({
       ]), 'warning');
     }
 
-    m = new form.Map(
-      "fleth",
+    m = new form.JSONMap(
+      { global: {} },
       _("Flet'h Configuration"),
       _(
-        "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
+        "Flet'h provides LuCI protocol helpers for IPv4 over IPv6 tunnels."
       )
     );
 
@@ -245,75 +239,12 @@ return view.extend({
     }
 
 
-    o = s.taboption(
-      "general",
-      form.Flag,
-      "enabled",
-      _("Auto Configure tunnel Interface")
-    );
-    o.rmempty = false;
-    o.default = "0";
-
-
-    o = s.taboption(
-      "general",
-      widgets.NetworkSelect,
-      "interface",
-      _("Tunnel Interface")
-    );
-    o.nocreate = false;
-    o.default = "wan";
-
-    o = s.taboption(
-      "general",
-      widgets.NetworkSelect,
-      "interface6",
-      _("IPv6 Interface"),
-      _("Uplink interface")
-    );
-    o.nocreate = false;
-    o.default = "wan6"
-
-    // https://jp.finalfantasyxiv.com/lodestone/character/2621487/blog/3512706/
-    // = 1460
-    o = s.taboption(
-      "general",
-      form.Value,
-      "mtu",
-      _("Tunnel Interface MTU"),
-      _("We recommend setting MTU to 1460.")
-    );
-    o.datatype = "range(1280,1500)";
-    o.default = "1460";
-
-    o = s.taboption(
-      "general",
-      widgets.ZoneSelect,
-      "interface_zone",
-      _("Tunnel Interface Firewall Zone")
-    );
-    o.nocreate = true;
-    o.default = "wan";
-
-    o = s.taboption(
-      "general",
-      form.Flag,
-      "prefer_slaac",
-      _("Prefer SLAAC Address"),
-      _("Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses")
-    );
-    o.rmempty = false;
-    o.default = "1";
-
-    o = s.taboption(
-      "general",
-      form.Flag,
-      "tunnel_activation",
-      _("Auto Activate Tunnel"),
-      _("Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly.")
-    );
-    o.rmempty = false;
-    o.default = "1";
+    o = s.taboption("general", form.DummyValue, "_protocol_setup", _("Protocol Setup"));
+    o.rawhtml = true;
+    o.cfgvalue = function () {
+      return '<p>' + _("Automatic tunnel configuration has been removed from this page.") + '</p>' +
+        '<p>' + _("Open Network → Interfaces, edit the target interface, then choose the required protocol: Flet'h automatic IPv4 over IPv6, IPv4 over IPv6 (Flet'h), or IPv4 over IPv6 passthrough (Flet'h).") + '</p>';
+    };
 
     // LAN IPv6 Configuration section in Tools tab
     o = s.taboption("tools", form.DummyValue, "_lan_ipv6_recommendation");
@@ -369,58 +300,6 @@ return view.extend({
       return this.applyWan6ClientIdFix(m);
     }, this, m);
 
-    // map.sh Management section in Tools tab
-    o = s.taboption("tools", form.DummyValue, "_mapsh_description");
-    o.title = _("map.sh Management");
-    o.cfgvalue = function () {
-      return _("OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version.") +
-        ' <a href="https://github.com/fakemanhk/openwrt-jp-ipoe/tree/main" target="_blank" style="color: #0088cc;">(' + _("See more") + ')</a>';
-    };
-    o.rawhtml = true;
-
-    o = s.taboption("tools", form.DummyValue, "_mapsh_status");
-    o.title = "&#160;";
-    o.cfgvalue = function () {
-      let icon = "";
-      let text = "";
-
-      if (data.mapshStatus === "patched") {
-        icon = "✓";
-        text = _("Patched version");
-      } else if (data.mapshStatus === "unknown") {
-        icon = "?";
-        text = _("Unknown modified version");
-      } else if (data.mapshStatus === "unavailable") {
-        icon = "⚠";
-        text = _("Not installed");
-      } else {
-        icon = "⚠";
-        text = _("Original version");
-      }
-
-      return '<span style="color: #0088cc; font-weight: bold;">' + icon + ' ' + text + '</span>';
-    };
-    o.rawhtml = true;
-
-    if (data.mapshStatus !== "unavailable") {
-      o = s.taboption("tools", form.Button, "_patch_mapsh");
-      o.title = "&#160;";
-      o.inputtitle = _("Patch");
-      o.inputstyle = data.mapIsPatched ? "cbi-button-action" : "cbi-button-apply";
-      o.onclick = L.bind(function (m) {
-        return this.patchMapSh(m);
-      }, this, m);
-
-      o = s.taboption("tools", form.Button, "_restore_mapsh");
-      o.title = "&#160;";
-      o.inputtitle = _("Restore");
-      o.inputstyle = "cbi-button-action";
-      o.onclick = L.bind(function (m) {
-        return this.restoreMapSh(m);
-      }, this, m);
-      o.depends("_patch_mapsh", "");
-    }
-
     const renderedNode = await m.render();
 
     // Hide footer when tools tab is active
@@ -458,17 +337,11 @@ return view.extend({
     const command = mode === 'slaac' ? 'setup_ipv6_slaac' : 'setup_ipv6_pd';
 
     return new Promise(function (resolve, reject) {
-      // First save current configuration
-      mapObj.save()
-        .then(function () {
-          // Show loading message
-          ui.showModal(_('Configuring LAN IPv6'), [
-            E('p', { 'class': 'spinning' }, _('Applying ' + modeText + ' configuration...'))
-          ]);
+      ui.showModal(_('Configuring LAN IPv6'), [
+        E('p', { 'class': 'spinning' }, _('Applying ' + modeText + ' configuration...'))
+      ]);
 
-          // Execute the IPv6 setup
-          return fs.exec('/usr/sbin/fleth', [command]);
-        })
+      fs.exec('/usr/sbin/fleth', [command])
         .then(function (result) {
           ui.hideModal();
 
@@ -504,14 +377,11 @@ return view.extend({
 
   applyWan6ClientIdFix: function (mapObj) {
     return new Promise(function (resolve, reject) {
-      mapObj.save()
-        .then(function () {
-          ui.showModal(_('Applying Fix'), [
-            E('p', { 'class': 'spinning' }, _('Setting Uplink Client ID...'))
-          ]);
+      ui.showModal(_('Applying Fix'), [
+        E('p', { 'class': 'spinning' }, _('Setting Uplink Client ID...'))
+      ]);
 
-          return fs.exec('/usr/sbin/fleth', ['set_wan6_clientid']);
-        })
+      fs.exec('/usr/sbin/fleth', ['set_wan6_clientid'])
         .then(function (result) {
           ui.hideModal();
 
@@ -537,58 +407,4 @@ return view.extend({
     });
   },
 
-  manageMapSh: function (mapObj, action) {
-    const actionConfig = {
-      patch: { verb: _('Patching'), gerund: _('Downloading...') },
-      restore: { verb: _('Restoring'), gerund: _('Restoring...') }
-    };
-
-    const config = actionConfig[action];
-    const actionLower = action.toLowerCase();
-
-    return new Promise(function (resolve, reject) {
-      mapObj.save()
-        .then(function () {
-          ui.showModal(config.verb, [
-            E('p', { 'class': 'spinning' }, config.gerund)
-          ]);
-
-          return fs.exec('/usr/sbin/fleth', [action + '_map.sh']);
-        })
-        .then(function (result) {
-          ui.hideModal();
-
-          if (result.code === 0 && result.stdout.trim() === 'SUCCESS') {
-            ui.addNotification(null, E('p', _('Operation completed successfully! Please restart the network interface manually.')), 'info');
-
-            setTimeout(function () {
-              window.location.reload();
-            }, 5000);
-          } else {
-            ui.addNotification(null, E('div', [
-              E('p', _('Failed to ' + actionLower + ':')),
-              E('pre', result.stdout || result.stderr || 'Unknown error')
-            ]), 'error');
-          }
-
-          resolve();
-        })
-        .catch(function (error) {
-          ui.hideModal();
-          ui.addNotification(null, E('div', [
-            E('p', _('Error ' + config.gerund.toLowerCase() + ':')),
-            E('pre', error.message || error)
-          ]), 'error');
-          reject(error);
-        });
-    });
-  },
-
-  patchMapSh: function (mapObj) {
-    return this.manageMapSh(mapObj, 'patch');
-  },
-
-  restoreMapSh: function (mapObj) {
-    return this.manageMapSh(mapObj, 'restore');
-  },
 });

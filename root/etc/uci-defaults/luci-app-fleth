@@ -2,15 +2,13 @@
 
 for file in \
     /usr/sbin/fleth \
-    /etc/init.d/fleth \
     /lib/netifd/proto/fleth.sh \
     /lib/netifd/proto/ipip6h.sh \
     /lib/netifd/proto/ipip6hp.sh \
     /usr/share/fleth/firewall.include \
-    /usr/share/fleth/ipip6hp-hotplug.sh \
-    /usr/share/fleth/legacy-auto.sh \
-    /usr/share/fleth/proto-auto.sh \
-    /usr/share/fleth/map.sh; do
+    /usr/share/fleth/common.sh \
+    /usr/share/fleth/ipip6h-common.sh \
+    /usr/share/fleth/ipip6hp-hotplug.sh; do
     [ -f "$file" ] && chmod +x "$file"
 done
 
@@ -19,32 +17,7 @@ if [ -d /usr/share/luci/menu.d ]; then
     rm -f /usr/lib/lua/luci/model/cbi/fleth.lua
 fi
 
-if [ ! -f /etc/config/fleth ]; then
-    cat <<EOF > /etc/config/fleth
-config fleth 'global'
-	option enabled '0'
-	option interface 'wan'
-	option interface_zone 'wan'
-	option interface6 'wan6'
-	option mtu '1460'
-	option prefer_slaac '1'
-	option tunnel_activation '1'
-EOF
-else
-    sed -i '/option ip6prefix_enabled/d' /etc/config/fleth
-    sed -i '/option cron_dhcpv6_renew_enabled/d' /etc/config/fleth
-    sed -i '/option type/d' /etc/config/fleth
-    # Add prefer_slaac option if not exists
-    if ! grep -q "option prefer_slaac" /etc/config/fleth; then
-        uci set fleth.global.prefer_slaac='1'
-        uci commit fleth
-    fi
-    # Add tunnel_activation option if not exists
-    if ! grep -q "option tunnel_activation" /etc/config/fleth; then
-        uci set fleth.global.tunnel_activation='1'
-        uci commit fleth
-    fi
-fi
+rm -f /etc/config/fleth
 
 if [ -f /usr/share/fleth/firewall.include ] && ! uci -q get firewall.fleth_ipip6hp >/dev/null; then
     uci set firewall.fleth_ipip6hp='include'

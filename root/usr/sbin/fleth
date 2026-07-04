@@ -4,32 +4,29 @@
 DNS_E=2404:1a8:7f01:a::3
 DNS_W=2001:a7ff:5f01::a
 
-# Lock file for preventing concurrent execution
-LOCK_FILE="/var/run/fleth.lock"
-LOCK_FD=200
+detect_uplink_interface() {
+    local cfg tunlink
 
-FLETH_LEGACY_AUTO_PATH="/usr/share/fleth/legacy-auto.sh"
-[ -f "$FLETH_LEGACY_AUTO_PATH" ] && . "$FLETH_LEGACY_AUTO_PATH"
-FLETH_PROTO_AUTO_PATH="/usr/share/fleth/proto-auto.sh"
-[ -f "$FLETH_PROTO_AUTO_PATH" ] && . "$FLETH_PROTO_AUTO_PATH"
+    for proto in fleth ipip6h ipip6hp; do
+        for cfg in $(uci show network 2>/dev/null | sed -n "s/^network\.\([^.=]*\)\.proto='$proto'$/\1/p"); do
+            tunlink=$(uci get network.${cfg}.tunlink 2>/dev/null)
+            if [ -n "$tunlink" ]; then
+                echo "$tunlink"
+                return
+            fi
+        done
+    done
 
-# Commands that don't require UCI configuration
-if [ "$1" = "hook_none.js" ] || [ "$1" = "restore_none.js" ]; then
-    # Skip UCI configuration checks for these commands
-    :
-else
-    # Note: UCI variables are not validated here as malicious modification
-    h_ENABLED=$(uci get fleth.global.enabled 2>/dev/null)
-    h_TUNNEL_INTERFACE=$(uci get fleth.global.interface 2>/dev/null)
-    h_TUNNEL_INTERFACE_MTU=$(uci get fleth.global.mtu 2>/dev/null)
-    h_TUNNEL_INTERFACE_zone=$(uci get fleth.global.interface_zone 2>/dev/null)
-    h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
-
-    if [ -z "$h_ENABLED" ] || [ -z "$h_TUNNEL_INTERFACE" ] || [ -z "$h_TUNNEL_INTERFACE_MTU" ] || [ -z "$h_UPLINK_INTERFACE" ]; then
-        echo "Failed to retrieve one or more configuration values"
-        exit 1
+    if uci -q get network.wan6.proto >/dev/null; then
+        echo "wan6"
+        return
     fi
-fi
+
+    cfg=$(uci show network 2>/dev/null | sed -n "s/^network\.\([^.=]*\)\.proto='dhcpv6'$/\1/p" | head -n 1)
+    [ -n "$cfg" ] && echo "$cfg" || echo "wan6"
+}
+
+h_UPLINK_INTERFACE="${FLETH_UPLINK_INTERFACE:-$(detect_uplink_interface)}"
 
 # real xxxx
 r_TYPE="UNKNOWN"
@@ -128,29 +125,6 @@ filter_global_ipv6() {
     grep -viE '^(fe80|f[cd][0-9a-f][0-9a-f]|::|::1|::ffff:0:0|::/96)' | head -n 1
 }
 
-# Verify file SHA256 checksum
-# Usage: verify_sha256 <file_path> <expected_hash>
-# Returns: 0 if match, 1 if mismatch or sha256sum not available
-verify_sha256() {
-    local file_path="$1"
-    local expected_hash="$2"
-
-    if ! command -v sha256sum >/dev/null 2>&1; then
-        logger -t fleth "WARNING: sha256sum not available, skipping checksum verification"
-        return 0  # Continue without verification if tool unavailable
-    fi
-
-    local actual_hash=$(sha256sum "$file_path" | awk '{print $1}')
-
-    if [ "$actual_hash" != "$expected_hash" ]; then
-        logger -t fleth "ERROR: SHA256 checksum mismatch!"
-        logger -t fleth "Expected: $expected_hash"
-        logger -t fleth "Got:      $actual_hash"
-        return 1
-    fi
-    return 0
-}
-
 get_uplink_interface_ipv6() {
     ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} 2>/dev/null | grep '"address"' | awk -F '"' '{print $4}' | filter_global_ipv6)
     echo $ipv6_address
@@ -235,6 +209,7 @@ check_prefix_alignment() {
     # Returns: "ALIGNED" or "NOT_ALIGNED:hextet" or "SKIPPED:/XX"
 
     local ipv6_addr="${1:-$(get_uplink_interface_ipv6)}"
+    local prefix_len="${2:-$(get_uplink_prefix_length)}"
 
     if [ -z "$ipv6_addr" ]; then
         echo "ERROR:NO_IPV6_ADDRESS"
@@ -242,7 +217,6 @@ check_prefix_alignment() {
     fi
 
     # Check prefix length - /56 and /64 skip alignment check
-    local prefix_len=$(get_uplink_prefix_length)
     if [ "$prefix_len" = "56" ] || [ "$prefix_len" = "64" ]; then
         echo "SKIPPED:/$prefix_len"
         return 0
@@ -278,69 +252,6 @@ check_prefix_alignment() {
     return 0
 }
 
-auto_setup_ipv6_mode() {
-    # Automatically detect and configure IPv6 mode based on prefix length
-    local prefix_len=$(get_uplink_prefix_length)
-
-    if [ -z "$prefix_len" ]; then
-        logger -t fleth "Unable to detect IPv6 prefix length, skipping auto IPv6 mode configuration"
-        return 1
-    fi
-
-    logger -t fleth "Detected IPv6 prefix length: /$prefix_len"
-
-    if [ "$prefix_len" = "56" ]; then
-        logger -t fleth "Detected /56 prefix, configuring PD mode"
-        $0 setup_ipv6_pd
-    elif [ "$prefix_len" = "64" ]; then
-        logger -t fleth "Detected /64 prefix, configuring SLAAC mode"
-        $0 setup_ipv6_slaac
-    else
-        logger -t fleth "Unexpected prefix length /$prefix_len, skipping auto configuration"
-        return 1
-    fi
-}
-
-auto_configure_extendprefix() {
-    # Automatically configure extendprefix based on IPv6 prefix length
-    # /56 (PD mode) - extendprefix should NOT be set
-    # /64 (SLAAC mode) - extendprefix should be set to 1
-    local prefix_len=$(get_uplink_prefix_length)
-
-    if [ -z "$prefix_len" ]; then
-        logger -t fleth "Unable to detect IPv6 prefix length, skipping extendprefix auto-configuration"
-        return 1
-    fi
-
-    local current_extendprefix=$(uci get network.${h_UPLINK_INTERFACE}.extendprefix 2>/dev/null)
-    local config_changed=0
-
-    if [ "$prefix_len" = "56" ]; then
-        # For /56 (PD mode), extendprefix should NOT be set
-        if [ -n "$current_extendprefix" ]; then
-            logger -t fleth "Detected /56 prefix, removing extendprefix from ${h_UPLINK_INTERFACE}"
-            uci delete network.${h_UPLINK_INTERFACE}.extendprefix 2>/dev/null
-            config_changed=1
-        fi
-    elif [ "$prefix_len" = "64" ]; then
-        # For /64 (SLAAC mode), extendprefix should be set to 1
-        if [ "$current_extendprefix" != "1" ]; then
-            logger -t fleth "Detected /64 prefix, setting extendprefix=1 on ${h_UPLINK_INTERFACE}"
-            uci set network.${h_UPLINK_INTERFACE}.extendprefix=1
-            config_changed=1
-        fi
-    fi
-
-    # Only commit and restart if configuration changed
-    if [ "$config_changed" = "1" ]; then
-        uci commit network
-        logger -t fleth "Restarting ${h_UPLINK_INTERFACE} due to extendprefix configuration change"
-        ifdown ${h_UPLINK_INTERFACE}; sleep 2; ifup ${h_UPLINK_INTERFACE}
-    fi
-
-    return 0
-}
-
 # https://ipv4.web.fc2.com/map-e.html
 get_mape_provider() {
     # I can't rewritten calc logic with shell, asking lua for help
@@ -367,31 +278,6 @@ $t_DATA
 EOF
         r_TYPE="map-e"
     fi
-}
-
-get_mape_psid() {
-    local ipv6="$1"
-    local psidlen="$2"
-    local fourth_hextet
-    local high_byte
-    local psid
-
-    fourth_hextet=$(echo "$ipv6" | sed 's/%.*$//' | cut -d: -f4)
-    high_byte=$(printf "%04x" "0x$fourth_hextet" 2>/dev/null | sed 's/..$//')
-    [ -n "$high_byte" ] || return 1
-
-    psid=$(printf "%d" "0x$high_byte" 2>/dev/null)
-    [ -n "$psid" ] || return 1
-
-    if [ "$psidlen" = "6" ]; then
-        psid=$(((psid & 63) << 10))
-    elif [ "$psidlen" = "8" ]; then
-        psid=$((psid << 8))
-    else
-        return 1
-    fi
-
-    echo "$psid"
 }
 
 # https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
@@ -425,17 +311,7 @@ get_dslite_provider(){
     echo $r_AFTR
 }
 
-if [ "$1" = "auto" ]; then
-    if type fleth_proto_auto >/dev/null 2>&1; then
-        fleth_proto_auto
-    elif type fleth_legacy_auto >/dev/null 2>&1; then
-        fleth_legacy_auto
-    else
-        echo "ERROR: auto configuration backend is not installed"
-        exit 1
-    fi
-
-elif [ "$1" = "mape_status" ]; then
+if [ "$1" = "mape_status" ]; then
     get_uplink_interface_ipv6 > /dev/null
     get_mape_provider
 elif [ "$1" = "get_area" ]; then
@@ -456,18 +332,6 @@ elif [ "$1" = "get_prefix_length" ]; then
     fi
 elif [ "$1" = "check_alignment" ]; then
     check_prefix_alignment "$2"
-elif [ "$1" = "auto_setup_ipv6" ]; then
-    auto_setup_ipv6_mode
-elif [ "$1" = "mapsh_status" ]; then
-    if type fleth_legacy_mapsh_status >/dev/null 2>&1; then
-        fleth_legacy_mapsh_status
-    else
-        echo "unavailable"
-    fi
-elif [ "$1" = "hook_none.js" || "$1" = "restore_none.js" ]; then
-    if grep -q "fleth-hook.js" /www/luci-static/resources/protocol/none.js 2>/dev/null; then
-        printf "'use strict';'require network';return network.registerProtocol('none',{getI18n:function(){return _('Unmanaged');}});" > /www/luci-static/resources/protocol/none.js
-    fi
 elif [ "$1" = "setup_ipv6_slaac" ]; then
     # Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa (/64)
     logger -t fleth "Starting IPv6 SLAAC configuration"
@@ -586,53 +450,7 @@ elif [ "$1" = "set_wan6_clientid" ]; then
     restart_uplink_interface
 
     echo "SUCCESS"
-elif [ "$1" = "patch_map.sh" ]; then
-    if type fleth_legacy_patch_mapsh >/dev/null 2>&1; then
-        fleth_legacy_patch_mapsh
-    else
-        echo "ERROR: legacy map.sh management is not installed"
-        exit 1
-    fi
-elif [ "$1" = "restore_map.sh" ]; then
-    if type fleth_legacy_restore_mapsh >/dev/null 2>&1; then
-        fleth_legacy_restore_mapsh
-    else
-        echo "ERROR: legacy map.sh management is not installed"
-        exit 1
-    fi
 else
-    echo "Flet'h by huggy"
-    echo "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically in Japan."
-    echo ""
-    echo "Usage: fleth <command> [arguments]"
-    echo ""
-    echo "Tunnel Configuration Commands:"
-    echo "  auto                  Configure the tunnel settings based on current state and config."
-    echo ""
-    echo "Status and Detection Commands:"
-    echo "  pending_status        Show if the service is in pending state."
-    echo "  get_area              Show the current area information (EAST/WEST)."
-    echo "  get_dslite_provider   Show the current DS-Lite provider details."
-    echo "  mape_status           Show the current MAP-E provider details."
-    echo "  get_prefix_length     Show the detected IPv6 prefix length (/56 or /64)."
-    echo "  check_alignment [ip]  Check if prefix is aligned for MAP-E/IPIP6 (4th hextet ends with 00)."
-    echo "  mapsh_status          Show if map.sh is patched, original, or unknown."
-    echo ""
-    echo "IPv6 Configuration Commands:"
-    echo "  auto_setup_ipv6       Auto-detect prefix and configure PD (/56) or SLAAC (/64) mode."
-    echo "  setup_ipv6_slaac      Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa (/64)."
-    echo "  setup_ipv6_pd         Configure IPv6 PD for CROSS(10Gbps) or with Hikari Denwa (/56)."
-    echo "  set_wan6_clientid     Set uplink client ID to 00030001\$MAC and restart uplink."
-    echo ""
-    echo "File Patches:"
-    echo "  patch_map.sh          Patch map.sh with fixed version (backup created if not exists)."
-    echo "  restore_map.sh        Restore original map.sh from backup."
-    echo ""
-    echo "To modify settings, try these examples below:"
-    echo "uci show fleth.global"
-    echo "uci set fleth.global.enabled=1"
-    echo "uci commit"
-    echo ""
-    echo "For more details, consult the documentation:"
-    echo "https://fleth.link/"
+    echo "ERROR: unsupported internal command"
+    exit 1
 fi

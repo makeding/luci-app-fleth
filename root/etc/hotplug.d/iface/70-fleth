@@ -1,15 +1,8 @@
 #!/bin/ash
-# Automatic fleth configuration on interface changes
-# Runs 'fleth auto' when the uplink IPv6 interface comes up
+# ipip6hp firewall rule maintenance on interface changes
 
 [ -f /usr/share/fleth/ipip6hp-hotplug.sh ] && . /usr/share/fleth/ipip6hp-hotplug.sh
 
-h_ENABLED=$(uci get fleth.global.enabled 2>/dev/null)
-h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
-h_PREFER_SLAAC=$(uci get fleth.global.prefer_slaac 2>/dev/null)
-h_TUNNEL_ACTIVATION=$(uci get fleth.global.tunnel_activation 2>/dev/null)
-
-# Get interface protocol type for interface-related operations
 if [ "$ACTION" = "ifup" ] || [ "$ACTION" = "ifdown" ]; then
     proto=$(uci get network.${INTERFACE}.proto 2>/dev/null)
 fi
@@ -24,85 +17,4 @@ fi
 
 if [ "$ACTION" = "ifdown" ] && [ "$proto" = "ipip6hp" ]; then
     type fleth_remove_ipip6hp_rules >/dev/null 2>&1 && fleth_remove_ipip6hp_rules "$INTERFACE"
-fi
-
-# Exit if fleth is not enabled or interface is not configured
-[ "$h_ENABLED" != "1" ] && exit 0
-[ -z "$h_UPLINK_INTERFACE" ] && exit 0
-
-# Run fleth auto when the uplink interface comes up
-if [ "$INTERFACE" = "$h_UPLINK_INTERFACE" ] && [ "$ACTION" = "ifup" ]; then
-    logger -t fleth-hotplug "Interface $INTERFACE up, running fleth auto"
-    /usr/sbin/fleth auto &
-fi
-
-# Connectivity test for tunnel interfaces
-if [ "$h_TUNNEL_ACTIVATION" = "1" ] && [ "$ACTION" = "ifup" ]; then
-    case "$proto" in
-        fleth|map|dslite|ipip6|ipip6h)
-            # Kill previous waiting process if exists
-            PID_FILE="/var/run/fleth-tunnel-${INTERFACE}.pid"
-            if [ -f "$PID_FILE" ]; then
-                old_pid=$(cat "$PID_FILE" 2>/dev/null)
-                [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null && kill "$old_pid" 2>/dev/null
-            fi
-
-            # Non-blocking delayed ping to activate tunnel
-            (
-                echo $$ > "$PID_FILE"
-                sleep 30
-
-                # Check if interface is still up
-                if ! ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.up' 2>/dev/null | grep -q true; then
-                    rm -f "$PID_FILE"
-                    exit 0
-                fi
-
-                # Get actual device name for the interface
-                device=$(ifstatus ${INTERFACE} 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)
-
-                if [ -n "$device" ]; then
-                    ping -I "$device" 1.1.1.1 -c 1 -W 3 >/dev/null 2>&1
-                fi
-
-                rm -f "$PID_FILE"
-            ) &
-            ;;
-    esac
-fi
-
-# Deprecate static /128 addresses to prioritize SLAAC
-if [ "$h_PREFER_SLAAC" = "1" ]; then
-    should_check=0
-
-    # Check on tunnel interface ifup or wan6 ifupdate
-    if [ "$ACTION" = "ifup" ]; then
-        case "$proto" in
-            fleth|map|ipip6|ipip6h|ipip6hp)
-                should_check=1
-                ;;
-        esac
-    elif [ "$ACTION" = "ifupdate" ] && [ "$INTERFACE" = "$h_UPLINK_INTERFACE" ]; then
-        should_check=1
-    fi
-
-    if [ "$should_check" = "1" ]; then
-        device=$(uci get network.${h_UPLINK_INTERFACE}.device 2>/dev/null)
-        if [ -n "$device" ]; then
-            ip -6 addr show dev "$device" scope global 2>/dev/null | while read -r line; do
-                if echo "$line" | grep -q "inet6"; then
-                    addr=$(echo "$line" | awk '{print $2}')
-                    if echo "$addr" | grep -q "/128$"; then
-                        echo "$line" | grep -q "deprecated" && continue
-                        echo "$line" | grep -q "dynamic" && continue
-                        read -r nextline
-                        echo "$nextline" | grep -q "preferred_lft 0" && continue
-                        clean_addr=$(echo "$addr" | cut -d'/' -f1)
-                        ip -6 addr change "$clean_addr"/128 dev "$device" preferred_lft 0
-                        logger -t fleth-hotplug "Deprecated static /128 address $clean_addr on $device"
-                    fi
-                fi
-            done
-        fi
-    fi
 fi
