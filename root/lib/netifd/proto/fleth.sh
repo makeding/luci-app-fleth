@@ -375,6 +375,7 @@ proto_fleth_setup_dslite() {
 	local cfg="$1"
 	local link="fleth-$cfg"
 	local remoteip6 ip6
+	local local_ip6
 	local ip4addr="192.0.0.2"
 	local ip4gateway="192.0.0.1"
 
@@ -390,6 +391,16 @@ proto_fleth_setup_dslite() {
 		return
 	}
 
+	if ! network_get_ipaddr6 local_ip6 "$tunlink"; then
+		[ -n "$weakif" ] || weakif="lan"
+		network_get_ipaddr6 local_ip6 "$weakif"
+	fi
+	[ -n "$local_ip6" ] || local_ip6="$FLETH_IPV6ADDR"
+	[ -n "$local_ip6" ] || {
+		proto_notify_error "$cfg" "NO_LOCAL_IPV6"
+		return
+	}
+
 	proto_init_update "$link" 1
 	: ${defaultroute:=1}
 	[ "$defaultroute" -eq 1 ] && {
@@ -402,8 +413,8 @@ proto_fleth_setup_dslite() {
 	json_add_string mode ipip6
 	json_add_int mtu "${mtu:-1460}"
 	json_add_int ttl "${ttl:-64}"
+	json_add_string local "$local_ip6"
 	json_add_string remote "$FLETH_AFTR"
-	[ -n "$FLETH_IPV6ADDR" ] && json_add_string local "$FLETH_IPV6ADDR"
 	[ -n "$tunlink" ] && json_add_string link "$tunlink"
 	json_add_object "data"
 		[ -n "$encaplimit" ] && json_add_string encaplimit "$encaplimit"
@@ -430,17 +441,11 @@ proto_fleth_setup() {
 	local cfg="$1"
 	local iface="$2"
 
-	json_get_vars tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac auto_activate custom_aftr_enabled custom_aftr_preset custom_aftr
+	json_get_vars tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac auto_activate weakif custom_aftr_enabled custom_aftr_preset custom_aftr
 	[ "$zone" = "-" ] && zone=""
 	tunlink="${tunlink:-wan6}"
 
 	( proto_add_host_dependency "$cfg" "::" "$tunlink" )
-
-	FLETH_IPV6ADDR=$(fleth_get_uplink_ipv6 "$tunlink")
-	if [ -z "$FLETH_IPV6ADDR" ]; then
-		proto_notify_error "$cfg" "NO_LOCAL_IPV6"
-		return
-	fi
 
 	if fleth_has_custom_dslite_provider; then
 		if fleth_get_custom_dslite_provider; then
@@ -453,7 +458,8 @@ proto_fleth_setup() {
 		return
 	fi
 
-	if fleth_detect_mape "$FLETH_IPV6ADDR"; then
+	FLETH_IPV6ADDR=$(fleth_get_uplink_ipv6 "$tunlink")
+	if [ -n "$FLETH_IPV6ADDR" ] && fleth_detect_mape "$FLETH_IPV6ADDR"; then
 		logger -t fleth "[${cfg}] detected MAP-E provider $FLETH_PROVIDER"
 		proto_fleth_setup_mape "$cfg" "$iface"
 		return
@@ -497,6 +503,7 @@ proto_fleth_init_config() {
 	proto_config_add_int "metric"
 	proto_config_add_boolean "prefer_slaac"
 	proto_config_add_boolean "auto_activate"
+	proto_config_add_string "weakif"
 	proto_config_add_boolean "custom_aftr_enabled"
 	proto_config_add_string "custom_aftr_preset"
 	proto_config_add_string "custom_aftr"
