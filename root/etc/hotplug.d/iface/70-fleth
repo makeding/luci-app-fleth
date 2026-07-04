@@ -2,7 +2,7 @@
 # Automatic fleth configuration on interface changes
 # Runs 'fleth auto' when the uplink IPv6 interface comes up
 
-. /usr/share/fleth/ipip6hp-hotplug.sh
+[ -f /usr/share/fleth/ipip6hp-hotplug.sh ] && . /usr/share/fleth/ipip6hp-hotplug.sh
 
 h_ENABLED=$(uci get fleth.global.enabled 2>/dev/null)
 h_UPLINK_INTERFACE=$(uci get fleth.global.interface6 2>/dev/null)
@@ -18,12 +18,12 @@ fi
 if [ "$ACTION" = "ifup" ] && [ "$proto" = "ipip6hp" ]; then
     (
         sleep 1
-        fleth_apply_ipip6hp_rules "$INTERFACE"
+        type fleth_apply_ipip6hp_rules >/dev/null 2>&1 && fleth_apply_ipip6hp_rules "$INTERFACE"
     ) &
 fi
 
 if [ "$ACTION" = "ifdown" ] && [ "$proto" = "ipip6hp" ]; then
-    fleth_remove_ipip6hp_rules "$INTERFACE"
+    type fleth_remove_ipip6hp_rules >/dev/null 2>&1 && fleth_remove_ipip6hp_rules "$INTERFACE"
 fi
 
 # Exit if fleth is not enabled or interface is not configured

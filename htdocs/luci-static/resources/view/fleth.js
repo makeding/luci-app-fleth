@@ -366,52 +366,54 @@ return view.extend({
       return this.applyWan6ClientIdFix(m);
     }, this, m);
 
-    // map.sh Management section in Tools tab
-    o = s.taboption("tools", form.DummyValue, "_mapsh_description");
-    o.title = _("map.sh Management");
-    o.cfgvalue = function () {
-      return _("OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version.") +
-        ' <a href="https://github.com/fakemanhk/openwrt-jp-ipoe/tree/main" target="_blank" style="color: #0088cc;">(' + _("See more") + ')</a>';
-    };
-    o.rawhtml = true;
+    if (data.mapshStatus !== "unavailable") {
+      // map.sh Management section in Tools tab
+      o = s.taboption("tools", form.DummyValue, "_mapsh_description");
+      o.title = _("map.sh Management");
+      o.cfgvalue = function () {
+        return _("OpenWrt's map.sh has bugs: only the first port group works and ICMP is broken. Click below to replace with the fixed version.") +
+          ' <a href="https://github.com/fakemanhk/openwrt-jp-ipoe/tree/main" target="_blank" style="color: #0088cc;">(' + _("See more") + ')</a>';
+      };
+      o.rawhtml = true;
 
-    o = s.taboption("tools", form.DummyValue, "_mapsh_status");
-    o.title = "&#160;";
-    o.cfgvalue = function () {
-      let icon = "";
-      let text = "";
+      o = s.taboption("tools", form.DummyValue, "_mapsh_status");
+      o.title = "&#160;";
+      o.cfgvalue = function () {
+        let icon = "";
+        let text = "";
 
-      if (data.mapshStatus === "patched") {
-        icon = "✓";
-        text = _("Patched version");
-      } else if (data.mapshStatus === "unknown") {
-        icon = "?";
-        text = _("Unknown modified version");
-      } else {
-        icon = "⚠";
-        text = _("Original version");
-      }
+        if (data.mapshStatus === "patched") {
+          icon = "✓";
+          text = _("Patched version");
+        } else if (data.mapshStatus === "unknown") {
+          icon = "?";
+          text = _("Unknown modified version");
+        } else {
+          icon = "⚠";
+          text = _("Original version");
+        }
 
-      return '<span style="color: #0088cc; font-weight: bold;">' + icon + ' ' + text + '</span>';
-    };
-    o.rawhtml = true;
+        return '<span style="color: #0088cc; font-weight: bold;">' + icon + ' ' + text + '</span>';
+      };
+      o.rawhtml = true;
 
-    o = s.taboption("tools", form.Button, "_patch_mapsh");
-    o.title = "&#160;";
-    o.inputtitle = _("Patch");
-    o.inputstyle = data.mapIsPatched ? "cbi-button-action" : "cbi-button-apply";
-    o.onclick = L.bind(function (m) {
-      return this.patchMapSh(m);
-    }, this, m);
+      o = s.taboption("tools", form.Button, "_patch_mapsh");
+      o.title = "&#160;";
+      o.inputtitle = _("Patch");
+      o.inputstyle = data.mapIsPatched ? "cbi-button-action" : "cbi-button-apply";
+      o.onclick = L.bind(function (m) {
+        return this.patchMapSh(m);
+      }, this, m);
 
-    o = s.taboption("tools", form.Button, "_restore_mapsh");
-    o.title = "&#160;";
-    o.inputtitle = _("Restore");
-    o.inputstyle = "cbi-button-action";
-    o.onclick = L.bind(function (m) {
-      return this.restoreMapSh(m);
-    }, this, m);
-    o.depends("_patch_mapsh", "");
+      o = s.taboption("tools", form.Button, "_restore_mapsh");
+      o.title = "&#160;";
+      o.inputtitle = _("Restore");
+      o.inputstyle = "cbi-button-action";
+      o.onclick = L.bind(function (m) {
+        return this.restoreMapSh(m);
+      }, this, m);
+      o.depends("_patch_mapsh", "");
+    }
 
     const renderedNode = await m.render();
 

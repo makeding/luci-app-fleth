@@ -8,28 +8,22 @@ PKG_RELEASE:=1
 
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+luci-base +lua +luci-proto-ipv6 \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_MAP:map \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_DSLITE:ds-lite
+	+PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO:map \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO:ds-lite
 
 
 PKG_CONFIG_DEPENDS:= \
-	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_MAP \
-	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_DSLITE \
+	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6HP
 
 define Package/luci-app-fleth/config
-	config PACKAGE_$(PKG_NAME)_INCLUDE_MAP
-		bool "Include MAP-E support"
+	config PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO
+		bool "Include legacy MAP-E/DS-Lite auto configuration"
 		default y
 		help
-		  Include MAP-E tunnel protocol support.
-
-	config PACKAGE_$(PKG_NAME)_INCLUDE_DSLITE
-		bool "Include DS-Lite support"
-		default y
-		help
-		  Include DS-Lite tunnel protocol support.
+		  Include the legacy auto-configuration helper that writes
+		  OpenWrt's map and dslite protocols into UCI.
 
 	config PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H
 		bool "Include luci-proto-ipip6h"
@@ -51,6 +45,13 @@ include $(TOPDIR)/feeds/luci/luci.mk
 
 define Build/Compile
 	$(call Build/Compile/Default)
+ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_LEGACY_AUTO
+	# Legacy MAP-E/DS-Lite auto configuration is included
+else
+	# Remove legacy invasive auto-configuration files if not selected
+	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/legacy-auto.sh
+	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/map.sh
+endif
 ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_IPIP6H
 	# IPIP6H support is included
 else

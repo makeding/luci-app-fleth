@@ -8,6 +8,7 @@ on:
     branches:
       - master
       - test-ci
+      - dev
 jobs:
   build:
     name: Build ${{ matrix.package_type }}
