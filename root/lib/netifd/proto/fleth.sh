@@ -39,7 +39,11 @@ fleth_get_aaaa_record() {
 	local domain="$1"
 	local result
 
-	result=$(nslookup -type=AAAA "$domain" "$DNS" 2>/dev/null | grep "Address:")
+	if [ -n "$DNS" ]; then
+		result=$(nslookup -type=AAAA "$domain" "$DNS" 2>/dev/null | grep "Address:")
+	else
+		result=$(nslookup -type=AAAA "$domain" 2>/dev/null | grep "Address:")
+	fi
 	[ -n "$result" ] && echo "$result" | awk 'NR==2' | awk '{print $2}'
 }
 
@@ -65,7 +69,13 @@ fleth_set_dslite_provider() {
 	local domain="$1"
 	local aftr
 
-	aftr=$(fleth_get_aaaa_record "$domain")
+	case "$domain" in
+		*:*) aftr="$domain" ;;
+		*)
+			aftr=$(fleth_get_aaaa_record "$domain")
+			[ -n "$aftr" ] || aftr=$(resolveip -6 "$domain" 2>/dev/null | head -n 1)
+			;;
+	esac
 	[ -n "$aftr" ] || return 1
 
 	FLETH_TYPE="dslite"
@@ -74,18 +84,30 @@ fleth_set_dslite_provider() {
 	return 0
 }
 
-fleth_get_dslite_provider() {
-	local transix xpass asahi
+fleth_has_custom_dslite_provider() {
+	[ -n "$custom_aftr" ] && return 0
+	[ "$custom_aftr_enabled" = "1" ] && [ -n "$custom_aftr_preset" ] && return 0
+	return 1
+}
 
+fleth_get_custom_dslite_provider() {
 	fleth_get_area
 
 	if [ -n "$custom_aftr" ]; then
 		fleth_set_dslite_provider "$custom_aftr" && return 0
 	fi
 
-	if [ "$custom_aftr_enabled" = "1" ] && [ "$DNS" = "$DNS_E" ] && [ -n "$custom_aftr_preset" ]; then
+	if [ "$custom_aftr_enabled" = "1" ] && [ -n "$custom_aftr_preset" ]; then
 		fleth_set_dslite_provider "$custom_aftr_preset" && return 0
 	fi
+
+	return 1
+}
+
+fleth_get_dslite_provider() {
+	local transix xpass asahi
+
+	fleth_get_custom_dslite_provider && return 0
 
 	transix=$(fleth_get_aaaa_record "gw.transix.jp")
 	if [ -n "$transix" ]; then
@@ -408,6 +430,17 @@ proto_fleth_setup() {
 	FLETH_IPV6ADDR=$(fleth_get_uplink_ipv6 "$tunlink")
 	if [ -z "$FLETH_IPV6ADDR" ]; then
 		proto_notify_error "$cfg" "NO_LOCAL_IPV6"
+		return
+	fi
+
+	if fleth_has_custom_dslite_provider; then
+		if fleth_get_custom_dslite_provider; then
+			logger -t fleth "[${cfg}] using custom DS-Lite provider $FLETH_AFTR_DOMAIN"
+			proto_fleth_setup_dslite "$cfg" "$iface"
+		else
+			logger -t fleth "[${cfg}] failed to resolve custom DS-Lite provider"
+			proto_notify_error "$cfg" "AFTR_RESOLVE_FAIL"
+		fi
 		return
 	fi
 
