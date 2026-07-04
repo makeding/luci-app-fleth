@@ -1,7 +1,7 @@
 local m, s, o
 
-m = SimpleForm("fleth", translate("Flet'h Configuration"),
-	translate("Flet'h provides LuCI protocol helpers for IPv4 over IPv6 tunnels."))
+m = SimpleForm("fleth", translate("Flet'H Configuration"),
+	translate("Flet'H provides LuCI protocol helpers for IPv4 over IPv6 tunnels."))
 m.reset = false
 m.submit = false
 
@@ -11,7 +11,7 @@ o = s:option(DummyValue, "_protocol_setup", translate("Protocol Setup"))
 o.rawhtml = true
 function o.cfgvalue()
 	return "<p>" .. translate("Automatic tunnel configuration has been removed from this page.") .. "</p>" ..
-		"<p>" .. translate("Open Network → Interfaces, edit the target interface, then choose the required protocol: Flet'h automatic IPv4 over IPv6, IPv4 over IPv6 (Flet'h), or IPv4 over IPv6 passthrough (Flet'h).") .. "</p>"
+		"<p>" .. translate("Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H, Flet'H 固定IP, or Flet'H 固定IP（透传）.") .. "</p>"
 end
 
 return m

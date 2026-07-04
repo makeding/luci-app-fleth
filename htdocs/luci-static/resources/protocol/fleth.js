@@ -1,6 +1,5 @@
-// Native automatic Flet'h protocol.
+// Native automatic Flet'H protocol.
 "use strict";
-"require fs";
 "require form";
 "require network";
 "require tools.widgets as widgets";
@@ -9,7 +8,7 @@ network.registerPatternVirtual(/^fleth-.+$/);
 
 return network.registerProtocol("fleth", {
   getI18n: function () {
-    return _("IPv4 over IPv6 (Flet'h)");
+    return _("Flet'H");
   },
 
   getIfname: function () {
@@ -71,17 +70,6 @@ return network.registerProtocol("fleth", {
     o.rmempty = true;
     o.description = _("SDCC presets are only shown in EAST area.");
     o.depends("custom_aftr_enabled", "1");
-    o.render = function (section_id) {
-      var node = form.ListValue.prototype.render.apply(this, [section_id]);
-
-      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }).then(function (result) {
-        var area = (result.stdout || "").trim();
-        if (area !== "EAST")
-          node.style.display = "none";
-      });
-
-      return node;
-    };
 
     o = s.taboption(
       "general",
@@ -104,17 +92,6 @@ return network.registerProtocol("fleth", {
     o.depends("custom_aftr_enabled", "1");
     o.cfgvalue = function () {
       return '<a href="https://wiki.s.sdconw.com/68adeceb59b31226a3736ddb" target="_blank" rel="noreferrer noopener">' + _("Learn more") + '</a>';
-    };
-    o.render = function (section_id) {
-      var node = form.DummyValue.prototype.render.apply(this, [section_id]);
-
-      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }).then(function (result) {
-        var area = (result.stdout || "").trim();
-        if (area !== "EAST")
-          node.style.display = "none";
-      });
-
-      return node;
     };
 
     o = s.taboption(

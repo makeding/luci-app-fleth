@@ -1,12 +1,6 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-msgid "Flet'h Configuration"
-msgstr "Flet'h 設定"
-
-msgid "Flet'h is a helper that can configure your IPv4 over IPv6 tunnel automatically."
-msgstr "Flet'h 是一個可以自動配置您的 IPv4 over IPv6 隧道的助手。"
-
 msgid "Area"
 msgstr "區域"
 
@@ -151,19 +145,6 @@ msgstr "施工完成後，服務通常會在傍晚開通。"
 msgid "We recommend setting MTU to 1460."
 msgstr "建議將 MTU 設定為 1460。"
 
-# IPIP6H Protocol - Custom additions only
-msgid "IPv4 over IPv6 (fleth edition)"
-msgstr "IPv4 over IPv6 (Flet'h)"
-
-msgid "IPv4 over IPv6 (Flet'h)"
-msgstr "IPv4 over IPv6 (Flet'h)"
-
-msgid "IPv4 over IPv6 passthrough (fleth edition)"
-msgstr "IPv4 over IPv6 透傳 (Flet'h)"
-
-msgid "IPv4 over IPv6 passthrough (Flet'h)"
-msgstr "IPv4 over IPv6 透傳 (Flet'h)"
-
 msgid "BR Address"
 msgstr "BR 地址"
 
@@ -193,7 +174,6 @@ msgstr "隧道介面使用的公網 IPv4 地址"
 
 msgid "IPv6 Interface ID"
 msgstr "IPv6 介面 ID"
-
 
 msgid "IPv6 Interface ID is required"
 msgstr "IPv6 介面 ID 為必填項"
@@ -345,9 +325,6 @@ msgstr "自動啟動隧道"
 msgid "Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly."
 msgstr "自動傳送 ping 以啟動隧道。如果沒有流量，某些隧道可能無法正常建立連線。"
 
-msgid "Flet'h automatic IPv4 over IPv6"
-msgstr "IPv4 over IPv6 (Flet'h)"
-
 msgid "Not installed"
 msgstr "未安裝"
 
@@ -375,14 +352,27 @@ msgstr "可選。留空則使用選取的預設。"
 msgid "Learn more"
 msgstr "了解更多"
 
-msgid "Flet'h provides LuCI protocol helpers for IPv4 over IPv6 tunnels."
-msgstr "Flet'h 提供 IPv4 over IPv6 隧道用的 LuCI 協定輔助元件。"
-
 msgid "Protocol Setup"
 msgstr "協定設定"
 
 msgid "Automatic tunnel configuration has been removed from this page."
 msgstr "此頁面已移除隧道自動設定功能。"
 
-msgid "Open Network → Interfaces, edit the target interface, then choose the required protocol: Flet'h automatic IPv4 over IPv6, IPv4 over IPv6 (Flet'h), or IPv4 over IPv6 passthrough (Flet'h)."
-msgstr "開啟 Network → Interfaces，編輯目標介面，然後選擇需要的協定：Flet'h automatic IPv4 over IPv6、IPv4 over IPv6 (Flet'h) 或 IPv4 over IPv6 passthrough (Flet'h)。"
+msgid "Flet'H"
+msgstr "Flet'H"
+
+msgid "Flet'H 固定IP"
+msgstr "Flet'H 固定IP"
+
+msgid "Flet'H 固定IP（透传）"
+msgstr "Flet'H 固定IP（透传）"
+
+msgid "Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H, Flet'H 固定IP, or Flet'H 固定IP（透传）."
+msgstr "開啟 Network → Interfaces，編輯目標介面，然後選擇需要的 Flet'H 家族協定：Flet'H、Flet'H 固定IP 或 Flet'H 固定IP（透传）。"
+
+
+msgid "Flet'H Configuration"
+msgstr "Flet'H 設定"
+
+msgid "Flet'H provides LuCI protocol helpers for IPv4 over IPv6 tunnels."
+msgstr "Flet'H 提供 IPv4 over IPv6 隧道用的 LuCI 協定輔助元件。"

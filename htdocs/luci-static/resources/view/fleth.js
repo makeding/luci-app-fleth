@@ -135,9 +135,9 @@ return view.extend({
 
     m = new form.JSONMap(
       { global: {} },
-      _("Flet'h Configuration"),
+      _("Flet'H Configuration"),
       _(
-        "Flet'h provides LuCI protocol helpers for IPv4 over IPv6 tunnels."
+        "Flet'H provides LuCI protocol helpers for IPv4 over IPv6 tunnels."
       )
     );
 
@@ -243,7 +243,7 @@ return view.extend({
     o.rawhtml = true;
     o.cfgvalue = function () {
       return '<p>' + _("Automatic tunnel configuration has been removed from this page.") + '</p>' +
-        '<p>' + _("Open Network → Interfaces, edit the target interface, then choose the required protocol: Flet'h automatic IPv4 over IPv6, IPv4 over IPv6 (Flet'h), or IPv4 over IPv6 passthrough (Flet'h).") + '</p>';
+        '<p>' + _("Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H, Flet'H 固定IP, or Flet'H 固定IP（透传）.") + '</p>';
     };
 
     // LAN IPv6 Configuration section in Tools tab
