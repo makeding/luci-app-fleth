@@ -375,6 +375,8 @@ proto_fleth_setup_dslite() {
 	local cfg="$1"
 	local link="fleth-$cfg"
 	local remoteip6 ip6
+	local ip4addr="192.0.0.2"
+	local ip4gateway="192.0.0.1"
 
 	remoteip6=$(resolveip -6 "$FLETH_AFTR_DOMAIN" 2>/dev/null)
 	[ -z "$remoteip6" ] && remoteip6="$FLETH_AFTR"
@@ -394,6 +396,7 @@ proto_fleth_setup_dslite() {
 		: ${metric:=0}
 		proto_add_ipv4_route "0.0.0.0" 0 "" "" "$metric"
 	}
+	proto_add_ipv4_address "$ip4addr" "" "" "$ip4gateway"
 
 	proto_add_tunnel
 	json_add_string mode ipip6
@@ -409,6 +412,12 @@ proto_fleth_setup_dslite() {
 
 	proto_add_data
 	[ -n "$zone" ] && json_add_string zone "$zone"
+	json_add_array firewall
+		json_add_object ""
+			json_add_string type nat
+			json_add_string target ACCEPT
+		json_close_object
+	json_close_array
 	proto_close_data
 	proto_send_update "$cfg"
 	: ${auto_activate:=1}
