@@ -136,6 +136,7 @@ fleth_detect_mape() {
 			8) FLETH_EALEN=$line ;;
 			9) FLETH_PSIDLEN=$line ;;
 			10) FLETH_OFFSET=$line ;;
+			12) FLETH_LOCAL_IPV6=$line ;;
 		esac
 	done << EOF
 $data
@@ -175,37 +176,6 @@ fleth_map_portsets_from_psid() {
 	done
 
 	echo "$portsets"
-}
-
-fleth_get_mape_raw_psid() {
-	local psid="$1"
-	local psidlen="$2"
-	local max_raw_psid
-
-	case "$psid:$psidlen" in
-		*[!0-9:]*|::*|*::*) return 1 ;;
-	esac
-
-	max_raw_psid=$((1 << psidlen))
-	if [ "$psid" -lt "$max_raw_psid" ]; then
-		echo "$psid"
-	else
-		echo $((psid >> (16 - psidlen)))
-	fi
-}
-
-fleth_get_mape_local_ipv6() {
-	local ipv6="$1"
-	local psid="$2"
-	local psidlen="$3"
-	local raw_psid suffix prefix_part
-
-	raw_psid=$(fleth_get_mape_raw_psid "$psid" "$psidlen") || return 1
-	suffix=$(printf "%x" "$((raw_psid << 8))")
-	prefix_part=$(echo "$ipv6" | sed 's/%.*$//' | cut -d: -f1-4)
-	[ -n "$prefix_part" ] || return 1
-
-	echo "${prefix_part}::${suffix}"
 }
 
 fleth_iptables_chain() {
@@ -294,7 +264,7 @@ proto_fleth_setup_mape() {
 		proto_block_restart "$cfg"
 		return
 	}
-	local_ipv6=$(fleth_get_mape_local_ipv6 "$FLETH_IPV6ADDR" "$FLETH_PSID" "$FLETH_PSIDLEN")
+	local_ipv6="${FLETH_LOCAL_IPV6:-$FLETH_IPV6ADDR}"
 	[ -n "$local_ipv6" ] || {
 		proto_notify_error "$cfg" "INVALID_LOCAL_IPV6"
 		proto_block_restart "$cfg"

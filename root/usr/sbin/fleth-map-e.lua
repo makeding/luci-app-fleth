@@ -844,6 +844,38 @@ local function split(str, sep)
     return result
 end
 
+local function legacy_ipv6addr(hextet, octet, psid)
+    local bytes = {}
+    for i = 1, 16 do
+        bytes[i] = 0
+    end
+
+    -- the IPv4 address at byte offset 9 and the raw PSID at byte offset 13.
+    -- Japanese MAP-E rules used here all derive a /56 PD.
+    bytes[1] = rshift(hextet[1], 8)
+    bytes[2] = band(hextet[1], 0xff)
+    bytes[3] = rshift(hextet[2], 8)
+    bytes[4] = band(hextet[2], 0xff)
+    bytes[5] = rshift(hextet[3], 8)
+    bytes[6] = band(hextet[3], 0xff)
+    bytes[7] = rshift(hextet[4], 8)
+
+    bytes[10] = octet[1]
+    bytes[11] = octet[2]
+    bytes[12] = octet[3]
+    bytes[13] = octet[4]
+
+    bytes[14] = rshift(psid, 8)
+    bytes[15] = band(psid, 0xff)
+
+    local words = {}
+    for i = 1, 8 do
+        words[i] = string.format("%x", bytes[i * 2 - 1] * 0x100 + bytes[i * 2])
+    end
+
+    return table.concat(words, ":")
+end
+
 local function calc(prefix)
     prefix = prefix:gsub("::", ":0::")
     local field = {prefix:match("([0-9a-f]+):([0-9a-f]+):([0-9a-f]+):([0-9a-f]*)")}
@@ -969,6 +1001,7 @@ local function calc(prefix)
     print(offset)
     -- print(psid)
     print(table.concat(ports, " "))
+    print(legacy_ipv6addr(hextet, octet, psid))
 end
 
 local function main(args)
