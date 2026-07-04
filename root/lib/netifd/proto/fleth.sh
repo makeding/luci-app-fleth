@@ -61,10 +61,32 @@ fleth_get_uplink_ipv6() {
 	echo "$ipv6_address"
 }
 
+fleth_set_dslite_provider() {
+	local domain="$1"
+	local aftr
+
+	aftr=$(fleth_get_aaaa_record "$domain")
+	[ -n "$aftr" ] || return 1
+
+	FLETH_TYPE="dslite"
+	FLETH_AFTR="$aftr"
+	FLETH_AFTR_DOMAIN="$domain"
+	return 0
+}
+
 fleth_get_dslite_provider() {
 	local transix xpass asahi
 
 	fleth_get_area
+
+	if [ "$custom_aftr_enabled" = "1" ]; then
+		if [ -n "$custom_aftr" ]; then
+			fleth_set_dslite_provider "$custom_aftr" && return 0
+		fi
+		if [ "$DNS" = "$DNS_E" ] && [ -n "$custom_aftr_preset" ]; then
+			fleth_set_dslite_provider "$custom_aftr_preset" && return 0
+		fi
+	fi
 
 	transix=$(fleth_get_aaaa_record "gw.transix.jp")
 	if [ -n "$transix" ]; then
@@ -183,6 +205,10 @@ fleth_iptables_chain() {
 	echo "FLETH_${1}" | tr -c 'A-Za-z0-9_' '_' | cut -c 1-28
 }
 
+fleth_nft_table() {
+	echo "fleth_mape_${1}" | tr -c 'A-Za-z0-9_' '_' | cut -c 1-63
+}
+
 fleth_delete_iptables_snat() {
 	local cfg="$1"
 	local chain
@@ -224,11 +250,13 @@ fleth_apply_nft_snat() {
 	local link="$2"
 	local ipv4="$3"
 	local portsets="$4"
+	local table
 	local portcount=0
 	local allports=""
 	local portset startport endport x proto
 
 	command -v nft >/dev/null 2>&1 || return 1
+	table=$(fleth_nft_table "$cfg")
 
 	for portset in $portsets; do
 		startport=$(echo "$portset" | cut -d'-' -f1)
@@ -244,12 +272,13 @@ fleth_apply_nft_snat() {
 	[ "$portcount" -gt 0 ] || return 0
 	allports=${allports%??}
 
+	nft list tables 2>/dev/null | grep -q "table inet $table" && nft delete table inet "$table"
 	nft list tables 2>/dev/null | grep -q "table inet fleth_mape" && nft delete table inet fleth_mape
-	nft add table inet fleth_mape || return 1
-	nft add chain inet fleth_mape srcnat { type nat hook postrouting priority 0\; policy accept\; } || return 1
+	nft add table inet "$table" || return 1
+	nft add chain inet "$table" srcnat { type nat hook postrouting priority 0\; policy accept\; } || return 1
 
 	for proto in icmp tcp udp; do
-		nft add rule inet fleth_mape srcnat ip protocol "$proto" oifname "$link" \
+		nft add rule inet "$table" srcnat ip protocol "$proto" oifname "$link" \
 			snat ip to "$ipv4" : numgen inc mod "$portcount" map { $allports } || return 1
 	done
 }
@@ -369,7 +398,7 @@ proto_fleth_setup() {
 	local cfg="$1"
 	local iface="$2"
 
-	json_get_vars tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac
+	json_get_vars tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac custom_aftr_enabled custom_aftr_preset custom_aftr
 	[ "$zone" = "-" ] && zone=""
 	tunlink="${tunlink:-wan6}"
 
@@ -399,9 +428,15 @@ proto_fleth_setup() {
 
 proto_fleth_teardown() {
 	local cfg="$1"
+	local table
 
+	type fleth_cancel_ping_activation >/dev/null 2>&1 && fleth_cancel_ping_activation "$cfg"
 	ifdown "${cfg}_"
-	command -v nft >/dev/null 2>&1 && nft list tables 2>/dev/null | grep -q "table inet fleth_mape" && nft delete table inet fleth_mape
+	if command -v nft >/dev/null 2>&1; then
+		table=$(fleth_nft_table "$cfg")
+		nft list tables 2>/dev/null | grep -q "table inet $table" && nft delete table inet "$table"
+		nft list tables 2>/dev/null | grep -q "table inet fleth_mape" && nft delete table inet fleth_mape
+	fi
 	fleth_delete_iptables_snat "$cfg"
 	rm -f "/tmp/fleth-$cfg.rules"
 }
@@ -418,6 +453,9 @@ proto_fleth_init_config() {
 	proto_config_add_boolean "defaultroute"
 	proto_config_add_int "metric"
 	proto_config_add_boolean "prefer_slaac"
+	proto_config_add_boolean "custom_aftr_enabled"
+	proto_config_add_string "custom_aftr_preset"
+	proto_config_add_string "custom_aftr"
 }
 
 [ -n "$INCLUDE_ONLY" ] || {

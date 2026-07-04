@@ -95,6 +95,7 @@ proto_ipip6h_setup() {
 
 proto_ipip6h_teardown() {
 	local cfg="$1"
+	type fleth_cancel_ping_activation >/dev/null 2>&1 && fleth_cancel_ping_activation "$cfg"
 	ifdown "${cfg}_"
 	logger -t ipip6h "[${cfg}] Tearing down"
 }

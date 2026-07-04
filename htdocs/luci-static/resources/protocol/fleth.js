@@ -1,5 +1,6 @@
 // Native automatic Flet'h protocol.
 "use strict";
+"require fs";
 "require form";
 "require network";
 "require tools.widgets as widgets";
@@ -47,6 +48,74 @@ return network.registerProtocol("fleth", {
     o.default = "wan6";
     o.exclude = s.section;
     o.rmempty = false;
+
+    o = s.taboption(
+      "general",
+      form.Flag,
+      "custom_aftr_enabled",
+      _("Custom AFTR"),
+      _("Use a custom DS-Lite AFTR endpoint instead of automatic detection."),
+    );
+    o.default = o.disabled;
+
+    o = s.taboption(
+      "general",
+      form.ListValue,
+      "custom_aftr_preset",
+      _("AFTR preset"),
+    );
+    o.value("", _("None"));
+    o.value("wtd01-aftr01-ngnintf.i.open.ad.jp", "SDCC - 1 (wtd01-aftr01-ngnintf.i.open.ad.jp)");
+    o.value("ksk01-aftr01-ngnintf.i.open.ad.jp", "SDCC - Port Forward (ksk01-aftr01-ngnintf.i.open.ad.jp)");
+    o.default = "";
+    o.rmempty = true;
+    o.description = _("SDCC presets are only shown in EAST area.");
+    o.depends("custom_aftr_enabled", "1");
+    o.render = function (section_id) {
+      var node = form.ListValue.prototype.render.apply(this, [section_id]);
+
+      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }).then(function (result) {
+        var area = (result.stdout || "").trim();
+        if (area !== "EAST")
+          node.style.display = "none";
+      });
+
+      return node;
+    };
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "custom_aftr",
+      _("AFTR endpoint"),
+      _("Optional. Leave empty to use the selected preset."),
+    );
+    o.placeholder = "aftr.example.net";
+    o.datatype = 'or(hostname,ip6addr("nomask"))';
+    o.depends("custom_aftr_enabled", "1");
+
+    o = s.taboption(
+      "general",
+      form.DummyValue,
+      "_dslite_test_help",
+      "&#160;",
+    );
+    o.rawhtml = true;
+    o.depends("custom_aftr_enabled", "1");
+    o.cfgvalue = function () {
+      return '<a href="https://wiki.s.sdconw.com/68adeceb59b31226a3736ddb" target="_blank" rel="noreferrer noopener">' + _("Learn more") + '</a>';
+    };
+    o.render = function (section_id) {
+      var node = form.DummyValue.prototype.render.apply(this, [section_id]);
+
+      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }).then(function (result) {
+        var area = (result.stdout || "").trim();
+        if (area !== "EAST")
+          node.style.display = "none";
+      });
+
+      return node;
+    };
 
     o = s.taboption(
       "advanced",

@@ -387,6 +387,30 @@ msgstr "IPv4 over IPv6 (Flet'h)"
 msgid "Not installed"
 msgstr "未安装"
 
+msgid "Custom AFTR"
+msgstr "自定义 AFTR"
+
+msgid "Use a custom DS-Lite AFTR endpoint instead of automatic detection."
+msgstr "使用自定义 DS-Lite AFTR 端点替代自动检测。"
+
+msgid "AFTR preset"
+msgstr "AFTR 预设"
+
+msgid "None"
+msgstr "无"
+
+msgid "SDCC presets are only shown in EAST area."
+msgstr "SDCC 预设仅在东日本区域显示。"
+
+msgid "AFTR endpoint"
+msgstr "AFTR 端点"
+
+msgid "Optional. Leave empty to use the selected preset."
+msgstr "可选。留空则使用选中的预设。"
+
+msgid "Learn more"
+msgstr "了解更多"
+
 msgid "Flet'h provides LuCI protocol helpers for IPv4 over IPv6 tunnels."
 msgstr "Flet'h 提供 IPv4 over IPv6 隧道用的 LuCI 协议辅助组件。"
 

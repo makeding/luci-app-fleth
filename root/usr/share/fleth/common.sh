@@ -22,6 +22,19 @@ fleth_schedule_ping_activation() {
     ) &
 }
 
+fleth_cancel_ping_activation() {
+    local cfg="$1"
+    local pid_file="/var/run/fleth-activation-${cfg}.pid"
+    local old_pid
+
+    [ -n "$cfg" ] || return 0
+    [ -f "$pid_file" ] || return 0
+
+    old_pid=$(cat "$pid_file" 2>/dev/null)
+    [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null && kill "$old_pid" 2>/dev/null
+    rm -f "$pid_file"
+}
+
 fleth_get_interface_device() {
     local iface="$1"
     local status device

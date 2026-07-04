@@ -60,10 +60,18 @@ ipip6hp_delete_nft_rules() {
 
 	command -v nft >/dev/null 2>&1 || return
 
-	for chain in dstnat input forward srcnat; do
-		nft -a list chain inet fw4 "$chain" 2>/dev/null | grep "$comment" | sed -n 's/.* handle \([0-9][0-9]*\)$/\1/p' | while read -r handle; do
-			[ -n "$handle" ] && nft delete rule inet fw4 "$chain" handle "$handle" 2>/dev/null
-		done
+	nft -a list table inet fw4 2>/dev/null | awk -v comment="$comment" '
+		$1 == "chain" { chain = $2 }
+		index($0, comment) {
+			for (i = 1; i < NF; i++) {
+				if ($i == "handle") {
+					print chain, $(i + 1)
+					break
+				}
+			}
+		}
+	' | while read -r chain handle; do
+		[ -n "$chain" ] && [ -n "$handle" ] && nft delete rule inet fw4 "$chain" handle "$handle" 2>/dev/null
 	done
 }
 
@@ -240,6 +248,7 @@ proto_ipip6hp_teardown() {
 	: ${ip4table:=100}
 	: ${ip4rule_priority:=10000}
 
+	type fleth_cancel_ping_activation >/dev/null 2>&1 && fleth_cancel_ping_activation "$cfg"
 	local passthrough_device=$(uci get network.${cfg}.device 2>/dev/null)
 	ipip6hp_delete_nft_rules "$cfg"
 	[ -n "$ip4ifaddr" ] && ipip6hp_delete_policy_route "$ip4ifaddr" "$ip4table" "$ip4rule_priority" "$link"
