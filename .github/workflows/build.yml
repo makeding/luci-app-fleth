@@ -78,18 +78,25 @@ jobs:
       #       mv "$apk.signed" "$apk"
       #     done
       - name: Prepare artifacts
+        id: prepare_artifact
         run: |
-          set -eu
+          set -euo pipefail
           mkdir -p dist
-          cp bin/packages/x86_64/huggy/${{ matrix.package_name }}*.${{ matrix.package_type }} dist/
-          test "$(find dist -maxdepth 1 -type f -name '${{ matrix.package_name }}*.${{ matrix.package_type }}' | wc -l)" -gt 0
-          cp bin/packages/x86_64/huggy/luci-i18n-fleth-*.${{ matrix.package_type }} dist/ 2>/dev/null || true
+          mapfile -t packages < <(find bin/packages/x86_64/huggy -maxdepth 1 -type f -name '${{ matrix.package_name }}*.${{ matrix.package_type }}' | sort)
+          if [ "${#packages[@]}" -ne 1 ]; then
+            echo "Expected exactly one ${{ matrix.package_name }}.${{ matrix.package_type }} package, found ${#packages[@]}."
+            find bin/packages/x86_64/huggy -maxdepth 1 -type f | sort
+            exit 1
+          fi
+          cp "${packages[0]}" dist/
+          echo "path=dist/$(basename "${packages[0]}")" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ matrix.package_name }}-${{ matrix.package_type }}
-          path: dist/
+          path: ${{ steps.prepare_artifact.outputs.path }}
+          if-no-files-found: error
+          archive: false
       # - name: 'Pack all packages'
       #   run: tar cf pack.tar bin/packages/x86_64/base/ds-lite* bin/packages/x86_64/base/ds-lite*
       - name: Release
@@ -98,4 +105,4 @@ jobs:
         with:
           # draft: true
           make_latest: true
-          files: dist/${{ matrix.package_name }}*
+          files: ${{ steps.prepare_artifact.outputs.path }}
