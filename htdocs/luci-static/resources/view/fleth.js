@@ -142,16 +142,16 @@ return view.extend({
     );
 
     s = m.section(form.NamedSection, "global");
-    s.tab("info", _("Information"));
+    s.tab("diag", _("Diagnostics"));
     s.tab("general", _("General Settings"));
     s.tab("tools", _("Tools"));
 
-    o = s.taboption("info", form.DummyValue, "area", _("Area"));
+    o = s.taboption("diag", form.DummyValue, "area", _("Area"));
     o.cfgvalue = function () {
       return data.area;
     };
 
-    o = s.taboption("info", form.DummyValue, "prefix_length", _("IPv6 Prefix Length"));
+    o = s.taboption("diag", form.DummyValue, "prefix_length", _("IPv6 Prefix Length"));
     o.cfgvalue = function () {
       const prefix = data.prefix_length;
       if (prefix && prefix !== "UNKNOWN") {
@@ -162,7 +162,7 @@ return view.extend({
     };
 
     o = s.taboption(
-      "info",
+      "diag",
       form.DummyValue,
       "dslite_provider",
       _("DS-Lite Provider")
@@ -175,7 +175,7 @@ return view.extend({
     const hasMapeData = data.mape_status[0] !== "UNKNOWN" && data.mape_status.length > 1;
 
     // Always show MAP-E Provider
-    o = s.taboption("info", form.DummyValue, "mape_provider", _("MAP-E Provider"));
+    o = s.taboption("diag", form.DummyValue, "mape_provider", _("MAP-E Provider"));
     o.cfgvalue = function () {
       return data.mape_status[0] || _("UNKNOWN");
     };
@@ -197,7 +197,7 @@ return view.extend({
 
       mapeDetailFields.forEach((field, i) => {
         const [fieldName, fieldLabel] = field;
-        o = s.taboption("info", form.DummyValue, fieldName, _(fieldLabel));
+        o = s.taboption("diag", form.DummyValue, fieldName, _(fieldLabel));
 
         // Special rendering for Available ports with highlighting
         if (fieldName === "mape_map_ports") {

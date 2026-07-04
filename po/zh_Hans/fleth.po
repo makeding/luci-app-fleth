@@ -1,6 +1,9 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+msgid "Diagnostics"
+msgstr "诊断"
+
 msgid "Area"
 msgstr "区域"
 
