@@ -11,7 +11,7 @@ on:
       - dev
 jobs:
   build:
-    name: Build ${{ matrix.package_type }}
+    name: Build ${{ matrix.package_type }} ${{ matrix.variant }}
     runs-on: ubuntu-24.04
     environment: runner
     permissions:
@@ -21,8 +21,16 @@ jobs:
         include:
           - package_type: ipk
             arch: x86_64-22.03.2
+            variant: legacy
           - package_type: apk
             arch: x86_64-25.12.4
+            variant: legacy
+          - package_type: ipk
+            arch: x86_64-22.03.2
+            variant: proto
+          - package_type: apk
+            arch: x86_64-25.12.4
+            variant: proto
     steps:
       - name: Fetch luci-app-fleth code
         uses: actions/checkout@v6
@@ -43,7 +51,15 @@ jobs:
           $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hans/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh-cn.lmo
           $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hant/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh-tw.lmo
 
-      - name: Build ${{ matrix.package_type }}
+      - name: Select ${{ matrix.variant }} variant
+        run: |
+          cd $GITHUB_WORKSPACE/huggy/luci-app-fleth
+          if [ "${{ matrix.variant }}" = "proto" ]; then
+            sed -i "0,/default y/s/default y/default n/" Makefile
+            sed -i "/config PACKAGE_\$(PKG_NAME)_INCLUDE_PROTO_FLETH/,/help/s/default n/default y/" Makefile
+          fi
+
+      - name: Build ${{ matrix.package_type }} ${{ matrix.variant }}
         uses: openwrt/gh-action-sdk@main
         env:
           # We only use lua and shellscript, so it will worked on arm / mips router
@@ -68,11 +84,27 @@ jobs:
       #       python3 apk-signer/scripts/sign.py "$apk" "$apk.signed"
       #       mv "$apk.signed" "$apk"
       #     done
+      - name: Prepare artifacts
+        run: |
+          set -eu
+          mkdir -p dist
+          find bin/packages/x86_64/huggy -maxdepth 1 -type f -name "luci-app-fleth*.${{ matrix.package_type }}" | while read -r pkg; do
+            base=$(basename "$pkg")
+            case "$base" in
+              luci-app-fleth_*) out="luci-app-fleth-${{ matrix.variant }}_${base#luci-app-fleth_}" ;;
+              luci-app-fleth-*) out="luci-app-fleth-${{ matrix.variant }}-${base#luci-app-fleth-}" ;;
+              *) out="luci-app-fleth-${{ matrix.variant }}-$base" ;;
+            esac
+            cp "$pkg" "dist/$out"
+          done
+          test "$(find dist -maxdepth 1 -type f -name 'luci-app-fleth-${{ matrix.variant }}*.${{ matrix.package_type }}' | wc -l)" -gt 0
+          cp bin/packages/x86_64/huggy/luci-i18n-fleth-*.${{ matrix.package_type }} dist/ 2>/dev/null || true
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: luci-app-fleth-${{ matrix.package_type }}
-          path: bin/packages/x86_64/huggy/
+          name: luci-app-fleth-${{ matrix.package_type }}-${{ matrix.variant }}
+          path: dist/
       # - name: 'Pack all packages'
       #   run: tar cf pack.tar bin/packages/x86_64/base/ds-lite* bin/packages/x86_64/base/ds-lite*
       - name: Release
@@ -81,4 +113,4 @@ jobs:
         with:
           # draft: true
           make_latest: true
-          files: bin/packages/x86_64/huggy/luci-app-fleth*
+          files: dist/luci-app-fleth-${{ matrix.variant }}_*
