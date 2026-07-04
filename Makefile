@@ -18,6 +18,7 @@ LUCI_DEPENDS:=+luci-base +lua +luci-proto-ipv6 \
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_LEGACY_AUTO \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_PROTO_FLETH \
+	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_LUA_UI \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6HP
 
@@ -37,6 +38,13 @@ define Package/luci-app-fleth/config
 		help
 		  Include the native fleth netifd protocol handler.
 		  This does not depend on OpenWrt's map or ds-lite packages.
+
+	config PACKAGE_$(PKG_NAME)_INCLUDE_LUA_UI
+		bool "Include legacy LuCI Lua UI"
+		default n
+		help
+		  Include a minimal Lua CBI fallback page for old LuCI versions
+		  that cannot render JavaScript views.
 
 	config PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H
 		bool "Include luci-proto-ipip6h"
@@ -72,6 +80,13 @@ else
 	rm -f $(PKG_BUILD_DIR)/htdocs/luci-static/resources/protocol/fleth.js
 	rm -f $(PKG_BUILD_DIR)/root/lib/netifd/proto/fleth.sh
 	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/proto-auto.sh
+endif
+ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_LUA_UI
+	# Legacy LuCI Lua UI is included
+else
+	# Remove legacy LuCI Lua UI if not selected
+	rm -f $(PKG_BUILD_DIR)/root/usr/lib/lua/luci/controller/fleth.lua
+	rm -f $(PKG_BUILD_DIR)/root/usr/lib/lua/luci/model/cbi/fleth.lua
 endif
 ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_IPIP6H
 	# IPIP6H support is included

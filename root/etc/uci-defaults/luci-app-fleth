@@ -14,6 +14,11 @@ for file in \
     [ -f "$file" ] && chmod +x "$file"
 done
 
+if [ -d /usr/share/luci/menu.d ]; then
+    rm -f /usr/lib/lua/luci/controller/fleth.lua
+    rm -f /usr/lib/lua/luci/model/cbi/fleth.lua
+fi
+
 if [ ! -f /etc/config/fleth ]; then
     cat <<EOF > /etc/config/fleth
 config fleth 'global'
