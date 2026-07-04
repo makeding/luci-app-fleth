@@ -11,7 +11,7 @@ on:
       - dev
 jobs:
   build:
-    name: Build ${{ matrix.package_type }}
+    name: Build ${{ matrix.package_type }} ${{ matrix.package_name }}
     runs-on: ubuntu-24.04
     environment: runner
     permissions:
@@ -21,8 +21,16 @@ jobs:
         include:
           - package_type: ipk
             arch: x86_64-22.03.2
+            package_name: luci-proto-fleth
+          - package_type: ipk
+            arch: x86_64-22.03.2
+            package_name: luci-app-fleth
           - package_type: apk
             arch: x86_64-25.12.1
+            package_name: luci-proto-fleth
+          - package_type: apk
+            arch: x86_64-25.12.1
+            package_name: luci-app-fleth
     steps:
       - name: Fetch luci-app-fleth code
         uses: actions/checkout@v6
@@ -43,12 +51,13 @@ jobs:
           $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hans/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh-cn.lmo
           $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo/src/po2lmo $GITHUB_WORKSPACE/huggy/luci-app-fleth/po/zh_Hant/fleth.po $GITHUB_WORKSPACE/huggy/luci-app-fleth/root/usr/lib/lua/luci/i18n/fleth.zh-tw.lmo
 
-      - name: Build ${{ matrix.package_type }}
+      - name: Build ${{ matrix.package_type }} ${{ matrix.package_name }}
         uses: openwrt/gh-action-sdk@main
         env:
           # We only use lua and shellscript, so it will worked on arm / mips router
           ARCH: ${{ matrix.arch }}
-          PACKAGES: luci-app-fleth
+          PACKAGES: ${{ matrix.package_name }}
+          FLETH_PACKAGE_NAME: ${{ matrix.package_name }}
           FEEDNAME: huggy
           NO_REFRESH_CHECK: true
       # - name: Checkout apk-signer
@@ -72,14 +81,14 @@ jobs:
         run: |
           set -eu
           mkdir -p dist
-          cp bin/packages/x86_64/huggy/luci-app-fleth*.${{ matrix.package_type }} dist/
-          test "$(find dist -maxdepth 1 -type f -name 'luci-app-fleth*.${{ matrix.package_type }}' | wc -l)" -gt 0
+          cp bin/packages/x86_64/huggy/${{ matrix.package_name }}*.${{ matrix.package_type }} dist/
+          test "$(find dist -maxdepth 1 -type f -name '${{ matrix.package_name }}*.${{ matrix.package_type }}' | wc -l)" -gt 0
           cp bin/packages/x86_64/huggy/luci-i18n-fleth-*.${{ matrix.package_type }} dist/ 2>/dev/null || true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: luci-app-fleth-${{ matrix.package_type }}
+          name: ${{ matrix.package_name }}-${{ matrix.package_type }}
           path: dist/
       # - name: 'Pack all packages'
       #   run: tar cf pack.tar bin/packages/x86_64/base/ds-lite* bin/packages/x86_64/base/ds-lite*
@@ -89,4 +98,4 @@ jobs:
         with:
           # draft: true
           make_latest: true
-          files: dist/luci-app-fleth*
+          files: dist/${{ matrix.package_name }}*

@@ -1,6 +1,8 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-fleth
+FLETH_PACKAGE_NAME?=luci-proto-fleth
+
+PKG_NAME:=$(FLETH_PACKAGE_NAME)
 LUCI_TITLE:=LuCI Support for Flet'H
 LUCI_DESCRIPTION:=LuCI protocol collection for IPv4 over IPv6 tunnels in Japan.
 PKG_VERSION:=0.24
@@ -18,7 +20,7 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6HP
 
-define Package/luci-app-fleth/config
+define Package/$(PKG_NAME)/config
 	config PACKAGE_$(PKG_NAME)_INCLUDE_LUA_UI
 		bool "Include legacy LuCI Lua UI"
 		default n
@@ -46,21 +48,21 @@ include $(TOPDIR)/feeds/luci/luci.mk
 
 define Build/Compile
 	$(call Build/Compile/Default)
-ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_LUA_UI
+ifeq ($(CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_LUA_UI),y)
 	# Legacy LuCI Lua UI is included
 else
 	# Remove legacy LuCI Lua UI if not selected
 	rm -f $(PKG_BUILD_DIR)/root/usr/lib/lua/luci/controller/fleth.lua
 	rm -f $(PKG_BUILD_DIR)/root/usr/lib/lua/luci/model/cbi/fleth.lua
 endif
-ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_IPIP6H
+ifeq ($(CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H),y)
 	# IPIP6H support is included
 else
 	# Remove IPIP6H files if not selected
 	rm -f $(PKG_BUILD_DIR)/htdocs/luci-static/resources/protocol/ipip6h.js
 	rm -f $(PKG_BUILD_DIR)/root/lib/netifd/proto/ipip6h.sh
 endif
-ifdef CONFIG_PACKAGE_luci-app-fleth_INCLUDE_IPIP6HP
+ifeq ($(CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6HP),y)
 	# IPIP6HP support is included
 else
 	# Remove IPIP6HP files if not selected
