@@ -24,8 +24,8 @@ proto_ipip6h_setup() {
 	local iface="$2"
 	local link="ipip6h-$cfg"
 
-	local peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac weakif activation_enabled activation_url
-	json_get_vars peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac weakif activation_enabled activation_url
+	local peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac auto_activate weakif activation_enabled activation_url
+	json_get_vars peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac auto_activate weakif activation_enabled activation_url
 
 	logger -t ipip6h "[${cfg}] Starting setup"
 	logger -t ipip6h "[${cfg}]   peeraddr=$peeraddr ip4ifaddr=$ip4ifaddr"
@@ -86,7 +86,8 @@ proto_ipip6h_setup() {
 	proto_close_data
 
 	proto_send_update "$cfg"
-	type fleth_schedule_ping_activation >/dev/null 2>&1 && fleth_schedule_ping_activation "$cfg" "$link"
+	: ${auto_activate:=1}
+	[ "$auto_activate" = "1" ] && type fleth_schedule_ping_activation >/dev/null 2>&1 && fleth_schedule_ping_activation "$cfg" "$link"
 
 	fleth_ipip6_add_dynamic_address "$cfg" ipip6h "$tunlink" "$interface_id" "$ip6addr" "$activation_enabled" "$activation_url" "$prefer_slaac"
 

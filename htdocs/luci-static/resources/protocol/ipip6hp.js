@@ -229,6 +229,10 @@ return network.registerProtocol('ipip6hp', {
 			_('Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses'));
 		o.default = o.enabled;
 
+		o = s.taboption('advanced', form.Flag, 'auto_activate', _('Auto Activate Tunnel'),
+			_('Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly.'));
+		o.default = o.enabled;
+
 		o = s.taboption('advanced', form.Value, 'ip4table', _('IPv4 routing table'),
 			_('Routing table used by the source rule for the client IPv4 address'));
 		o.placeholder = '100';

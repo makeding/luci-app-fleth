@@ -126,8 +126,8 @@ proto_ipip6hp_setup() {
 	local passthrough_device="$2"
 	local link="ipip6hp-$cfg"
 
-	local peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac activation_enabled activation_url
-	json_get_vars peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac activation_enabled activation_url
+	local peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac auto_activate activation_enabled activation_url
+	json_get_vars peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac auto_activate activation_enabled activation_url
 
 	logger -t ipip6hp "[${cfg}] Starting passthrough setup"
 	[ -z "$passthrough_device" ] && passthrough_device=$(uci get network.${cfg}.device 2>/dev/null)
@@ -228,7 +228,8 @@ proto_ipip6hp_setup() {
 	proto_close_data
 
 	proto_send_update "$cfg"
-	type fleth_schedule_ping_activation >/dev/null 2>&1 && fleth_schedule_ping_activation "$cfg" "$link"
+	: ${auto_activate:=1}
+	[ "$auto_activate" = "1" ] && type fleth_schedule_ping_activation >/dev/null 2>&1 && fleth_schedule_ping_activation "$cfg" "$link"
 	[ "$defaultroute" -eq 1 ] && {
 		: ${metric:=0}
 		ipip6hp_add_policy_route "$cfg" "$link" "$ip4ifaddr" "$ip4table" "$ip4rule_priority" "$metric"

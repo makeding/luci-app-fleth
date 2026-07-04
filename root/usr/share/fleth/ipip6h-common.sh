@@ -13,6 +13,7 @@ fleth_ipip6_add_common_config() {
 	proto_config_add_boolean "defaultroute"
 	proto_config_add_int "metric"
 	proto_config_add_boolean "prefer_slaac"
+	proto_config_add_boolean "auto_activate"
 	proto_config_add_boolean "activation_enabled"
 	proto_config_add_string "activation_url"
 }

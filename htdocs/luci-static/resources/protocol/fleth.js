@@ -115,5 +115,14 @@ return network.registerProtocol("fleth", {
       _("Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses"),
     );
     o.default = o.enabled;
+
+    o = s.taboption(
+      "advanced",
+      form.Flag,
+      "auto_activate",
+      _("Auto Activate Tunnel"),
+      _("Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly."),
+    );
+    o.default = o.enabled;
   },
 });
