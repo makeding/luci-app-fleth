@@ -42,6 +42,9 @@ jobs:
           repository: 'openwrt-dev/po2lmo'
           ref: 'db656750ab032f3056d329c5e727a10af9ba15dd'
           path: 'huggy/luci-app-fleth/po2lmo'
+      - name: Use compatibility package name
+        if: matrix.package_name == 'luci-app-fleth'
+        run: sed -i 's/^PKG_NAME:=luci-proto-fleth$/PKG_NAME:=luci-app-fleth/' "$GITHUB_WORKSPACE/huggy/luci-app-fleth/Makefile"
       - name: 'Make po2lmo binary'
         run: 'cd $GITHUB_WORKSPACE/huggy/luci-app-fleth/po2lmo && make'
       - name: 'Manual convert i18n(lmo) file'
@@ -57,7 +60,6 @@ jobs:
           # We only use lua and shellscript, so it will worked on arm / mips router
           ARCH: ${{ matrix.arch }}
           PACKAGES: ${{ matrix.package_name }}
-          FLETH_PACKAGE_NAME: ${{ matrix.package_name }}
           FEEDNAME: huggy
           NO_REFRESH_CHECK: true
       # - name: Checkout apk-signer

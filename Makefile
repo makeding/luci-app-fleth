@@ -1,8 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-FLETH_PACKAGE_NAME?=luci-proto-fleth
-
-PKG_NAME:=$(FLETH_PACKAGE_NAME)
+PKG_NAME:=luci-proto-fleth
 LUCI_TITLE:=LuCI Support for Flet'H
 LUCI_DESCRIPTION:=LuCI protocol collection for IPv4 over IPv6 tunnels in Japan.
 PKG_VERSION:=0.24
