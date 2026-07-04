@@ -55,6 +55,7 @@ return network.registerProtocol("fleth", {
       _("AFTR endpoint"),
       _("Optional. Leave empty to use automatic detection."),
     );
+    o.value("", _("None"));
     o.value("wtd01-aftr01-ngnintf.i.open.ad.jp", "SDCC - 1 (wtd01-aftr01-ngnintf.i.open.ad.jp)");
     o.value("ksk01-aftr01-ngnintf.i.open.ad.jp", "SDCC - Port Forward (ksk01-aftr01-ngnintf.i.open.ad.jp)");
     o.placeholder = "aftr.example.net";
