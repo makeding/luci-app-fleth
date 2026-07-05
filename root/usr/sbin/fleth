@@ -428,6 +428,13 @@ EOF
     logger -t fleth "IPv6 PD configuration completed successfully"
     echo "SUCCESS"
 elif [ "$1" = "set_wan6_clientid" ]; then
+    [ -n "$2" ] && h_UPLINK_INTERFACE="$2"
+    case "$h_UPLINK_INTERFACE" in
+        ""|*[!A-Za-z0-9_]*)
+            echo "ERROR: Invalid uplink interface"
+            exit 1
+            ;;
+    esac
     logger -t fleth "Setting uplink client ID for ${h_UPLINK_INTERFACE}"
 
     uplink_dev=$(get_uplink_device)

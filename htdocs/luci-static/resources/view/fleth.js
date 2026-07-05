@@ -3,6 +3,8 @@
 "require fs";
 "require form";
 "require ui";
+"require network";
+"require tools.widgets as widgets";
 
 // fix css paading (kusa
 const fleth_style = document.createElement("style");
@@ -297,12 +299,22 @@ return view.extend({
       return _("OpenWrt 25.12 and later use the Default DUID as a randomized DHCPv6 client identifier. This does not meet NGN requirements.");
     };
 
+    o = s.taboption("tools", widgets.NetworkSelect, "_wan6_clientid_interface", _("Uplink interface"));
+    const clientIdInterfaceOption = o;
+    o.filter = function (section_id) {
+      const net = network.getNetwork(section_id);
+      return net && net.getProtocol() === "dhcpv6";
+    };
+    o.default = "wan6";
+    o.nocreate = true;
+    o.rmempty = false;
+
     o = s.taboption("tools", form.Button, "_apply_wan6_clientid_fix");
     o.title = "&#160;";
     o.inputtitle = _("Fix");
     o.inputstyle = "cbi-button-apply";
     o.onclick = L.bind(function (m) {
-      return this.applyWan6ClientIdFix(m);
+      return this.applyWan6ClientIdFix(m, clientIdInterfaceOption.formvalue("global"));
     }, this, m);
 
     const renderedNode = await m.render();
@@ -380,13 +392,13 @@ return view.extend({
     return this.setupIPv6Config(mapObj, 'pd');
   },
 
-  applyWan6ClientIdFix: function (mapObj) {
+  applyWan6ClientIdFix: function (mapObj, uplinkInterface) {
     return new Promise(function (resolve, reject) {
       ui.showModal(_('Applying Fix'), [
         E('p', { 'class': 'spinning' }, _('Setting Uplink Client ID...'))
       ]);
 
-      fs.exec('/usr/sbin/fleth', ['set_wan6_clientid'])
+      fs.exec('/usr/sbin/fleth', ['set_wan6_clientid', uplinkInterface || 'wan6'])
         .then(function (result) {
           ui.hideModal();
 
