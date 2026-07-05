@@ -3,7 +3,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=luci-proto-fleth
 LUCI_TITLE:=LuCI Support for Flet'H
 LUCI_DESCRIPTION:=LuCI protocol collection for IPv4 over IPv6 tunnels in Japan.
-PKG_VERSION:=0.24
+PKG_VERSION:=1.0
 PKG_RELEASE:=1
 
 LUCI_PKGARCH:=all
