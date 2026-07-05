@@ -151,9 +151,6 @@ msgstr "建議將 MTU 設定為 1460。"
 msgid "BR Address"
 msgstr "BR 地址"
 
-msgid "Border Relay IPv6 address"
-msgstr "Border Relay IPv6 地址"
-
 msgid "Client IPv4 Address"
 msgstr "客戶端 IPv4 地址"
 
@@ -172,9 +169,6 @@ msgstr "下游客戶端作為預設閘道使用的地址；路由器會回應該
 msgid "Public IPv4 Address"
 msgstr "公網 IPv4 地址"
 
-msgid "Your public IPv4 address for the tunnel interface"
-msgstr "隧道介面使用的公網 IPv4 地址"
-
 msgid "IPv6 Interface ID"
 msgstr "IPv6 介面 ID"
 
@@ -187,14 +181,8 @@ msgstr "v6plus 和 SoftBank 10G 需要填寫 IPv6 介面 ID"
 msgid "Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000"
 msgstr "無效的 IPv6 介面識別碼格式。範例：0011:4514:1b00:0000"
 
-msgid "Fill with 1 (Softbank)"
-msgstr "填充全 1 (Softbank)"
-
 msgid "1111:1111:1111:1111"
 msgstr "1111:1111:1111:1111"
-
-msgid "Fill from IPv4"
-msgstr "從 IPv4 轉換"
 
 msgid "Use IPv4 → Hex"
 msgstr "使用 IPv4 → 十六進制"

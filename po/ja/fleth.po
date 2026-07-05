@@ -68,7 +68,7 @@ msgid "IPv6 Interface"
 msgstr "IPv6 インターフェース"
 
 msgid "Uplink interface"
-msgstr "アップリンク側インターフェース"
+msgstr "上位IF"
 
 msgid "Uplink Interface"
 msgstr "アップリンクインターフェース"
@@ -151,9 +151,6 @@ msgstr "通常、工事完了日の夕方頃にサービスが利用可能にな
 msgid "BR Address"
 msgstr "BR アドレス"
 
-msgid "Border Relay IPv6 address"
-msgstr "BR (Border Relay) の IPv6 アドレス"
-
 msgid "Client IPv4 Address"
 msgstr "クライアント IPv4 アドレス"
 
@@ -161,19 +158,16 @@ msgid "Client IPv4 CIDR prefix length"
 msgstr "クライアント IPv4 プレフィックス長"
 
 msgid "Suggested prefix length for the downstream client static IPv4 configuration"
-msgstr "下流クライアントの静的 IPv4 設定に使用する推奨プレフィックス長です"
+msgstr "クライアントの静的 IPv4 設定に使用する推奨プレフィックス長です"
 
 msgid "Client Gateway IPv4 Address"
 msgstr "クライアントゲートウェイ IPv4 アドレス"
 
 msgid "Address used by the downstream client as its default gateway; the router answers ARP for this address"
-msgstr "下流クライアントがデフォルトゲートウェイとして使用するアドレスです。ルーターはこのアドレスへの ARP に応答します"
+msgstr "クライアントがデフォルトゲートウェイとして使用するアドレスです。ルーターはこのアドレスへの ARP に応答します"
 
 msgid "Public IPv4 Address"
 msgstr "パブリック IPv4 アドレス"
-
-msgid "Your public IPv4 address for the tunnel interface"
-msgstr "トンネルインターフェースで使用するパブリック IPv4 アドレス"
 
 msgid "IPv6 Interface ID"
 msgstr "IPv6 インターフェース ID"
@@ -187,17 +181,11 @@ msgstr "v6プラス と SoftBank 10G では IPv6 インターフェース ID が
 msgid "Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000"
 msgstr "IPv6 インターフェース ID の形式が正しくありません。例：0011:4514:1b00:0000"
 
-msgid "Fill with 1 (Softbank)"
-msgstr "SoftBank 用"
-
 msgid "1111:1111:1111:1111"
 msgstr "1111:1111:1111:1111"
 
-msgid "Fill from IPv4"
-msgstr "IPv4 変換"
-
 msgid "Use IPv4 → Hex"
-msgstr "IPv4 から入力"
+msgstr "IPv4 から生成"
 
 msgid "Tunnel Link"
 msgstr "トンネルリンク"

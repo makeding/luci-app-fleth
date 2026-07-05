@@ -52,6 +52,37 @@ function fillInterfaceIdFromIPv4() {
 	}
 }
 
+function fillInterfaceIdWithOnes() {
+	var ifIdInput = document.querySelector('[data-name="interface_id"] input');
+	if (ifIdInput) {
+		ifIdInput.value = '1111:1111:1111:1111';
+		ifIdInput.dispatchEvent(new Event('change', { bubbles: true }));
+	}
+}
+
+function renderInterfaceIdFillButtons() {
+	var ipv4Button = E('button', {
+		'class': 'cbi-button cbi-button-apply',
+		'type': 'button',
+		'style': 'margin-right: 0.75em;'
+	}, _('Use IPv4 → Hex'));
+	var onesButton = E('button', {
+		'class': 'cbi-button cbi-button-apply',
+		'type': 'button'
+	}, _('1111:1111:1111:1111'));
+
+	ipv4Button.addEventListener('click', fillInterfaceIdFromIPv4);
+	onesButton.addEventListener('click', fillInterfaceIdWithOnes);
+
+	return E('div', { 'class': 'cbi-value' }, [
+		E('label', { 'class': 'cbi-value-title' }, '\u00a0'),
+		E('div', { 'class': 'cbi-value-field' }, [
+			ipv4Button,
+			onesButton
+		])
+	]);
+}
+
 return network.registerProtocol('ipip6h', {
 	getI18n: function () {
 		return _("Flet'H Static IP");
@@ -84,16 +115,15 @@ return network.registerProtocol('ipip6h', {
 	renderFormOptions: function (s) {
 		var o;
 
-		o = s.taboption('general', form.Value, 'peeraddr', _('BR Address'),
-			_('Border Relay IPv6 address'));
+		o = s.taboption('general', form.Value, 'peeraddr', _('BR Address'));
 		o.value('2404:9200:225:100::65', '2404:9200:225:100::65 (v6plus)');
+		o.value('dgw.xpass.jp', 'dgw.xpass.jp (Xpass)');
 		o.value('2400:2000:4:0:a000::1999', '2400:2000:4:0:a000::1999 (SoftBank 10G)');
 		o.default = '2404:9200:225:100::65';
 		o.datatype = 'or(hostname,ip6addr("nomask"))';
 		o.rmempty = false;
 
-		o = s.taboption('general', form.Value, 'ip4ifaddr', _('Public IPv4 Address'),
-			_('Your public IPv4 address for the tunnel interface'));
+		o = s.taboption('general', form.Value, 'ip4ifaddr', _('Public IPv4 Address'));
 		o.rmempty = false;
 		o.datatype = 'ip4addr("nomask")';
 		o.placeholder = '111.0.0.1';
@@ -113,21 +143,8 @@ return network.registerProtocol('ipip6h', {
 			return true;
 		};
 
-		o = s.taboption('general', form.Button, '_fill_from_ipv4', _('Fill from IPv4'));
-		o.inputtitle = _('Use IPv4 → Hex');
-		o.inputstyle = 'apply';
-		o.onclick = fillInterfaceIdFromIPv4;
-
-		o = s.taboption('general', form.Button, '_fill_ones', _('Fill with 1 (Softbank)'));
-		o.inputtitle = _('1111:1111:1111:1111');
-		o.inputstyle = 'apply';
-		o.onclick = function () {
-			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
-			if (ifIdInput) {
-				ifIdInput.value = '1111:1111:1111:1111';
-				ifIdInput.dispatchEvent(new Event('change', { bubbles: true }));
-			}
-		};
+		o = s.taboption('general', form.DummyValue, '_fill_interface_id');
+		o.render = renderInterfaceIdFillButtons;
 
 		o = s.taboption('general', form.Flag, 'activation_enabled', _('Activation request'),
 			_('Run one HTTP request after the virtual interface is created'));
