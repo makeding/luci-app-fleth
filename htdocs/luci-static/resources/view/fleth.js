@@ -4,6 +4,7 @@
 "require form";
 "require ui";
 "require network";
+"require uci";
 "require tools.widgets as widgets";
 
 // fix css paading (kusa
@@ -62,17 +63,25 @@ return view.extend({
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
       L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_prefix_length"]), { stdout: "" }),
+      uci.load("network"),
     ]).then(function (results) {
       const area = (results[0].stdout || "").trim();
       const mape_status = (results[1].stdout || "").split("\n");
       const prefix_length = (results[2].stdout || "").trim();
+      const dhcpv6_interfaces = [];
       let areaValue = area || "UNKNOWN";
       const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
+
+      uci.sections("network", "interface", function (section) {
+        if (section[".name"] && section.proto === "dhcpv6")
+          dhcpv6_interfaces.push(section[".name"]);
+      });
 
       // Base return object with common fields
       const baseData = {
         mape_status: mape_status,
         prefix_length: prefix_length || "UNKNOWN",
+        dhcpv6_interfaces: dhcpv6_interfaces,
       };
 
       if (mape_status[0] === "NURO") areaValue = "UNKNOWN(NURO)";
@@ -301,11 +310,11 @@ return view.extend({
 
     o = s.taboption("tools", widgets.NetworkSelect, "_wan6_clientid_interface", _("Uplink interface"));
     const clientIdInterfaceOption = o;
-    o.filter = function (section_id) {
-      const net = network.getNetwork(section_id);
-      return net && net.getProtocol() === "dhcpv6";
-    };
-    o.default = "wan6";
+    const dhcpv6Interfaces = data.dhcpv6_interfaces && data.dhcpv6_interfaces.length ? data.dhcpv6_interfaces : ["wan6"];
+    dhcpv6Interfaces.forEach(function (iface) {
+      o.value(iface);
+    });
+    o.default = dhcpv6Interfaces[0];
     o.nocreate = true;
     o.rmempty = false;
 
