@@ -106,5 +106,6 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           # draft: true
-          make_latest: true
+          prerelease: ${{ startsWith(github.ref_name, 'p') }}
+          make_latest: ${{ startsWith(github.ref_name, 'p') && 'false' || 'true' }}
           files: ${{ steps.prepare_artifact.outputs.path }}
