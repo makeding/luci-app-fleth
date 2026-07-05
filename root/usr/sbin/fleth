@@ -28,6 +28,15 @@ detect_uplink_interface() {
 
 h_UPLINK_INTERFACE="${FLETH_UPLINK_INTERFACE:-$(detect_uplink_interface)}"
 
+case "$1" in
+    mape_status|pending_status|get_prefix_length)
+        [ -n "$2" ] && h_UPLINK_INTERFACE="$2"
+        ;;
+    check_alignment)
+        [ -n "$3" ] && h_UPLINK_INTERFACE="$3"
+        ;;
+esac
+
 # real xxxx
 r_TYPE="UNKNOWN"
 # DS-Lite
@@ -314,6 +323,8 @@ get_dslite_provider(){
 if [ "$1" = "mape_status" ]; then
     get_uplink_interface_ipv6 > /dev/null
     get_mape_provider
+elif [ "$1" = "get_uplink_interface" ]; then
+    echo "$h_UPLINK_INTERFACE"
 elif [ "$1" = "get_area" ]; then
     get_area > /dev/null
     echo ${e_AREA}

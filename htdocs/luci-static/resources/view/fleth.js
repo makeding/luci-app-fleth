@@ -59,58 +59,60 @@ return view.extend({
   },
 
   load: function () {
-    return Promise.all([
-      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
-      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
-      L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_prefix_length"]), { stdout: "" }),
-      uci.load("network"),
-    ]).then(function (results) {
-      const area = (results[0].stdout || "").trim();
-      const mape_status = (results[1].stdout || "").split("\n");
-      const prefix_length = (results[2].stdout || "").trim();
-      const dhcpv6_interfaces = [];
-      let areaValue = area || "UNKNOWN";
-      const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
+    return uci.load("network").then(function () {
+      return Promise.all([
+        L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_area"]), { stdout: "" }),
+        L.resolveDefault(fs.exec("/usr/sbin/fleth", ["mape_status"]), { stdout: "" }),
+        L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_prefix_length"]), { stdout: "" }),
+        L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_uplink_interface"]), { stdout: "" }),
+      ]).then(function (results) {
+        const area = (results[0].stdout || "").trim();
+        const mape_status = (results[1].stdout || "").split("\n");
+        const prefix_length = (results[2].stdout || "").trim();
+        const uplinkInterface = (results[3].stdout || "").trim() || "wan6";
+        const dhcpv6_interfaces = [];
+        let areaValue = area || "UNKNOWN";
+        const mapeIsUnknown = mape_status.length <= 1 || mape_status[0] === "UNKNOWN";
 
-      uci.sections("network", "interface", function (section) {
-        if (section[".name"] && section.proto === "dhcpv6")
-          dhcpv6_interfaces.push(section[".name"]);
-      });
+        uci.sections("network", "interface", function (section) {
+          if (section[".name"] && section.proto === "dhcpv6")
+            dhcpv6_interfaces.push(section[".name"]);
+        });
 
-      // Base return object with common fields
-      const baseData = {
-        mape_status: mape_status,
-        prefix_length: prefix_length || "UNKNOWN",
-        dhcpv6_interfaces: dhcpv6_interfaces,
-      };
+        const baseData = {
+          mape_status: mape_status,
+          prefix_length: prefix_length || "UNKNOWN",
+          dhcpv6_interfaces: dhcpv6_interfaces,
+          uplink_interface: uplinkInterface,
+        };
 
-      if (mape_status[0] === "NURO") areaValue = "UNKNOWN(NURO)";
+        if (mape_status[0] === "NURO") areaValue = "UNKNOWN(NURO)";
 
-      // Check prefix alignment for non-/56,/64 with MAP-E
-      const needsAlignmentCheck = !mapeIsUnknown &&
-        !["/56", "/64", "UNKNOWN"].includes(prefix_length);
+        const needsAlignmentCheck = !mapeIsUnknown &&
+          !["/56", "/64", "UNKNOWN"].includes(prefix_length);
 
-      const alignmentCheckPromise = needsAlignmentCheck
-        ? L.resolveDefault(fs.exec("/usr/sbin/fleth", ["check_alignment"]), { stdout: "" })
-        : Promise.resolve({ stdout: "" });
+        const alignmentCheckPromise = needsAlignmentCheck
+          ? L.resolveDefault(fs.exec("/usr/sbin/fleth", ["check_alignment"]), { stdout: "" })
+          : Promise.resolve({ stdout: "" });
 
-      if (mapeIsUnknown) {
-        return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["pending_status"]), { stdout: "" })
-          .then(function (pendingResult) {
-            const pendingStatus = (pendingResult.stdout || "").trim();
-            if (pendingStatus.endsWith("_pending")) {
-              return { ...baseData, area: pendingStatus.split('_')[0], dslite_provider: "UNKNOWN", isPending: true };
-            }
-            return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_dslite_provider"]), { stdout: "" })
-              .then(function (dsliteResult) {
-                return { ...baseData, area: areaValue, dslite_provider: (dsliteResult.stdout || "").trim() || "UNKNOWN", isPending: false };
-              });
-          });
-      }
+        if (mapeIsUnknown) {
+          return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["pending_status"]), { stdout: "" })
+            .then(function (pendingResult) {
+              const pendingStatus = (pendingResult.stdout || "").trim();
+              if (pendingStatus.endsWith("_pending")) {
+                return { ...baseData, area: pendingStatus.split('_')[0], dslite_provider: "UNKNOWN", isPending: true };
+              }
+              return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_dslite_provider"]), { stdout: "" })
+                .then(function (dsliteResult) {
+                  return { ...baseData, area: areaValue, dslite_provider: (dsliteResult.stdout || "").trim() || "UNKNOWN", isPending: false };
+                });
+            });
+        }
 
-      return alignmentCheckPromise.then(function (alignmentResult) {
-        const alignment_check = (alignmentResult.stdout || "").trim();
-        return { ...baseData, area: areaValue, dslite_provider: "UNKNOWN", isPending: false, alignment_check: alignment_check };
+        return alignmentCheckPromise.then(function (alignmentResult) {
+          const alignment_check = (alignmentResult.stdout || "").trim();
+          return { ...baseData, area: areaValue, dslite_provider: "UNKNOWN", isPending: false, alignment_check: alignment_check };
+        });
       });
     });
   },
@@ -156,6 +158,13 @@ return view.extend({
     s.tab("diag", _("Diagnostics"));
     s.tab("general", _("General Settings"));
     s.tab("tools", _("Tools"));
+
+    const dhcpv6Interfaces = data.dhcpv6_interfaces && data.dhcpv6_interfaces.length ? data.dhcpv6_interfaces : ["wan6"];
+
+    o = s.taboption("diag", form.DummyValue, "uplink_interface", _("Uplink interface"));
+    o.cfgvalue = function () {
+      return data.uplink_interface || dhcpv6Interfaces[0];
+    };
 
     o = s.taboption("diag", form.DummyValue, "area", _("Area"));
     o.cfgvalue = function () {
@@ -308,13 +317,12 @@ return view.extend({
       return _("OpenWrt 25.12 and later use the Default DUID as a randomized DHCPv6 client identifier. This does not meet NGN requirements.");
     };
 
-    o = s.taboption("tools", widgets.NetworkSelect, "_wan6_clientid_interface", _("Uplink interface"));
-    const clientIdInterfaceOption = o;
-    const dhcpv6Interfaces = data.dhcpv6_interfaces && data.dhcpv6_interfaces.length ? data.dhcpv6_interfaces : ["wan6"];
+    o = s.taboption("tools", widgets.NetworkSelect, "_uplink_interface", _("Uplink interface"));
+    const uplinkInterfaceOption = o;
     dhcpv6Interfaces.forEach(function (iface) {
       o.value(iface);
     });
-    o.default = dhcpv6Interfaces[0];
+    o.default = data.uplink_interface || dhcpv6Interfaces[0];
     o.nocreate = true;
     o.rmempty = false;
 
@@ -323,36 +331,16 @@ return view.extend({
     o.inputtitle = _("Fix");
     o.inputstyle = "cbi-button-apply";
     o.onclick = L.bind(function (m) {
-      return this.applyWan6ClientIdFix(m, clientIdInterfaceOption.formvalue("global"));
+      return this.applyWan6ClientIdFix(m, uplinkInterfaceOption.formvalue("global"));
     }, this, m);
 
     const renderedNode = await m.render();
 
-    // Hide footer when tools tab is active
+    // This page is diagnostics/tools only; actions are handled by buttons.
     setTimeout(function () {
       const footer = document.querySelector('.cbi-page-actions');
-
-      const toggleFooter = function () {
-        // Check if tools tab is active
-        const toolsActive = document.querySelector('.cbi-tab[data-tab="tools"]');
-        if (footer) {
-          footer.style.display = toolsActive ? 'none' : '';
-        }
-      };
-
-      // Initial check on page load
-      toggleFooter();
-
-      // Listen to tab menu clicks
-      const tabMenu = document.querySelector('.cbi-tabmenu');
-      if (tabMenu) {
-        const tabItems = tabMenu.querySelectorAll('li[data-tab]');
-        tabItems.forEach(function (tabItem) {
-          tabItem.addEventListener('click', function () {
-            setTimeout(toggleFooter, 10);
-          });
-        });
-      }
+      if (footer)
+        footer.style.display = 'none';
     }, 0);
 
     return renderedNode;
