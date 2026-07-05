@@ -317,7 +317,8 @@ return view.extend({
       return _("OpenWrt 25.12 and later use the Default DUID as a randomized DHCPv6 client identifier. This does not meet NGN requirements.");
     };
 
-    o = s.taboption("tools", widgets.NetworkSelect, "_uplink_interface", _("Uplink interface"));
+    o = s.taboption("tools", widgets.NetworkSelect, "_uplink_interface");
+    o.title = "&#160;";
     const uplinkInterfaceOption = o;
     dhcpv6Interfaces.forEach(function (iface) {
       o.value(iface);
