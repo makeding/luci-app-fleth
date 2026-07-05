@@ -48,6 +48,7 @@ fleth_get_aaaa_record() {
 }
 
 fleth_check_ipv6_reachability() {
+	[ -n "$1" ] || return 1
 	ping6 -c 1 -w 2 "$1" >/dev/null 2>&1
 }
 

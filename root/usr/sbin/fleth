@@ -102,8 +102,14 @@ get_pending_status(){
 }
 
 get_AAAA_record() {
-    local domain=$1
-    result=$(nslookup -type=AAAA $domain $DNS 2>/dev/null | grep "Address:")
+    local domain="$1"
+    local result
+
+    if [ -n "$DNS" ]; then
+        result=$(nslookup -type=AAAA "$domain" "$DNS" 2>/dev/null | grep "Address:")
+    else
+        result=$(nslookup -type=AAAA "$domain" 2>/dev/null | grep "Address:")
+    fi
     if [ -n "$result" ]; then
         # get line=2
         echo "$result" | awk 'NR==2' | awk '{print $2}'
@@ -113,7 +119,9 @@ get_AAAA_record() {
 }
 
 check_ipv6_reachability() {
-    local ip=$1
+    local ip="$1"
+    [ -n "$ip" ] || return 1
+
     if ping6 -c 1 -w 2 "$ip" > /dev/null 2>&1; then
         return 0
     else
@@ -135,8 +143,15 @@ filter_global_ipv6() {
 }
 
 get_uplink_interface_ipv6() {
-    ipv6_address=$(ifstatus ${h_UPLINK_INTERFACE} 2>/dev/null | grep '"address"' | awk -F '"' '{print $4}' | filter_global_ipv6)
-    echo $ipv6_address
+    local status
+
+    status=$(ifstatus ${h_UPLINK_INTERFACE} 2>/dev/null)
+    ipv6_address=$(echo "$status" | grep '"address"' | awk -F '"' '{print $4}' | filter_global_ipv6)
+    if [ -z "$ipv6_address" ]; then
+        ipv6_address=$(echo "$status" | jsonfilter -e '@.route[*].source' 2>/dev/null | sed -n 's#/.*##p' | filter_global_ipv6)
+    fi
+
+    echo "$ipv6_address"
 }
 
 get_uplink_prefix_length() {
@@ -292,32 +307,42 @@ EOF
 # https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 get_dslite_provider(){
     # check type with DS-LITE
+    local t_TRANSIX t_XPASS t_ASAHI
+
     # 1. transix can't be resolved outside
     t_TRANSIX=$(get_AAAA_record "gw.transix.jp")
     if [ -n "$t_TRANSIX" ]; then
         r_TYPE="ds-lite"
-        r_AFTR=$t_TRANSIX
+        r_AFTR="$t_TRANSIX"
         r_AFTR_DOMAIN="gw.transix.jp"
+        echo "$r_AFTR"
+        return 0
     else
         # 2. xpass can be resolved outside but can't ping
         # http://checkv6.xpass.jp/check_address.php
         t_XPASS=$(get_AAAA_record "dgw.xpass.jp")
-        if check_ipv6_reachability $t_XPASS; then
+        if [ -n "$t_XPASS" ] && check_ipv6_reachability "$t_XPASS"; then
             r_TYPE="ds-lite"
-            r_AFTR=$t_XPASS
+            r_AFTR="$t_XPASS"
             r_AFTR_DOMAIN="dgw.xpass.jp"
+            echo "$r_AFTR"
+            return 0
         else
             # 3. v6connect can't be resolved outside
             # curl http://route6.asahi-net.jp/v1/address
             t_ASAHI=$(get_AAAA_record "dslite.v6connect.net")
             if [ -n "$t_ASAHI" ]; then
                 r_TYPE="ds-lite"
-                r_AFTR=$t_ASAHI
+                r_AFTR="$t_ASAHI"
                 r_AFTR_DOMAIN="dslite.v6connect.net"
+                echo "$r_AFTR"
+                return 0
             fi
         fi
     fi
-    echo $r_AFTR
+
+    echo "$r_AFTR"
+    return 1
 }
 
 if [ "$1" = "mape_status" ]; then
