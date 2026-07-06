@@ -1,23 +1,47 @@
-![banner](./logo/fleth-banner.svg)
+[![banner](./logo/fleth-banner.svg)](https://fleth.link/)
 # luci-app-fleth
 [Japanese](./readme.md) || [Chinese Simplified](./readme-zhs.md)
 
 luci-app-fleth is a helper that can automatically configure IPv4 over IPv6 tunnels. Supports DS-Lite, MAP-E, IPIP6H tunnels (Dedicated IP), and IPIP6HP passthrough.
+
+- Website: [fleth.link](https://fleth.link/)
+- Package feed: [dl.fleth.link](https://dl.fleth.link/)
 
 > Japan use only
 
 **If wan6 cannot obtain IPv6 on OpenWrt 25.12**
 If you need connectivity before installing this package, clear `Network → Interfaces → Default DUID`.
 
-[>>>>>> Download Here <<<<<<](https://github.com/makeding/luci-app-fleth/releases)
-
 > v0.24 is the last release with `map` / `ds-lite` dependencies. See the [v0.24 release note](https://github.com/makeding/luci-app-fleth/releases/tag/v0.24).
 
 # Installation (apk)
-If you are using OpenWrt 25.12 or newer, there is no signature yet, so `--allow-untrusted` is required.
+OpenWrt 25.12 and later:
 
 ```
-apk add --allow-untrusted /tmp/luci-app-fleth_*.apk
+wget -O /etc/apk/keys/fleth.pem https://dl.fleth.link/fleth.pem
+echo 'https://dl.fleth.link/apk/all/packages.adb' > /etc/apk/repositories.d/fleth.list
+apk update
+apk add luci-proto-fleth
+```
+
+# Installation (ipk)
+OpenWrt 24.10 and earlier:
+
+```
+mkdir -p /etc/opkg/keys
+wget -O /etc/opkg/keys/064499bbef2b4ee5 https://dl.fleth.link/opkg/all/064499bbef2b4ee5
+echo 'src/gz fleth https://dl.fleth.link/opkg/all' >> /etc/opkg/customfeeds.conf
+opkg update
+opkg install luci-proto-fleth
+```
+
+If the router already has the old `luci-app-fleth` package installed, add the
+same feed and install the compatibility package first:
+
+```
+opkg install luci-app-fleth
+# or
+apk add luci-app-fleth
 ```
 # Supported ISPs
 https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d  
@@ -60,15 +84,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 - `SoftBank 光`
   - 1Gbps
   - 10Gbps（東日本 テスト済）
-
-## IPIP6HP Passthrough
-IPIP6HP is a protocol for handing an independent IPv4 address to a dedicated downstream device without NAT on the OpenWrt router. It is intended for servers, existing routers, firewall appliances, or any device that should own the public IPv4 address directly.
-
-- Configure the downstream client IPv4 address, CIDR prefix length, and client gateway IPv4 address from LuCI.
-- For `/31` setups, the client gateway IPv4 address is auto-filled from the downstream client IPv4 address.
-- Use the IPv4-to-Interface-ID helper buttons for v6plus and SoftBank 10G configurations.
-- A dedicated passthrough device is recommended. Enable “Allow shared passthrough device” only when you intentionally share the device.
-- Proxy ARP, source policy routing, fw4 nft rules, and TCP MSS adjustment are applied automatically.
+- Fixed IP passthrough to a downstream device is also supported.
 
 # Screenshots
 ![information](./screenshots/luci-information-3.jpeg)  

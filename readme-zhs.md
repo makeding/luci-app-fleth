@@ -1,23 +1,46 @@
-![banner](./logo/fleth-banner.svg)
+[![banner](./logo/fleth-banner.svg)](https://fleth.link/)
 # luci-app-fleth
 [日本語](./readme.md) || [English](./readme-en.md)
 
-luci-app-fleth 是一个可以自动配置 IPv4 over IPv6 隧道的辅助工具。支持 DS-Lite、MAP-E、IPIP6H 隧道（独立 IP）以及 IPIP6HP 透传。
+luci-app-fleth 是一个可以自动配置 IPv4 over IPv6 隧道的辅助工具。支持 DS-Lite、MAP-E、IPIP6H 隧道（固定 IP）以及 IPIP6HP 透传。
+
+- 官网：[fleth.link](https://fleth.link/)
+- 软件源：[dl.fleth.link](https://dl.fleth.link/)
 
 > 仅面向日本
 
 **OpenWrt 25.12 上 wan6 无法获取 IPv6 的解决办法**
 如果需要在安装本插件前先恢复连接，请清空 `Network → Interfaces → Default DUID`。
 
-[>>>>>> 点击此处下载 <<<<<<](https://github.com/makeding/luci-app-fleth/releases)
-
 > v0.24 是最后一个包含 `map` / `ds-lite` 依赖的版本。详情请参见 [v0.24 release note](https://github.com/makeding/luci-app-fleth/releases/tag/v0.24)。
 
 # 安装（apk）
-如果使用 OpenWrt 25.12 或更新版本，目前没有签名，需要 `--allow-untrusted`。
+OpenWrt 25.12 及以后：
 
 ```
-apk add --allow-untrusted /tmp/luci-app-fleth_*.apk
+wget -O /etc/apk/keys/fleth.pem https://dl.fleth.link/fleth.pem
+echo 'https://dl.fleth.link/apk/all/packages.adb' > /etc/apk/repositories.d/fleth.list
+apk update
+apk add luci-proto-fleth
+```
+
+# 安装（ipk）
+OpenWrt 24.10 及以前：
+
+```
+mkdir -p /etc/opkg/keys
+wget -O /etc/opkg/keys/064499bbef2b4ee5 https://dl.fleth.link/opkg/all/064499bbef2b4ee5
+echo 'src/gz fleth https://dl.fleth.link/opkg/all' >> /etc/opkg/customfeeds.conf
+opkg update
+opkg install luci-proto-fleth
+```
+
+如果路由器已经安装旧的 `luci-app-fleth`，请添加同一个软件源后先安装兼容包：
+
+```
+opkg install luci-app-fleth
+# 或
+apk add luci-app-fleth
 ```
 # 对应 ISP
 https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d  
@@ -60,16 +83,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 - `SoftBank 光`
   - 1Gbps
   - 10Gbps（東日本 テスト済）
-
-
-## IPIP6HP 透传
-IPIP6HP 用于将独立 IPv4 不经 OpenWrt 路由器 NAT，直接交给一个专用下游设备使用。适合服务器、既有路由器、防火墙设备，或其他需要直接持有公网 IPv4 的设备。
-
-- 可在 LuCI 中设置下游客户端 IPv4、CIDR 前缀长度、客户端网关 IPv4。
-- `/31` 配置下，会根据下游客户端 IPv4 自动补全客户端网关 IPv4。
-- v6plus / SoftBank 10G 配置可使用 IPv4 到 Interface ID 的辅助填充按钮。
-- 建议使用专用透传设备；只有明确需要共享设备时，才启用 “Allow shared passthrough device”。
-- 会自动应用 Proxy ARP、源地址策略路由、fw4 nft 规则和 TCP MSS 调整。
+- 也支持将固定 IP passthrough 给下游设备使用。
 
 # 截图
 ![information](./screenshots/luci-information-3.jpeg)  

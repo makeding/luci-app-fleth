@@ -1,23 +1,46 @@
-![banner](./logo/fleth-banner.svg)  
+[![banner](./logo/fleth-banner.svg)](https://fleth.link/)
 # luci-app-fleth
 [English](./readme-en.md) || [Chinese Simplified](./readme-zhs.md)  
 
-luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘルパーです。DS-Lite、MAP-E、IPIP6H トンネル（独立IP）、および IPIP6HP パススルーに対応しています。
+luci-app-fleth は、IPv4 over IPv6 トンネルを自動構成できるヘルパーです。DS-Lite、MAP-E、IPIP6H トンネル（固定IP）、および IPIP6HP パススルーに対応しています。
+
+- 公式サイト: [fleth.link](https://fleth.link/)
+- パッケージフィード: [dl.fleth.link](https://dl.fleth.link/)
 
 > 日本向け
 
 **OpenWrt 25.12 で wan6 が IPv6 を取得できない場合**
 インストール前に接続が必要な場合は、`Network → Interfaces → Default DUID` を空にしてください。
 
-[＞＞＞＞＞＞ダウンロードはこちら＜＜＜＜＜＜＜](https://github.com/makeding/luci-app-fleth/releases)
-
 > v0.24 は `map` / `ds-lite` 依存関係を含む最後のリリースです。詳細は [v0.24 リリースノート](https://github.com/makeding/luci-app-fleth/releases/tag/v0.24) を参照してください。
 
 # インストール (apk)
-OpenWrt 25.12 以降を使用する場合、署名がまだ無いので `--allow-untrusted` が必要です。
+OpenWrt 25.12 以降:
 
 ```
-apk add --allow-untrusted /tmp/luci-app-fleth_*.apk
+wget -O /etc/apk/keys/fleth.pem https://dl.fleth.link/fleth.pem
+echo 'https://dl.fleth.link/apk/all/packages.adb' > /etc/apk/repositories.d/fleth.list
+apk update
+apk add luci-proto-fleth
+```
+
+# インストール (ipk)
+OpenWrt 24.10 以前:
+
+```
+mkdir -p /etc/opkg/keys
+wget -O /etc/opkg/keys/064499bbef2b4ee5 https://dl.fleth.link/opkg/all/064499bbef2b4ee5
+echo 'src/gz fleth https://dl.fleth.link/opkg/all' >> /etc/opkg/customfeeds.conf
+opkg update
+opkg install luci-proto-fleth
+```
+
+旧 `luci-app-fleth` から更新する場合は、同じフィードを追加した後に互換パッケージをインストールしてください。
+
+```
+opkg install luci-app-fleth
+# または
+apk add luci-app-fleth
 ```
 # 対応 ISP
 https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d  
@@ -60,15 +83,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 - `SoftBank 光`
   - 1Gbps
   - 10Gbps（東日本 テスト済）
-
-## IPIP6HP パススルー
-IPIP6HP は、独立 IPv4 を OpenWrt ルーターで NAT せず、専用の下流デバイスへ渡すためのプロトコルです。サーバー、既存ルーター、ファイアウォール機器など、公開 IPv4 を直接持たせたい機器向けです。
-
-- 下流クライアント IPv4、CIDR プレフィックス長、クライアント用ゲートウェイ IPv4 を LuCI から設定できます。
-- `/31` 構成では、下流クライアント IPv4 からゲートウェイ IPv4 を自動補完します。
-- v6プラス / SoftBank 10G 向けに、IPv4 から Interface ID を補完するボタンを利用できます。
-- パススルーデバイスは専用利用を推奨します。必要な場合のみ「Allow shared passthrough device」を有効にしてください。
-- Proxy ARP、送信元ポリシールーティング、fw4 用 nft ルール、TCP MSS 調整を自動で適用します。
+- 固定IPを下流機器へパススルーする構成にも対応しています。
 
 # スクリーンショット
 ![information](./screenshots/luci-information-3.jpeg)  
