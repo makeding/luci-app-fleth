@@ -6,6 +6,41 @@
 
 network.registerPatternVirtual(/^fleth-.+$/);
 
+function loadFlethHook() {
+  var hookPages = [
+    "/cgi-bin/luci/admin/network",
+    "/cgi-bin/luci/admin/network/network",
+    "/cgi-bin/luci/admin/network/firewall/forwards",
+  ];
+  var script;
+
+  if (hookPages.indexOf(location.pathname) === -1)
+    return;
+
+  if (window.flethHookLoaded || window.flethHookLoading)
+    return;
+
+  window.flethHookLoading = true;
+
+  try {
+    script = document.createElement("script");
+    script.src = L.resource("view/fleth-hook.js");
+    script.setAttribute("data-fleth-hook-loader", "1");
+    script.onload = function () {
+      window.flethHookLoading = false;
+    };
+    script.onerror = function () {
+      window.flethHookLoading = false;
+    };
+    document.head.appendChild(script);
+  } catch (error) {
+    window.flethHookLoading = false;
+    console.warn(error);
+  }
+}
+
+loadFlethHook();
+
 return network.registerProtocol("fleth", {
   getI18n: function () {
     return _("Flet'H IPoE");
