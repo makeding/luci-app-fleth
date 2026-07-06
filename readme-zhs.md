@@ -87,7 +87,7 @@ https://qiita.com/site_u/items/b6d5097f5e3a0f91c95d
 
 # 截图
 ![information](./screenshots/luci-information-3.jpeg)  
-![configuration](./screenshots/luci-configuration-3.jpeg)  
+![luci-proto-fleth](./screenshots/luci-proto-fleth.jpeg)  
 ![tools](./screenshots/luci-tools-1.jpeg)  
 ![luci-proto-ipip6h](./screenshots/luci-proto-ipip6h.jpeg)  
 ![firewall-port-forward-hook-1](./screenshots/firewall-port-forward-hook-1.png)
