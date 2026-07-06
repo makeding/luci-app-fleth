@@ -4,7 +4,7 @@ PKG_NAME:=luci-proto-fleth
 LUCI_TITLE:=LuCI Support for Flet'H
 LUCI_DESCRIPTION:=LuCI protocol collection for IPv4 over IPv6 tunnels in Japan.
 PKG_VERSION:=1.0
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+luci-base +lua +luci-proto-ipv6 \
