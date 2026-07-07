@@ -1,5 +1,0 @@
-#!/bin/ash
-
-. /usr/share/fleth/ipip6hp-hotplug.sh
-
-fleth_apply_all_ipip6hp_rules
