@@ -19,7 +19,7 @@ OpenWrt 25.12 及以后：
 
 ```
 wget -O /etc/apk/keys/fleth.pem https://dl.fleth.link/fleth.pem
-echo 'https://dl.fleth.link/apk/all/packages.adb' > /etc/apk/repositories.d/fleth.list
+echo 'https://dl.fleth.link/apk/all/packages.adb' >> /etc/apk/repositories.d/customfeeds.list
 apk update
 apk add luci-proto-fleth
 ```
