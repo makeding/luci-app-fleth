@@ -350,16 +350,23 @@ proto_fleth_setup_mape() {
 	proto_close_data
 	proto_send_update "$cfg"
 
-	json_init
-	json_add_string name "${cfg}_"
-	json_add_string ifname "@${tunlink:-wan6}"
-	json_add_string proto "static"
-	json_add_array ip6addr
-	json_add_string "" "${local_ipv6}/128"
-	json_close_array
-	json_close_object
-	if ubus call network add_dynamic "$(json_dump)" >/dev/null 2>&1; then
+	if fleth_local_ipv6_exists "$local_ipv6"; then
+		logger -t fleth "[${cfg}] IPv6 address $local_ipv6 already exists; skipping dynamic interface ${cfg}_"
 		type fleth_prefer_slaac_address >/dev/null 2>&1 && fleth_prefer_slaac_address "$cfg" "${tunlink:-wan6}" "$local_ipv6" "$prefer_slaac"
+	else
+		json_init
+		json_add_string name "${cfg}_"
+		json_add_string ifname "@${tunlink:-wan6}"
+		json_add_string proto "static"
+		json_add_array ip6addr
+		json_add_string "" "${local_ipv6}/128"
+		json_close_array
+		json_close_object
+		if ubus call network add_dynamic "$(json_dump)" >/dev/null 2>&1; then
+			type fleth_prefer_slaac_address >/dev/null 2>&1 && fleth_prefer_slaac_address "$cfg" "${tunlink:-wan6}" "$local_ipv6" "$prefer_slaac"
+		else
+			logger -t fleth "[${cfg}] ERROR: Failed to create dynamic interface ${cfg}_"
+		fi
 	fi
 	: ${auto_activate:=1}
 	[ "$auto_activate" = "1" ] && type fleth_schedule_ping_activation >/dev/null 2>&1 && fleth_schedule_ping_activation "$cfg" "$link"

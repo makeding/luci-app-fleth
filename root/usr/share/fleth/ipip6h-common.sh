@@ -206,6 +206,13 @@ fleth_ipip6_add_dynamic_address() {
 	[ -n "$interface_id" ] && [ -n "$ip6addr" ] || return 0
 
 	parent_iface="${tunlink:-wan6}"
+	if fleth_local_ipv6_exists "$ip6addr"; then
+		logger -t "$tag" "[${cfg}] IPv6 address $ip6addr already exists; skipping dynamic interface ${cfg}_"
+		fleth_ipip6_schedule_activation "$cfg" "$tag" "$activation_enabled" "$activation_url" "$ip6addr"
+		type fleth_prefer_slaac_address >/dev/null 2>&1 && fleth_prefer_slaac_address "$cfg" "$parent_iface" "$ip6addr" "$prefer_slaac"
+		return 0
+	fi
+
 	logger -t "$tag" "[${cfg}] Creating dynamic interface ${cfg}_ on @${parent_iface}"
 	json_init
 	json_add_string name "${cfg}_"

@@ -51,6 +51,13 @@ fleth_get_interface_device() {
     echo "$device"
 }
 
+fleth_local_ipv6_exists() {
+    local ip6addr="$1"
+
+    [ -n "$ip6addr" ] || return 1
+    ip -6 route get "$ip6addr" 2>/dev/null | grep -q '^[[:space:]]*local '
+}
+
 fleth_prefer_slaac_address() {
     local cfg="$1"
     local parent_iface="$2"
