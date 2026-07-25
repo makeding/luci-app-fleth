@@ -8,7 +8,6 @@
 	window.flethHookLoaded = true;
 
 	var mapeStatus = [];
-	var MAPE_PORTS_INDEX = 10;
 	var macRegex = /([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}/;
 	var callNetworkInterfaceStatus = L.rpc.declare({
 		object: 'network.interface',
@@ -73,6 +72,22 @@
 
 	function getAllPorts() {
 		return Array.apply(null, Array(65535)).map(function (_, i) { return String(i + 1); });
+	}
+
+	function getMapePorts(status) {
+		var i;
+		var line;
+
+		if (status.length === 0 || status[0] === 'UNKNOWN')
+			return [];
+
+		for (i = status.length - 1; i >= 0; i--) {
+			line = String(status[i] || '').trim();
+			if (/^\d+(?:\s+\d+)+$/.test(line))
+				return line.split(/\s+/);
+		}
+
+		return [];
 	}
 
 	function hookClientIdField(clientIdNode) {
@@ -186,9 +201,7 @@
 				return;
 
 			srcDportNode.setAttribute('data-fleth-port-hooked', '1');
-			ports = mapeStatus.length > MAPE_PORTS_INDEX && mapeStatus[0] !== 'UNKNOWN'
-				? mapeStatus[MAPE_PORTS_INDEX].split(/\s+/).filter(function (port) { return port; })
-				: getAllPorts();
+			ports = getMapePorts(mapeStatus);
 
 			if (ports.length === 0)
 				ports = getAllPorts();

@@ -150,6 +150,15 @@ return network.registerProtocol('ipip6hp', {
 	renderFormOptions: function (s) {
 		var o;
 
+		o = s.taboption('firewall', form.DummyValue, '_firewall_zone_warning', _('Warning'));
+		o.rawhtml = true;
+		o.cfgvalue = function () {
+			return '<div class="alert-message warning">' +
+				_('When using ipip6hp, do not assign a firewall zone here. Leave this field unspecified.') +
+				'</div>';
+		};
+		o.write = function () {};
+
 		o = s.taboption('general', form.Value, 'peeraddr', _('BR Address'));
 		o.value('2404:9200:225:100::65', '2404:9200:225:100::65 (v6plus)');
 		o.value('dgw.xpass.jp', 'dgw.xpass.jp (Xpass)');
@@ -245,10 +254,6 @@ return network.registerProtocol('ipip6hp', {
 
 		o = s.taboption('advanced', form.Flag, 'prefer_slaac', _('Prefer SLAAC Address'),
 			_('Router outbound connections will prefer SLAAC addresses over MAP-E/ipip6h static addresses'));
-		o.default = o.enabled;
-
-		o = s.taboption('advanced', form.Flag, 'auto_activate', _('Auto Activate Tunnel'),
-			_('Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly.'));
 		o.default = o.enabled;
 
 		o = s.taboption('advanced', form.Value, 'ip4table', _('IPv4 routing table'),

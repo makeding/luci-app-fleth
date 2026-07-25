@@ -361,6 +361,12 @@ msgstr "Flet'H 固定IP"
 msgid "Flet'H Static IP (Passthrough)"
 msgstr "Flet'H 固定IP（透传）"
 
+msgid "Warning"
+msgstr "警告"
+
+msgid "When using ipip6hp, do not assign a firewall zone here. Leave this field unspecified."
+msgstr "使用 ipip6hp 时，禁止在此分配防火墙区域。请将此项保持为“未指定”。"
+
 msgid "Open Network → Interfaces, edit the target interface, then choose the required Flet'H family protocol: Flet'H IPoE, Flet'H Static IP, or Flet'H Static IP (Passthrough)."
 msgstr "打开 Network → Interfaces，编辑目标接口，然后选择需要的 Flet'H 家族协议：Flet'H IPoE、Flet'H 固定IP 或 Flet'H 固定IP（透传）。"
 

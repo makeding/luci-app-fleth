@@ -1,6 +1,8 @@
 #!/bin/sh
 
 fleth_ipip6_add_common_config() {
+	local include_auto_activate="${1:-1}"
+
 	proto_config_add_string "peeraddr"
 	proto_config_add_string "ip4ifaddr"
 	proto_config_add_string "ip6addr"
@@ -13,7 +15,7 @@ fleth_ipip6_add_common_config() {
 	proto_config_add_boolean "defaultroute"
 	proto_config_add_int "metric"
 	proto_config_add_boolean "prefer_slaac"
-	proto_config_add_boolean "auto_activate"
+	[ "$include_auto_activate" = "1" ] && proto_config_add_boolean "auto_activate"
 	proto_config_add_boolean "activation_enabled"
 	proto_config_add_string "activation_url"
 }
