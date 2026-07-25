@@ -2,6 +2,11 @@
 (function () {
 	'use strict';
 
+	if (typeof window === 'undefined' || typeof document === 'undefined' ||
+	    typeof L === 'undefined' || !L.rpc || typeof L.rpc.declare !== 'function' ||
+	    !L.fs || typeof L.resolveDefault !== 'function')
+		return;
+
 	if (window.flethHookLoaded)
 		return;
 
@@ -148,26 +153,93 @@
 		}
 	}
 
+	function hookProtocolSelects() {
+		var nodes = document.querySelectorAll('div[data-name="proto"] select');
+		var protocolOrder = [ 'fleth', 'ipip6h', 'ipip6hp' ];
+		var i;
+
+		for (i = 0; i < nodes.length; i++) {
+			try {
+				var selectNode = nodes[i];
+				var anchor = selectNode.querySelector('option[value="fleth"]');
+				var j;
+
+				if (!anchor || selectNode.getAttribute('data-fleth-protocol-order-hooked') === '1')
+					continue;
+
+				for (j = 1; j < protocolOrder.length; j++) {
+					var option = selectNode.querySelector('option[value="' + protocolOrder[j] + '"]');
+					if (option) {
+						selectNode.insertBefore(option, anchor.nextSibling);
+						anchor = option;
+					}
+				}
+
+				selectNode.setAttribute('data-fleth-protocol-order-hooked', '1');
+			} catch (error) {
+				reportHookError(error);
+			}
+		}
+	}
+
+	function reportHookError(error) {
+		try {
+			if (window.console && typeof window.console.warn === 'function')
+				window.console.warn("Flet'H hook skipped:", error);
+		} catch (ignored) {}
+	}
+
+	function invokeHook(callback) {
+		var result;
+
+		try {
+			result = callback();
+			if (result && typeof result.catch === 'function')
+				result.catch(reportHookError);
+		} catch (error) {
+			reportHookError(error);
+		}
+	}
+
 	function observeAddedNodes(selector, callback, attributeFilter) {
 		var observeTarget = document.querySelector('#modal_overlay') || document.body;
-		var observer = new MutationObserver(function (mutationsList) {
-			mutationsList.forEach(function (mutation) {
-				mutation.addedNodes.forEach(function (node) {
-					if (node.nodeType === Node.ELEMENT_NODE &&
-					    (node.matches(selector) || node.querySelector(selector)))
-						callback();
-				});
+		var observer;
+
+		invokeHook(callback);
+
+		if (!observeTarget || typeof MutationObserver !== 'function')
+			return;
+
+		try {
+			observer = new MutationObserver(function (mutationsList) {
+				var i;
+				var j;
+
+				for (i = 0; i < mutationsList.length; i++) {
+					for (j = 0; j < mutationsList[i].addedNodes.length; j++) {
+						var node = mutationsList[i].addedNodes[j];
+
+						try {
+							if (node.nodeType === 1 &&
+							    ((typeof node.matches === 'function' && node.matches(selector)) ||
+							     (typeof node.querySelector === 'function' && node.querySelector(selector))))
+								invokeHook(callback);
+						} catch (error) {
+							reportHookError(error);
+						}
+					}
+				}
 			});
-		});
 
-		observer.observe(observeTarget, {
-			childList: true,
-			attributes: true,
-			subtree: true,
-			attributeFilter: attributeFilter
-		});
-
-		callback();
+			observer.observe(observeTarget, {
+				childList: true,
+				attributes: true,
+				subtree: true,
+				attributeFilter: attributeFilter
+			});
+		} catch (error) {
+			reportHookError(error);
+		}
 	}
 
 	function hookFirewallPortForward() {
@@ -258,6 +330,8 @@
 	if (location.pathname === '/cgi-bin/luci/admin/network/firewall/forwards')
 		observeAddedNodes('div[data-name="src_dport"]', hookFirewallPortForward, [ 'data-name' ]);
 
-	if ([ '/cgi-bin/luci/admin/network', '/cgi-bin/luci/admin/network/network' ].indexOf(location.pathname) !== -1)
+	if ([ '/cgi-bin/luci/admin/network', '/cgi-bin/luci/admin/network/network' ].indexOf(location.pathname) !== -1) {
 		observeAddedNodes('div[data-name="clientid"][data-field^="cbid.network."][data-field$=".clientid"]', hookInterfaceClientIdFields, [ 'data-name', 'data-field' ]);
+		observeAddedNodes('div[data-name="proto"] select', hookProtocolSelects, [ 'data-name', 'data-field' ]);
+	}
 })();

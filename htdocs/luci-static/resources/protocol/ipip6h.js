@@ -38,15 +38,6 @@ function ipv4ToHex(ipv4) {
 	return '00' + hexParts[0] + ':' + hexParts[1] + hexParts[2] + ':' + hexParts[3] + '00:0000';
 }
 
-function getPeerValue() {
-	var peerInput = document.querySelector('[data-name="peeraddr"] input[type="hidden"]');
-	return peerInput ? peerInput.value : '';
-}
-
-function peerRequiresInterfaceId(peeraddr) {
-	return peeraddr === '2404:9200:225:100::65' || peeraddr === '2400:2000:4:0:a000::1999';
-}
-
 function fillInterfaceIdFromIPv4() {
 	var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
 	var ifIdInput = document.querySelector('[data-name="interface_id"] input');
@@ -128,6 +119,7 @@ return network.registerProtocol('ipip6h', {
 		o.value('2404:9200:225:100::65', '2404:9200:225:100::65 (v6plus)');
 		o.value('dgw.xpass.jp', 'dgw.xpass.jp (Xpass)');
 		o.value('2400:2000:4:0:a000::1999', '2400:2000:4:0:a000::1999 (SoftBank 10G)');
+		o.value('2400:2000:4:0:a000::2999', '2400:2000:4:0:a000::2999 (SoftBank 10G)');
 		o.default = '2404:9200:225:100::65';
 		o.datatype = 'or(hostname,ip6addr("nomask"))';
 		o.rmempty = false;
@@ -139,15 +131,13 @@ return network.registerProtocol('ipip6h', {
 
 		o = s.taboption('general', form.Value, 'interface_id', _('IPv6 Interface ID'));
 		o.placeholder = '006f:0000:0100:0000';
-		o.optional = true;
+		o.rmempty = false;
 		o.validate = function (_section_id, value) {
-			if (peerRequiresInterfaceId(getPeerValue()) && (!value || value.length === 0))
-				return _('IPv6 Interface ID is required for v6plus and SoftBank 10G');
+			if (!value || value.length === 0)
+				return _('IPv6 Interface ID is required');
 
-			if (value && value.length > 0) {
-				if (!/^([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}$/.test(value))
-					return _('Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000');
-			}
+			if (!/^([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}$/.test(value))
+				return _('Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000');
 
 			return true;
 		};
@@ -213,17 +203,5 @@ return network.registerProtocol('ipip6h', {
 			_('Automatically send ping to activate tunnel. Without traffic, some tunnels may fail to establish connection properly.'));
 		o.default = o.enabled;
 
-		setTimeout(function () {
-			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
-			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
-
-			if (!ip4Input || !ifIdInput)
-				return;
-
-			ip4Input.addEventListener('input', function () {
-				if (peerRequiresInterfaceId(getPeerValue()))
-					fillInterfaceIdFromIPv4();
-			});
-		}, 100);
 	}
 });

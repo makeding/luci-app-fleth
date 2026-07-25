@@ -61,15 +61,6 @@ function ipv4Peer31(ipv4) {
 	return peer.join('.');
 }
 
-function getPeerValue() {
-	var peerInput = document.querySelector('[data-name="peeraddr"] input[type="hidden"]');
-	return peerInput ? peerInput.value : '';
-}
-
-function peerRequiresInterfaceId(peeraddr) {
-	return peeraddr === '2404:9200:225:100::65' || peeraddr === '2400:2000:4:0:a000::1999';
-}
-
 function fillInterfaceIdFromIPv4() {
 	var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
 	var ifIdInput = document.querySelector('[data-name="interface_id"] input');
@@ -172,6 +163,7 @@ return network.registerProtocol('ipip6hp', {
 		o.value('2404:9200:225:100::65', '2404:9200:225:100::65 (v6plus)');
 		o.value('dgw.xpass.jp', 'dgw.xpass.jp (Xpass)');
 		o.value('2400:2000:4:0:a000::1999', '2400:2000:4:0:a000::1999 (SoftBank 10G)');
+		o.value('2400:2000:4:0:a000::2999', '2400:2000:4:0:a000::2999 (SoftBank 10G)');
 		o.default = '2404:9200:225:100::65';
 		o.datatype = 'or(hostname,ip6addr("nomask"))';
 		o.rmempty = false;
@@ -195,15 +187,13 @@ return network.registerProtocol('ipip6hp', {
 
 		o = s.taboption('general', form.Value, 'interface_id', _('IPv6 Interface ID'));
 		o.placeholder = '006f:0000:0100:0000';
-		o.optional = true;
+		o.rmempty = false;
 		o.validate = function (_section_id, value) {
-			if (peerRequiresInterfaceId(getPeerValue()) && (!value || value.length === 0))
-				return _('IPv6 Interface ID is required for v6plus and SoftBank 10G');
+			if (!value || value.length === 0)
+				return _('IPv6 Interface ID is required');
 
-			if (value && value.length > 0) {
-				if (!/^([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}$/.test(value))
-					return _('Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000');
-			}
+			if (!/^([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}$/.test(value))
+				return _('Invalid IPv6 interface identifier format. Example: 0011:4514:1b00:0000');
 
 			return true;
 		};
@@ -288,11 +278,10 @@ return network.registerProtocol('ipip6hp', {
 			var ip4Input = document.querySelector('[data-name="ip4ifaddr"] input');
 			var prefixInput = document.querySelector('[data-name="ip4prefixlen"] input');
 			var gatewayInput = document.querySelector('[data-name="gateway4"] input');
-			var ifIdInput = document.querySelector('[data-name="interface_id"] input');
 			var currentPeer = (ip4Input && prefixInput && prefixInput.value === '31') ? ipv4Peer31(ip4Input.value) : '';
 			var lastAutoGateway = (gatewayInput && gatewayInput.value === currentPeer) ? gatewayInput.value : '';
 
-			if (ip4Input && ifIdInput) {
+			if (ip4Input) {
 				if (gatewayInput) {
 					gatewayInput.addEventListener('input', function () {
 						if (gatewayInput.value !== lastAutoGateway)
@@ -316,8 +305,6 @@ return network.registerProtocol('ipip6hp', {
 
 				ip4Input.addEventListener('input', function () {
 					updateAutoGateway();
-					if (peerRequiresInterfaceId(getPeerValue()))
-						fillInterfaceIdFromIPv4();
 				});
 			}
 		}, 100);
