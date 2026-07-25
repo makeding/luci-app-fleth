@@ -2,6 +2,21 @@
 
 . /lib/functions.sh
 
+fleth_ipip6hp_device_name() {
+    local interface="$1"
+    local name="ipip6hp-${interface}"
+    local first last
+
+    if [ "${#name}" -le 15 ]; then
+        printf '%s\n' "$name"
+        return
+    fi
+
+    first=$(printf '%s' "$interface" | cut -c 1-4)
+    last=$(printf '%s' "$interface" | tail -c 4)
+    printf 'ip6hp-%s-%s\n' "$first" "$last"
+}
+
 fleth_delete_nft_comment_rules() {
     local chain="$1"
     local comment="$2"
@@ -181,7 +196,7 @@ fleth_apply_ipip6hp_rules() {
     device=$(uci get network.${interface}.device 2>/dev/null)
     client4=$(uci get network.${interface}.ip4ifaddr 2>/dev/null)
     link=$(ifstatus "$interface" 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)
-    [ -z "$link" ] && link="ipip6hp-${interface}"
+    [ -z "$link" ] && link=$(fleth_ipip6hp_device_name "$interface")
 
     [ -n "$device" ] && [ -n "$link" ] && [ -n "$client4" ] || {
         logger -t fleth-hotplug "ipip6hp $interface missing nft parameters"

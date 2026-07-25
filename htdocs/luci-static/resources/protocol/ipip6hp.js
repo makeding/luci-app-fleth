@@ -5,7 +5,16 @@
 'require network';
 'require tools.widgets as widgets';
 
-network.registerPatternVirtual(/^ipip6hp-.+$/);
+network.registerPatternVirtual(/^(?:ipip6hp|ip6hp)-.+$/);
+
+function getIpip6hpDeviceName(sectionId) {
+	var name = 'ipip6hp-' + sectionId;
+
+	if (name.length <= 15)
+		return name;
+
+	return 'ip6hp-' + sectionId.substring(0, 4) + '-' + sectionId.substring(sectionId.length - 4);
+}
 
 function ipv4ToHex(ipv4) {
 	if (!ipv4)
@@ -112,7 +121,7 @@ return network.registerProtocol('ipip6hp', {
 	},
 
 	getIfname: function () {
-		return this._ubus('l3_device') || 'ipip6hp-%s'.format(this.sid);
+		return this._ubus('l3_device') || getIpip6hpDeviceName(this.sid);
 	},
 
 	getPackageName: function () {

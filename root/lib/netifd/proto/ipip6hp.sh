@@ -124,7 +124,7 @@ ipip6hp_has_other_ipv4() {
 proto_ipip6hp_setup() {
 	local cfg="$1"
 	local passthrough_device="$2"
-	local link="ipip6hp-$cfg"
+	local link="$(fleth_ipip6hp_device_name "$cfg")"
 
 	local peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac activation_enabled activation_url
 	json_get_vars peeraddr ip4ifaddr ip4prefixlen gateway4 allow_shared_device proxy_arp ip4table ip4rule_priority ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac activation_enabled activation_url
@@ -245,7 +245,7 @@ proto_ipip6hp_teardown() {
 	local gateway4=$(uci get network.${cfg}.gateway4 2>/dev/null)
 	local ip4table=$(uci get network.${cfg}.ip4table 2>/dev/null)
 	local ip4rule_priority=$(uci get network.${cfg}.ip4rule_priority 2>/dev/null)
-	local link="ipip6hp-$cfg"
+	local link="$(fleth_ipip6hp_device_name "$cfg")"
 	: ${ip4table:=100}
 	: ${ip4rule_priority:=10000}
 

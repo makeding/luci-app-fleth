@@ -11,6 +11,21 @@
 	init_proto "$@"
 }
 
+fleth_ipip6h_device_name() {
+	local interface="$1"
+	local name="ipip6h-${interface}"
+	local first last
+
+	if [ "${#name}" -le 15 ]; then
+		printf '%s\n' "$name"
+		return
+	fi
+
+	first=$(printf '%s' "$interface" | cut -c 1-5)
+	last=$(printf '%s' "$interface" | tail -c 4)
+	printf 'ip6h-%s-%s\n' "$first" "$last"
+}
+
 proto_ipip6h_init_config() {
 	no_device=1
 	available=1
@@ -22,7 +37,7 @@ proto_ipip6h_init_config() {
 proto_ipip6h_setup() {
 	local cfg="$1"
 	local iface="$2"
-	local link="ipip6h-$cfg"
+	local link="$(fleth_ipip6h_device_name "$cfg")"
 
 	local peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac auto_activate weakif activation_enabled activation_url
 	json_get_vars peeraddr ip4ifaddr ip6addr interface_id tunlink mtu ttl encaplimit zone defaultroute metric prefer_slaac auto_activate weakif activation_enabled activation_url
