@@ -1,5 +1,5 @@
 ---
-name: Build package for luci-app-fleth
+name: Build package for luci-proto-fleth
 
 on:
   push:
@@ -22,17 +22,11 @@ jobs:
           - package_type: ipk
             arch: x86_64-22.03.2
             package_name: luci-proto-fleth
-          - package_type: ipk
-            arch: x86_64-22.03.2
-            package_name: luci-app-fleth
           - package_type: apk
             arch: x86_64-25.12.1
             package_name: luci-proto-fleth
-          - package_type: apk
-            arch: x86_64-25.12.1
-            package_name: luci-app-fleth
     steps:
-      - name: Fetch luci-app-fleth code
+      - name: Fetch luci-proto-fleth code
         uses: actions/checkout@v6
         with:
           path: huggy/${{ matrix.package_name }}
@@ -42,9 +36,6 @@ jobs:
           repository: 'openwrt-dev/po2lmo'
           ref: 'db656750ab032f3056d329c5e727a10af9ba15dd'
           path: huggy/${{ matrix.package_name }}/po2lmo
-      - name: Use compatibility package name
-        if: matrix.package_name == 'luci-app-fleth'
-        run: sed -i 's/^PKG_NAME:=luci-proto-fleth$/PKG_NAME:=luci-app-fleth/' "$GITHUB_WORKSPACE/huggy/${{ matrix.package_name }}/Makefile"
       - name: 'Make po2lmo binary'
         run: 'cd $GITHUB_WORKSPACE/huggy/${{ matrix.package_name }}/po2lmo && make'
       - name: 'Manual convert i18n(lmo) file'
@@ -75,7 +66,7 @@ jobs:
       #     APK_SIGNER_URL: ${{ secrets.APK_SIGNER_URL }}
       #     APK_SIGNER_KEY: ${{ secrets.APK_SIGNER_KEY }}
       #   run: |
-      #     for apk in bin/packages/x86_64/huggy/luci-app-fleth*.apk; do
+      #     for apk in bin/packages/x86_64/huggy/luci-proto-fleth*.apk; do
       #       python3 apk-signer/scripts/sign.py "$apk" "$apk.signed"
       #       mv "$apk.signed" "$apk"
       #     done
