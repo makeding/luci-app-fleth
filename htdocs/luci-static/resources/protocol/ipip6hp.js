@@ -150,14 +150,20 @@ return network.registerProtocol('ipip6hp', {
 	renderFormOptions: function (s) {
 		var o;
 
-		o = s.taboption('firewall', form.DummyValue, '_firewall_zone_warning', _('Warning'));
-		o.rawhtml = true;
-		o.cfgvalue = function () {
-			return '<div class="alert-message warning">' +
-				_('When using ipip6hp, do not assign a firewall zone here. Leave this field unspecified.') +
-				'</div>';
+		o = s.taboption('firewall', form.DummyValue, '_firewall_zone_warning');
+		o.render = function () {
+			return E('div', { 'class': 'cbi-value' }, [
+				E('label', { 'class': 'cbi-value-title' }, '\u00a0'),
+				E('div', { 'class': 'cbi-value-field' }, [
+					E('div', { 'class': 'cbi-value-description' }, [
+						E('strong', {}, [
+							'⚠ ',
+							_('When using ipip6hp, do not assign a firewall zone here. Leave this field unspecified.')
+						])
+					])
+				])
+			]);
 		};
-		o.write = function () {};
 
 		o = s.taboption('general', form.Value, 'peeraddr', _('BR Address'));
 		o.value('2404:9200:225:100::65', '2404:9200:225:100::65 (v6plus)');

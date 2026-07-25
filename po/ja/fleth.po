@@ -358,9 +358,6 @@ msgstr "Flet'H 固定IP"
 msgid "Flet'H Static IP (Passthrough)"
 msgstr "Flet'H 固定IP（パススルー）"
 
-msgid "Warning"
-msgstr "警告"
-
 msgid "When using ipip6hp, do not assign a firewall zone here. Leave this field unspecified."
 msgstr "ipip6hp を使用する場合、ここでファイアウォールゾーンを割り当てないでください。この項目は「指定なし」のままにしてください。"
 

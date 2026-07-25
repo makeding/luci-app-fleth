@@ -358,9 +358,6 @@ msgstr "Flet'H 固定IP"
 msgid "Flet'H Static IP (Passthrough)"
 msgstr "Flet'H 固定IP（透傳）"
 
-msgid "Warning"
-msgstr "警告"
-
 msgid "When using ipip6hp, do not assign a firewall zone here. Leave this field unspecified."
 msgstr "使用 ipip6hp 時，禁止在此分配防火牆區域。請將此項保持為「未指定」。"
 
