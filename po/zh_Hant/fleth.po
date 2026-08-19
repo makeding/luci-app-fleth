@@ -58,8 +58,41 @@ msgstr "偏移量"
 msgid "Available ports"
 msgstr "可用端口"
 
-msgid "Highlighted ports are easier to remember."
-msgstr "高亮端口是比較好記的候選。"
+msgid "Port status"
+msgstr "連接埠狀態"
+
+msgid "Blue: memorable port"
+msgstr "藍色：易記連接埠"
+
+msgid "Yellow: UPnP mapping"
+msgstr "黃色：UPnP 對映"
+
+msgid "Green: firewall rule"
+msgstr "綠色：防火牆規則"
+
+msgid "Hover a port to see current UPnP or firewall usage."
+msgstr "將游標停留在連接埠上，即可查看目前的 UPnP 或防火牆使用情況。"
+
+msgid "No active UPnP or firewall mapping detected."
+msgstr "未偵測到作用中的 UPnP 或防火牆對映。"
+
+msgid "Port usage could not be checked."
+msgstr "無法檢查連接埠使用情況。"
+
+msgid "UPnP mapping"
+msgstr "UPnP 對映"
+
+msgid "Firewall rule"
+msgstr "防火牆規則"
+
+msgid "Port forwarding"
+msgstr "連接埠轉送"
+
+msgid "protocol"
+msgstr "協定"
+
+msgid "Target"
+msgstr "目標"
 
 msgid "Auto Configure tunnel Interface"
 msgstr "自動配置隧道介面"

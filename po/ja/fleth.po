@@ -58,8 +58,41 @@ msgstr "オフセット"
 msgid "Available ports"
 msgstr "利用可能なポート"
 
-msgid "Highlighted ports are easier to remember."
-msgstr "ハイライトされたポートは覚えやすい候補です。"
+msgid "Port status"
+msgstr "ポートの状態"
+
+msgid "Blue: memorable port"
+msgstr "青: 覚えやすいポート"
+
+msgid "Yellow: UPnP mapping"
+msgstr "黄: UPnP マッピング"
+
+msgid "Green: firewall rule"
+msgstr "緑: ファイアウォールルール"
+
+msgid "Hover a port to see current UPnP or firewall usage."
+msgstr "ポートにカーソルを合わせると、現在の UPnP またはファイアウォールでの使用状況を確認できます。"
+
+msgid "No active UPnP or firewall mapping detected."
+msgstr "アクティブな UPnP またはファイアウォールのマッピングは検出されませんでした。"
+
+msgid "Port usage could not be checked."
+msgstr "ポートの使用状況を確認できませんでした。"
+
+msgid "UPnP mapping"
+msgstr "UPnP マッピング"
+
+msgid "Firewall rule"
+msgstr "ファイアウォールルール"
+
+msgid "Port forwarding"
+msgstr "ポートフォワーディング"
+
+msgid "protocol"
+msgstr "プロトコル"
+
+msgid "Target"
+msgstr "対象"
 
 msgid "Auto Configure tunnel Interface"
 msgstr "トンネル自動設定"

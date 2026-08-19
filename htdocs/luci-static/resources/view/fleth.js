@@ -11,18 +11,43 @@
 const fleth_style = document.createElement("style");
 fleth_style.innerHTML = `
   .cbi-value-title { padding-top: 6px !important; }
+  .port-item {
+    display: inline-block;
+    padding: 1px 4px;
+    margin: 1px;
+    border-radius: 3px;
+    cursor: help;
+  }
   .port-highlight {
     background-color: rgb(207, 226, 255);
     color: #1f2937;
-    padding: 1px 4px;
-    border-radius: 3px;
     font-weight: 500;
   }
+  .port-upnp {
+    background-color: rgb(254, 243, 199);
+    color: rgb(146, 64, 14);
+    font-weight: 600;
+  }
+  .port-firewall {
+    background-color: rgb(220, 252, 231);
+    color: rgb(22, 101, 52);
+    font-weight: 600;
+  }
+  .port-status-legend { line-height: 1.8; }
+  .port-legend { margin-right: 0.75em; white-space: nowrap; }
 
   @media (prefers-color-scheme: dark) {
     .port-highlight {
       background-color: rgb(59, 130, 246);
       color: #f8fafc;
+    }
+    .port-upnp {
+      background-color: rgb(161, 98, 7);
+      color: #fff7ed;
+    }
+    .port-firewall {
+      background-color: rgb(22, 101, 52);
+      color: #f0fdf4;
     }
   }
 `;
@@ -58,6 +83,82 @@ return view.extend({
     return isSpecial;
   },
 
+  _parsePortUsage: function (output) {
+    const usage = {};
+
+    String(output || '').split('\n').forEach(function (line) {
+      const fields = line.split('\t');
+      const port = fields[0];
+      const source = fields[1];
+
+      if (!/^\d+$/.test(port) || (source !== 'upnp' && source !== 'firewall'))
+        return;
+
+      if (!usage[port])
+        usage[port] = { upnp: [], firewall: [] };
+
+      const entries = usage[port][source];
+      const entry = {
+        protocol: fields[2] || 'ALL',
+        detail: fields[3] || ''
+      };
+
+      if (!entries.some(function (item) {
+        return item.protocol === entry.protocol && item.detail === entry.detail;
+      }))
+        entries.push(entry);
+    });
+
+    return usage;
+  },
+
+  _escapeHtml: function (value) {
+    return String(value || '').replace(/[&<>"']/g, function (character) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[character];
+    });
+  },
+
+  _portUsageTitle: function (usage, available) {
+    if (!available)
+      return _('Port usage could not be checked.');
+
+    const lines = [];
+    const appendEntries = function (label, entries, includeTarget) {
+      entries.forEach(function (entry) {
+        let line = label + ' (' + _('protocol') + ': ' + entry.protocol + ')';
+        if (includeTarget && entry.detail)
+          line += ' - ' + _('Target') + ': ' + entry.detail;
+        lines.push(line);
+      });
+    };
+
+    appendEntries(_('UPnP mapping'), usage.upnp, true);
+    usage.firewall.forEach(function (entry) {
+      const label = entry.detail === 'redirect' ? _('Port forwarding') : _('Firewall rule');
+      lines.push(label + ' (' + _('protocol') + ': ' + entry.protocol + ')');
+    });
+
+    return lines.length ? lines.join('\n') : _('No active UPnP or firewall mapping detected.');
+  },
+
+  _portClass: function (port, usage, available) {
+    if (!available)
+      return this._isSpecialPort(port) ? 'port-highlight' : '';
+    if (usage.upnp.length)
+      return 'port-upnp';
+    if (usage.firewall.length)
+      return 'port-firewall';
+    if (this._isSpecialPort(port))
+      return 'port-highlight';
+    return '';
+  },
+
   load: function () {
     return uci.load("network").then(function () {
       return Promise.all([
@@ -86,6 +187,22 @@ return view.extend({
           uplink_interface: uplinkInterface,
         };
 
+        const mapePorts = !mapeIsUnknown && mape_status[10]
+          ? mape_status[10].split(/\s+/).filter(function (port) { return /^\d+$/.test(port); })
+          : [];
+        const portUsagePromise = mapePorts.length
+          ? L.resolveDefault(fs.exec("/usr/sbin/fleth", ["port_usage"].concat(mapePorts)), { stdout: "", code: 1 })
+          : Promise.resolve({ stdout: "", code: mapeIsUnknown ? 0 : 1 });
+        const withPortUsage = function (payload) {
+          return portUsagePromise.then(function (portUsageResult) {
+            return {
+              ...payload,
+              port_usage: portUsageResult.stdout || "",
+              port_usage_available: portUsageResult.code === 0
+            };
+          });
+        };
+
         if (mape_status[0] === "NURO") areaValue = "UNKNOWN(NURO)";
 
         const needsAlignmentCheck = !mapeIsUnknown &&
@@ -100,18 +217,18 @@ return view.extend({
             .then(function (pendingResult) {
               const pendingStatus = (pendingResult.stdout || "").trim();
               if (pendingStatus.endsWith("_pending")) {
-                return { ...baseData, area: pendingStatus.split('_')[0], dslite_provider: "UNKNOWN", isPending: true };
+                return withPortUsage({ ...baseData, area: pendingStatus.split('_')[0], dslite_provider: "UNKNOWN", isPending: true });
               }
               return L.resolveDefault(fs.exec("/usr/sbin/fleth", ["get_dslite_provider"]), { stdout: "" })
                 .then(function (dsliteResult) {
-                  return { ...baseData, area: areaValue, dslite_provider: (dsliteResult.stdout || "").trim() || "UNKNOWN", isPending: false };
+                  return withPortUsage({ ...baseData, area: areaValue, dslite_provider: (dsliteResult.stdout || "").trim() || "UNKNOWN", isPending: false });
                 });
             });
         }
 
         return alignmentCheckPromise.then(function (alignmentResult) {
           const alignment_check = (alignmentResult.stdout || "").trim();
-          return { ...baseData, area: areaValue, dslite_provider: "UNKNOWN", isPending: false, alignment_check: alignment_check };
+          return withPortUsage({ ...baseData, area: areaValue, dslite_provider: "UNKNOWN", isPending: false, alignment_check: alignment_check });
         });
       });
     });
@@ -202,6 +319,8 @@ return view.extend({
 
     // Only show detailed MAP-E fields if we have valid data
     if (hasMapeData) {
+      const portUsage = this._parsePortUsage(data.port_usage);
+      const portUsageAvailable = data.port_usage_available === true;
       const mapeDetailFields = [
         ["mape_ipaddr", "IP Address"],
         ["mape_peeraddr", "Peer Address"],
@@ -228,11 +347,15 @@ return view.extend({
 
             // Split ports into individual numbers and highlight special ones
             const ports = portsString.split(/\s+/).filter(p => p);
-            const viewContext = this;  // Save reference for use in arrow function
-            const highlightedPorts = ports.map(port => {
-              return viewContext._isSpecialPort(port) ?
-                '<span class="port-highlight">' + port + '</span>' :
-                port;
+            const viewContext = this;
+            const highlightedPorts = ports.map(function (port) {
+              const usage = portUsage[port] || { upnp: [], firewall: [] };
+              const portClass = viewContext._portClass(port, usage, portUsageAvailable);
+              const className = 'port-item' + (portClass ? ' ' + portClass : '');
+              const title = viewContext._escapeHtml(viewContext._portUsageTitle(usage, portUsageAvailable));
+
+              return '<span class="' + className + '" title="' + title + '">' +
+                viewContext._escapeHtml(port) + '</span>';
             });
 
             return highlightedPorts.join(' ');
@@ -246,7 +369,13 @@ return view.extend({
               E('label', { 'class': 'cbi-value-title' }, _(fieldLabel)),
               E('div', { 'class': 'cbi-value-field' }, [
                 contentDiv,
-                E('div', { 'class': 'cbi-value-description' }, _('Highlighted ports are easier to remember.'))
+                E('div', { 'class': 'cbi-value-description port-status-legend' }, [
+                  E('strong', {}, _('Port status') + ': '),
+                  E('span', { 'class': 'port-legend port-item port-highlight' }, _('Blue: memorable port')),
+                  E('span', { 'class': 'port-legend port-item port-upnp' }, _('Yellow: UPnP mapping')),
+                  E('span', { 'class': 'port-legend port-item port-firewall' }, _('Green: firewall rule')),
+                  E('span', { 'class': 'port-legend' }, _('Hover a port to see current UPnP or firewall usage.'))
+                ])
               ])
             ]);
           }.bind(o);
