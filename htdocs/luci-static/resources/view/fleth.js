@@ -84,32 +84,65 @@ return view.extend({
   },
 
   _parsePortUsage: function (output) {
-    const usage = {};
+    const usage = [];
 
     String(output || '').split('\n').forEach(function (line) {
       const fields = line.split('\t');
       const port = fields[0];
       const source = fields[1];
 
-      if (!/^\d+$/.test(port) || (source !== 'upnp' && source !== 'firewall'))
+      if ((source === 'upnp' && !/^\d+$/.test(port)) ||
+          (source === 'firewall' && port !== '*') ||
+          (source !== 'upnp' && source !== 'firewall'))
         return;
 
-      if (!usage[port])
-        usage[port] = { upnp: [], firewall: [] };
-
-      const entries = usage[port][source];
       const entry = {
+        port: port,
+        source: source,
         protocol: fields[2] || 'ALL',
-        detail: fields[3] || ''
+        detail: fields[3] || '',
+        spec: fields[4] || ''
       };
 
-      if (!entries.some(function (item) {
-        return item.protocol === entry.protocol && item.detail === entry.detail;
+      if (!usage.some(function (item) {
+        return item.port === entry.port && item.source === entry.source &&
+          item.protocol === entry.protocol && item.detail === entry.detail &&
+          item.spec === entry.spec;
       }))
-        entries.push(entry);
+        usage.push(entry);
     });
 
     return usage;
+  },
+
+  _portMatchesSpec: function (port, spec) {
+    const candidate = Number(port);
+
+    return String(spec || '').split(/\s+/).some(function (range) {
+      if (!range)
+        return false;
+
+      range = range.replace(':', '-');
+      const separator = range.indexOf('-');
+      const start = separator >= 0 ? range.substring(0, separator) : range;
+      const end = separator >= 0 ? range.substring(separator + 1) : range;
+
+      if (!/^\d+$/.test(start) || !/^\d+$/.test(end))
+        return false;
+
+      return candidate >= Number(start) && candidate <= Number(end);
+    });
+  },
+
+  _portUsage: function (port, records) {
+    return {
+      upnp: records.filter(function (entry) {
+        return entry.source === 'upnp' && entry.port === port;
+      }),
+      firewall: records.filter(function (entry) {
+        return entry.source === 'firewall' && this._portMatchesSpec(port, entry.spec);
+      }, this)
+    };
   },
 
   _escapeHtml: function (value) {
@@ -187,12 +220,17 @@ return view.extend({
           uplink_interface: uplinkInterface,
         };
 
-        const mapePorts = !mapeIsUnknown && mape_status[10]
-          ? mape_status[10].split(/\s+/).filter(function (port) { return /^\d+$/.test(port); })
-          : [];
-        const portUsagePromise = mapePorts.length
-          ? L.resolveDefault(fs.exec("/usr/sbin/fleth", ["port_usage"].concat(mapePorts)), { stdout: "", code: 1 })
-          : Promise.resolve({ stdout: "", code: mapeIsUnknown ? 0 : 1 });
+        const portUsagePromise = !mapeIsUnknown
+          ? Promise.all([
+              L.resolveDefault(fs.exec("/usr/sbin/fleth", ["port_usage", "upnp"]), { stdout: "", code: 1 }),
+              L.resolveDefault(fs.exec("/usr/sbin/fleth", ["port_usage", "firewall"]), { stdout: "", code: 1 })
+            ]).then(function (portUsageResults) {
+              return {
+                stdout: portUsageResults.map(function (result) { return result.stdout || ""; }).join("\n"),
+                code: portUsageResults.every(function (result) { return result.code === 0; }) ? 0 : 1
+              };
+            })
+          : Promise.resolve({ stdout: "", code: 0 });
         const withPortUsage = function (payload) {
           return portUsagePromise.then(function (portUsageResult) {
             return {
@@ -349,7 +387,7 @@ return view.extend({
             const ports = portsString.split(/\s+/).filter(p => p);
             const viewContext = this;
             const highlightedPorts = ports.map(function (port) {
-              const usage = portUsage[port] || { upnp: [], firewall: [] };
+              const usage = viewContext._portUsage(port, portUsage);
               const portClass = viewContext._portClass(port, usage, portUsageAvailable);
               const className = 'port-item' + (portClass ? ' ' + portClass : '');
               const title = viewContext._escapeHtml(viewContext._portUsageTitle(usage, portUsageAvailable));

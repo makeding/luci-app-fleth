@@ -353,53 +353,6 @@ normalize_port_value() {
     echo "$value"
 }
 
-port_requested() {
-    local candidate="$1"
-    local requested
-
-    shift
-    for requested in "$@"; do
-        [ "$candidate" = "$requested" ] && return 0
-    done
-
-    return 1
-}
-
-port_matches_spec() {
-    local port="$1"
-    local spec="$2"
-    local range start end
-
-    case "$port" in
-        ''|*[!0-9]*) return 1 ;;
-    esac
-
-    port=$(normalize_port_value "$port")
-    for range in $spec; do
-        range=$(echo "$range" | tr ':' '-')
-        case "$range" in
-            *-*)
-                start=${range%%-*}
-                end=${range#*-}
-                ;;
-            *)
-                start="$range"
-                end="$range"
-                ;;
-        esac
-
-        case "$start:$end" in
-            ''|*[!0-9:]*|*:) continue ;;
-        esac
-
-        start=$(normalize_port_value "$start")
-        end=$(normalize_port_value "$end")
-        [ "$port" -ge "$start" ] && [ "$port" -le "$end" ] && return 0
-    done
-
-    return 1
-}
-
 collect_upnp_leases() {
     local lease_file now proto ext_port int_addr int_port expires description target
 
@@ -431,7 +384,6 @@ collect_upnp_leases() {
         esac
 
         ext_port=$(normalize_port_value "$ext_port")
-        port_requested "$ext_port" "$@" || continue
         int_addr=$(echo "$int_addr" | sed 's/[^0-9.]//g')
         int_port=$(normalize_port_value "$int_port")
         target="${int_addr:-?}:${int_port}"
@@ -453,7 +405,7 @@ collect_upnp_runtime() {
 
             ext_port=$(echo "$line" | sed -n 's/.*dport \([0-9][0-9]*\).*dnat .*to \([^ ]*\).*/\1/p')
             target=$(echo "$line" | sed -n 's/.*dport [0-9][0-9]*.*dnat .*to \([^ ]*\).*/\1/p')
-            [ -n "$ext_port" ] && port_requested "$ext_port" "$@" || continue
+            [ -n "$ext_port" ] || continue
             printf '%s\tupnp\t%s\t%s\n' "$(normalize_port_value "$ext_port")" "$proto" "${target:-?}"
         done
     fi
@@ -469,14 +421,14 @@ collect_upnp_runtime() {
 
             ext_port=$(echo "$line" | sed -n 's/.*dpt:\([0-9][0-9]*\).*/\1/p')
             target=$(echo "$line" | sed -n 's/.*to:\([^ ]*\).*/\1/p')
-            [ -n "$ext_port" ] && port_requested "$ext_port" "$@" || continue
+            [ -n "$ext_port" ] || continue
             printf '%s\tupnp\t%s\t%s\n' "$(normalize_port_value "$ext_port")" "$proto" "${target:-?}"
         done
     fi
 }
 
 collect_firewall_config() {
-    local kind section enabled spec proto port
+    local kind section enabled spec proto
 
     for kind in redirect rule; do
         uci show firewall 2>/dev/null |
@@ -498,27 +450,24 @@ collect_firewall_config() {
             [ -n "$proto" ] || proto=all
             proto=$(echo "$proto" | tr '[:lower:]' '[:upper:]')
 
-            for port in "$@"; do
-                port_matches_spec "$port" "$spec" || continue
-                printf '%s\tfirewall\t%s\t%s\n' "$(normalize_port_value "$port")" "$proto" "$kind"
-            done
+            printf '*\tfirewall\t%s\t%s\t%s\n' "$proto" "$kind" "$spec"
         done
     done
 }
 
 port_usage() {
-    local port
-
-    [ "$#" -gt 0 ] || return 0
-    for port in "$@"; do
-        case "$port" in
-            ''|*[!0-9]*) continue ;;
-        esac
-    done
-
-    collect_upnp_leases "$@"
-    collect_upnp_runtime "$@"
-    collect_firewall_config "$@"
+    case "$1" in
+        upnp)
+            collect_upnp_leases
+            collect_upnp_runtime
+            ;;
+        firewall)
+            collect_firewall_config
+            ;;
+        *)
+            return 1
+            ;;
+    esac
 }
 
 if [ "$1" = "mape_status" ]; then
@@ -545,8 +494,7 @@ elif [ "$1" = "get_prefix_length" ]; then
 elif [ "$1" = "check_alignment" ]; then
     check_prefix_alignment "$2"
 elif [ "$1" = "port_usage" ]; then
-    shift
-    port_usage "$@"
+    port_usage "$2"
 elif [ "$1" = "setup_ipv6_slaac" ]; then
     # Configure IPv6 SLAAC for NEXT(1Gbps) without Hikari Denwa (/64)
     logger -t fleth "Starting IPv6 SLAAC configuration"
