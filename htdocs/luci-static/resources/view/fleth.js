@@ -12,25 +12,31 @@ const fleth_style = document.createElement("style");
 fleth_style.innerHTML = `
   .cbi-value-title { padding-top: 6px !important; }
   .port-item {
-    display: inline-block;
-    padding: 1px 4px;
-    margin: 1px;
-    border-radius: 3px;
     cursor: help;
   }
   .port-highlight {
     background-color: rgb(207, 226, 255);
     color: #1f2937;
+    padding: 1px 4px;
+    border-radius: 3px;
     font-weight: 500;
   }
   .port-upnp {
     background-color: rgb(254, 243, 199);
     color: rgb(146, 64, 14);
+    display: inline-block;
+    padding: 1px 4px;
+    margin: 1px;
+    border-radius: 3px;
     font-weight: 600;
   }
   .port-firewall {
     background-color: rgb(220, 252, 231);
     color: rgb(22, 101, 52);
+    display: inline-block;
+    padding: 1px 4px;
+    margin: 1px;
+    border-radius: 3px;
     font-weight: 600;
   }
   .port-status-legend { line-height: 1.8; }
