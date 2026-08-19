@@ -167,7 +167,7 @@ return network.registerProtocol('ipip6hp', {
 
 		o = s.taboption('general', form.Value, 'peeraddr', _('BR Address'));
 		o.value('2404:9200:225:100::65', '2404:9200:225:100::65 (v6plus)');
-		o.value('dgw.xpass.jp', 'dgw.xpass.jp (Xpass)');
+		o.value('2001:f60:0:206::3', '2001:f60:0:206::3 (Xpass)');
 		o.value('2400:2000:4:0:a000::1999', '2400:2000:4:0:a000::1999 (SoftBank 10G)');
 		o.value('2400:2000:4:0:a000::2999', '2400:2000:4:0:a000::2999 (SoftBank 10G)');
 		o.default = '2404:9200:225:100::65';
