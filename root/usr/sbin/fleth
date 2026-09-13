@@ -1,13 +1,42 @@
 #!/bin/sh
 # author: huggy<fleth@huggy.moe>
 
+# Read-only preview also works for a new, unsaved LuCI interface.
+if [ "$1" = passthrough_detect ]; then
+    . /lib/functions/network.sh
+    . /usr/share/libubox/jshn.sh
+    . /usr/share/fleth/ipoe-common.sh
+    . /usr/share/fleth/flethp-common.sh
+    tunlink=${2:-wan6}; aftr=$3; prefix=$4; gateway=$5
+    if ! flethp_device "$tunlink"; then
+        FLETHP_ERROR=INVALID_DEVICE
+    else
+        case "$aftr" in *[!A-Za-z0-9.:-]*|-*) FLETHP_ERROR=INVALID_AFTR;; *) flethp_detect_plan;; esac
+    fi
+    json_init
+    if [ -n "$FLETHP_ERROR" ]; then
+        json_add_string error_code "$FLETHP_ERROR"
+    else
+        json_add_string state detected
+        json_add_string mode "$mode"
+        json_add_string client_ipv4 "$client"
+        json_add_int client_prefixlen "$prefix"
+        json_add_string gateway_ipv4 "$gateway"
+        json_add_string peeraddr "$peer"
+        json_add_string ports "$ports"
+        json_add_boolean internet_verified 0
+    fi
+    json_dump
+    exit 0
+fi
+
 DNS_E=2404:1a8:7f01:a::3
 DNS_W=2001:a7ff:5f01::a
 
 detect_uplink_interface() {
     local cfg tunlink
 
-    for proto in fleth ipip6h ipip6hp; do
+    for proto in fleth flethp ipip6h ipip6hp; do
         for cfg in $(uci show network 2>/dev/null | sed -n "s/^network\.\([^.=]*\)\.proto='$proto'$/\1/p"); do
             tunlink=$(uci get network.${cfg}.tunlink 2>/dev/null)
             if [ -n "$tunlink" ]; then
@@ -470,7 +499,10 @@ port_usage() {
     esac
 }
 
-if [ "$1" = "mape_status" ]; then
+if [ "$1" = "passthrough_status" ]; then
+    case "$2" in ''|*[!A-Za-z0-9_]*) exit 1;; esac
+    ubus call "network.interface.$2" status
+elif [ "$1" = "mape_status" ]; then
     get_uplink_interface_ipv6 > /dev/null
     get_mape_provider
 elif [ "$1" = "get_uplink_interface" ]; then

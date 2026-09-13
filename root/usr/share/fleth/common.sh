@@ -74,3 +74,24 @@ fleth_prefer_slaac_address() {
     ip -6 addr change "${ip6addr}/128" dev "$parent_device" preferred_lft 0 2>/dev/null
     logger -t fleth "[${cfg}] Deprecated static address ${ip6addr} on ${parent_device} to prefer SLAAC"
 }
+
+fleth_ipip6_add_tunnel() {
+	local ip6addr="$1"
+	local peeraddr="$2"
+	local tunlink="$3"
+	local mtu="$4"
+	local ttl="$5"
+	local encaplimit="$6"
+
+	proto_add_tunnel
+	json_add_string mode ipip6
+	json_add_int mtu "${mtu:-1460}"
+	json_add_int ttl "${ttl:-64}"
+	json_add_string local "$ip6addr"
+	json_add_string remote "$peeraddr"
+	[ -n "$tunlink" ] && json_add_string link "$tunlink"
+	json_add_object "data"
+	  [ -n "$encaplimit" ] && json_add_string encaplimit "$encaplimit"
+	json_close_object
+	proto_close_tunnel
+}

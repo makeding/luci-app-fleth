@@ -1,0 +1,22 @@
+#!/bin/sh
+. /usr/share/fleth/flethp-common.sh
+[ -d /var/run/flethp ] || exit 0
+exec 9>/var/run/flethp/lock
+flock -x 9 || exit 1
+for state in /var/run/flethp/*.state; do
+    [ -f "$state" ] || continue
+    (
+        . "$state"
+        [ "$rule_added" = 1 ] || exit 0
+        if nft list table ip "fp_$cfg" >/dev/null 2>&1; then
+            flethp_fw4
+        else
+            flethp_nft
+        fi
+        if [ "$?" != 0 ]; then
+            logger -t fleth "[$cfg] Firewall restoration failed; stopping passthrough"
+            flethp_cleanup
+            ubus call "network.interface.$cfg" notify_proto '{"action":0,"link-up":false}'
+        fi
+    )
+done

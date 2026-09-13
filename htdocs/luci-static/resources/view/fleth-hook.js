@@ -155,7 +155,7 @@
 
 	function hookProtocolSelects() {
 		var nodes = document.querySelectorAll('div[data-name="proto"] select');
-		var protocolOrder = [ 'fleth', 'ipip6h', 'ipip6hp' ];
+		var protocolOrder = [ 'fleth', 'flethp', 'ipip6h', 'ipip6hp' ];
 		var i;
 
 		for (i = 0; i < nodes.length; i++) {

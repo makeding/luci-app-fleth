@@ -1,0 +1,15 @@
+#!/bin/sh
+# Do not send activation traffic: only the downstream router uses the tunnel.
+case "$ACTION" in ifup|ifupdate) ;; *) exit 0;; esac
+. /lib/functions.sh
+flethp_uplink_event() {
+    local section="$1" proto tunlink disabled
+    config_get proto "$section" proto
+    [ "$proto" = flethp ] || return
+    config_get tunlink "$section" tunlink wan6
+    config_get disabled "$section" disabled 0
+    [ "$disabled" != 1 ] && [ "$tunlink" = "$INTERFACE" ] || return
+    ifup "$section"
+}
+config_load network
+config_foreach flethp_uplink_event interface

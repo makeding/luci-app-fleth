@@ -409,3 +409,171 @@ msgstr "Flet'H は IPv4 over IPv6 トンネル向けの診断と補助ツール�
 
 msgid "Flet'H"
 msgstr "Flet'H"
+
+msgid "Flet'H IPoE (Passthrough)"
+msgstr "Flet'H IPoE（パススルー）"
+
+msgid "Available MAP-E ports"
+msgstr "利用可能な MAP-E ポート"
+
+msgid "Passthrough status"
+msgstr "パススルー状態"
+
+msgid "Tunnel state"
+msgstr "トンネル状態"
+
+msgid "Detected protocol"
+msgstr "検出されたプロトコル"
+
+msgid "Downstream IPv4 address"
+msgstr "下流 IPv4 アドレス"
+
+msgid "Downstream IPv4 prefix length"
+msgstr "下流 IPv4 プレフィックス長"
+
+msgid "Downstream gateway"
+msgstr "下流ゲートウェイ"
+
+msgid "BR / AFTR address"
+msgstr "BR / AFTR アドレス"
+
+msgid "Internet connectivity"
+msgstr "インターネット接続"
+
+msgid "Not available"
+msgstr "利用不可"
+
+msgid "Not verified"
+msgstr "未確認"
+
+msgid "Verified"
+msgstr "確認済み"
+
+msgid "Waiting for interface status."
+msgstr "インターフェース状態を待機しています。"
+
+msgid "Unable to read passthrough status. Check that the interface exists, then reconnect it."
+msgstr "パススルー状態を読み取れません。インターフェースの存在を確認してから再接続してください。"
+
+msgid "Passthrough setup failed: "
+msgstr "パススルーの設定に失敗しました: "
+
+msgid "Check the dedicated device and IPv6 uplink, then reconnect the interface."
+msgstr "専用デバイスと IPv6 アップリンクを確認してから、インターフェースを再接続してください。"
+
+msgid "The tunnel is configured. Downstream internet connectivity has not been verified yet."
+msgstr "トンネルは設定済みです。下流のインターネット接続はまだ確認されていません。"
+
+msgid "Tunnel configuration and downstream internet connectivity are verified."
+msgstr "トンネル設定と下流のインターネット接続を確認しました。"
+
+msgid "Waiting for IPv6 uplink and tunnel detection. The interface will recover automatically when they are available."
+msgstr "IPv6 アップリンクとトンネル検出を待機しています。利用可能になるとインターフェースは自動復旧します。"
+
+msgid "Downstream IPv4 settings changed. Update the downstream router static WAN address, mask, and gateway before reconnecting it."
+msgstr "下流 IPv4 設定が変わりました。下流ルーターを再接続する前に、静的 WAN アドレス、マスク、ゲートウェイを更新してください。"
+
+msgid "Downstream device"
+msgstr "下流デバイス"
+
+msgid "Required. Select one dedicated physical port or VLAN for one downstream router."
+msgstr "必須です。1 台の下流ルーター用に、専用の物理ポートまたは VLAN を 1 つ選択してください。"
+
+msgid "IPv6 uplink"
+msgstr "IPv6 アップリンク"
+
+msgid "Optional. Leave empty to detect MAP-E first and DS-Lite second."
+msgstr "任意です。空欄の場合は、MAP-E を先に検出し、次に DS-Lite を検出します。"
+
+msgid "Downstream static WAN configuration"
+msgstr "下流の静的 WAN 設定"
+
+msgid "Use the detected address, prefix length, and gateway above to configure the downstream router WAN as static IPv4 before saving this interface."
+msgstr "このインターフェースを保存する前に、上で検出されたアドレス、プレフィックス長、ゲートウェイを使って下流ルーターの WAN を静的 IPv4 に設定してください。"
+
+msgid "Set downstream DNS manually to public DNS servers. Do not use this OpenWrt router as the downstream DNS server."
+msgstr "下流の DNS はパブリック DNS サーバーへ手動で設定してください。この OpenWrt ルーターを下流の DNS サーバーとして使用しないでください。"
+
+msgid "This dedicated device needs no firewall zone. The passthrough protocol limits forwarding to this device and downstream address."
+msgstr "この専用デバイスにはファイアウォールゾーンは不要です。パススループロトコルは、このデバイスと下流アドレスに転送を限定します。"
+
+msgid "MTU"
+msgstr "MTU"
+
+msgid "Optional override for downstream devices that cannot use the detected prefix length."
+msgstr "検出されたプレフィックス長を使用できない下流デバイス向けの任意の上書きです。"
+
+msgid "Optional override for the downstream router default gateway. OpenWrt answers ARP for this address."
+msgstr "下流ルーターのデフォルトゲートウェイ向けの任意の上書きです。OpenWrt はこのアドレスに対する ARP に応答します。"
+
+msgid "A dedicated policy-routing table. It must not conflict with an existing table."
+msgstr "専用のポリシールーティングテーブルです。既存のテーブルと競合させないでください。"
+
+msgid "A dedicated source-rule priority. It must not conflict with an existing rule."
+msgstr "専用の送信元ルール優先度です。既存のルールと競合させないでください。"
+
+msgid "Do not assign a firewall zone to Flet'H IPoE (Passthrough)."
+msgstr "Flet'H IPoE（パススルー）にはファイアウォールゾーンを割り当てないでください。"
+
+msgid "The selected interface or dedicated downstream device is invalid."
+msgstr "選択したインターフェースまたは専用の下流デバイスが無効です。"
+
+msgid "The policy-routing table or rule priority conflicts with an existing route or rule."
+msgstr "ポリシールーティングテーブルまたはルール優先度が既存のルートかルールと競合しています。"
+
+msgid "The AFTR endpoint is invalid or cannot be resolved over IPv6."
+msgstr "AFTR エンドポイントが無効であるか、IPv6 経由で名前解決できません。"
+
+msgid "The required fw4/nftables component is unavailable."
+msgstr "必要な fw4/nftables コンポーネントを利用できません。"
+
+msgid "The dedicated downstream device already has an IPv4 address."
+msgstr "専用の下流デバイスにはすでに IPv4 アドレスがあります。"
+
+msgid "The selected IPv6 uplink has no usable local IPv6 address."
+msgstr "選択した IPv6 アップリンクには利用可能なローカル IPv6 アドレスがありません。"
+
+msgid "No MAP-E or DS-Lite provider was detected."
+msgstr "MAP-E または DS-Lite プロバイダーを検出できませんでした。"
+
+msgid "The calculated downstream IPv4 settings are invalid."
+msgstr "計算された下流 IPv4 設定が無効です。"
+
+msgid "OpenWrt could not enable the required downstream ARP setting."
+msgstr "OpenWrt は必要な下流 ARP 設定を有効化できませんでした。"
+
+msgid "OpenWrt could not install the required nftables forwarding rules."
+msgstr "OpenWrt は必要な nftables 転送ルールをインストールできませんでした。"
+
+msgid "OpenWrt could not create the IPv6 tunnel or local tunnel address."
+msgstr "OpenWrt は IPv6 トンネルまたはローカルトンネルアドレスを作成できませんでした。"
+
+msgid "OpenWrt could not install the dedicated downstream route or policy rule."
+msgstr "OpenWrt は専用の下流ルートまたはポリシールールをインストールできませんでした。"
+
+msgid "OpenWrt could not save the configured runtime state."
+msgstr "OpenWrt は設定済みの実行時状態を保存できませんでした。"
+
+msgid "The tunnel setup did not complete."
+msgstr "トンネル設定は完了しませんでした。"
+
+msgid "Applied tunnel state"
+msgstr "適用済みトンネル状態"
+
+msgid "Detecting downstream settings..."
+msgstr "下流設定を検出中..."
+
+msgid "Unable to detect downstream settings: "
+msgstr "下流設定を検出できません: "
+
+msgid "Update the IPv6 uplink or AFTR endpoint, then try again."
+msgstr "IPv6 アップリンクまたは AFTR エンドポイントを更新してから、もう一度試してください。"
+
+msgid "Downstream settings are detected for the current unsaved configuration. They are not applied until this interface is saved and connected."
+msgstr "現在の未保存設定に対する下流設定を検出しました。このインターフェースを保存して接続するまで適用されません。"
+
+msgid "Not configured"
+msgstr "未設定"
+
+msgid "Retry detection"
+msgstr "検出を再試行"

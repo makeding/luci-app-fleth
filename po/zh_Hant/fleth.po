@@ -409,3 +409,171 @@ msgstr "Flet'H 提供 IPv4 over IPv6 隧道用的診斷和輔助工具。"
 
 msgid "Flet'H"
 msgstr "Flet'H"
+
+msgid "Flet'H IPoE (Passthrough)"
+msgstr "Flet'H IPoE（透傳）"
+
+msgid "Available MAP-E ports"
+msgstr "可用的 MAP-E 連接埠"
+
+msgid "Passthrough status"
+msgstr "透傳狀態"
+
+msgid "Tunnel state"
+msgstr "隧道狀態"
+
+msgid "Detected protocol"
+msgstr "偵測到的協定"
+
+msgid "Downstream IPv4 address"
+msgstr "下游 IPv4 位址"
+
+msgid "Downstream IPv4 prefix length"
+msgstr "下游 IPv4 前綴長度"
+
+msgid "Downstream gateway"
+msgstr "下游閘道"
+
+msgid "BR / AFTR address"
+msgstr "BR / AFTR 位址"
+
+msgid "Internet connectivity"
+msgstr "網際網路連線"
+
+msgid "Not available"
+msgstr "無法使用"
+
+msgid "Not verified"
+msgstr "未驗證"
+
+msgid "Verified"
+msgstr "已驗證"
+
+msgid "Waiting for interface status."
+msgstr "正在等待介面狀態。"
+
+msgid "Unable to read passthrough status. Check that the interface exists, then reconnect it."
+msgstr "無法讀取透傳狀態。請確認介面存在，然後重新連線。"
+
+msgid "Passthrough setup failed: "
+msgstr "透傳設定失敗："
+
+msgid "Check the dedicated device and IPv6 uplink, then reconnect the interface."
+msgstr "請檢查專用裝置和 IPv6 上行鏈路，然後重新連線介面。"
+
+msgid "The tunnel is configured. Downstream internet connectivity has not been verified yet."
+msgstr "隧道已設定。下游網際網路連線尚未驗證。"
+
+msgid "Tunnel configuration and downstream internet connectivity are verified."
+msgstr "隧道設定與下游網際網路連線皆已驗證。"
+
+msgid "Waiting for IPv6 uplink and tunnel detection. The interface will recover automatically when they are available."
+msgstr "正在等待 IPv6 上行鏈路和隧道偵測。可用後介面會自動恢復。"
+
+msgid "Downstream IPv4 settings changed. Update the downstream router static WAN address, mask, and gateway before reconnecting it."
+msgstr "下游 IPv4 設定已變更。請在重新連線下游路由器前更新其靜態 WAN 位址、遮罩與閘道。"
+
+msgid "Downstream device"
+msgstr "下游裝置"
+
+msgid "Required. Select one dedicated physical port or VLAN for one downstream router."
+msgstr "必填。請為一台下游路由器選擇一個專用實體連接埠或 VLAN。"
+
+msgid "IPv6 uplink"
+msgstr "IPv6 上行鏈路"
+
+msgid "Optional. Leave empty to detect MAP-E first and DS-Lite second."
+msgstr "選填。留空時先偵測 MAP-E，再偵測 DS-Lite。"
+
+msgid "Downstream static WAN configuration"
+msgstr "下游靜態 WAN 設定"
+
+msgid "Use the detected address, prefix length, and gateway above to configure the downstream router WAN as static IPv4 before saving this interface."
+msgstr "請在儲存此介面前，使用上方偵測到的位址、前綴長度和閘道，將下游路由器 WAN 設為靜態 IPv4。"
+
+msgid "Set downstream DNS manually to public DNS servers. Do not use this OpenWrt router as the downstream DNS server."
+msgstr "請手動將下游 DNS 設為公用 DNS 伺服器。不要將此 OpenWrt 路由器用作下游 DNS 伺服器。"
+
+msgid "This dedicated device needs no firewall zone. The passthrough protocol limits forwarding to this device and downstream address."
+msgstr "此專用裝置不需要防火牆區域。透傳協定會將轉送限制在此裝置和下游位址。"
+
+msgid "MTU"
+msgstr "MTU"
+
+msgid "Optional override for downstream devices that cannot use the detected prefix length."
+msgstr "供無法使用偵測到的前綴長度的下游裝置使用的選填覆寫值。"
+
+msgid "Optional override for the downstream router default gateway. OpenWrt answers ARP for this address."
+msgstr "下游路由器預設閘道的選填覆寫值。OpenWrt 會回應此位址的 ARP 要求。"
+
+msgid "A dedicated policy-routing table. It must not conflict with an existing table."
+msgstr "專用策略路由表。不得與現有路由表衝突。"
+
+msgid "A dedicated source-rule priority. It must not conflict with an existing rule."
+msgstr "專用來源規則優先權。不得與現有規則衝突。"
+
+msgid "Do not assign a firewall zone to Flet'H IPoE (Passthrough)."
+msgstr "不要為 Flet'H IPoE（透傳）指派防火牆區域。"
+
+msgid "The selected interface or dedicated downstream device is invalid."
+msgstr "所選介面或專用下游裝置無效。"
+
+msgid "The policy-routing table or rule priority conflicts with an existing route or rule."
+msgstr "策略路由表或規則優先權與現有路由或規則衝突。"
+
+msgid "The AFTR endpoint is invalid or cannot be resolved over IPv6."
+msgstr "AFTR 端點無效，或無法透過 IPv6 解析。"
+
+msgid "The required fw4/nftables component is unavailable."
+msgstr "所需的 fw4/nftables 元件無法使用。"
+
+msgid "The dedicated downstream device already has an IPv4 address."
+msgstr "專用下游裝置已擁有 IPv4 位址。"
+
+msgid "The selected IPv6 uplink has no usable local IPv6 address."
+msgstr "所選 IPv6 上行鏈路沒有可用的本機 IPv6 位址。"
+
+msgid "No MAP-E or DS-Lite provider was detected."
+msgstr "未偵測到 MAP-E 或 DS-Lite 供應商。"
+
+msgid "The calculated downstream IPv4 settings are invalid."
+msgstr "計算出的下游 IPv4 設定無效。"
+
+msgid "OpenWrt could not enable the required downstream ARP setting."
+msgstr "OpenWrt 無法啟用所需的下游 ARP 設定。"
+
+msgid "OpenWrt could not install the required nftables forwarding rules."
+msgstr "OpenWrt 無法安裝所需的 nftables 轉送規則。"
+
+msgid "OpenWrt could not create the IPv6 tunnel or local tunnel address."
+msgstr "OpenWrt 無法建立 IPv6 隧道或本機隧道位址。"
+
+msgid "OpenWrt could not install the dedicated downstream route or policy rule."
+msgstr "OpenWrt 無法安裝專用下游路由或策略規則。"
+
+msgid "OpenWrt could not save the configured runtime state."
+msgstr "OpenWrt 無法儲存已設定的執行時狀態。"
+
+msgid "The tunnel setup did not complete."
+msgstr "隧道設定未完成。"
+
+msgid "Applied tunnel state"
+msgstr "已套用的隧道狀態"
+
+msgid "Detecting downstream settings..."
+msgstr "正在偵測下游設定..."
+
+msgid "Unable to detect downstream settings: "
+msgstr "無法偵測下游設定："
+
+msgid "Update the IPv6 uplink or AFTR endpoint, then try again."
+msgstr "請更新 IPv6 上行鏈路或 AFTR 端點，然後重試。"
+
+msgid "Downstream settings are detected for the current unsaved configuration. They are not applied until this interface is saved and connected."
+msgstr "已針對目前未儲存的設定偵測到下游設定。在儲存並連線此介面前不會套用。"
+
+msgid "Not configured"
+msgstr "未設定"
+
+msgid "Retry detection"
+msgstr "重新偵測"

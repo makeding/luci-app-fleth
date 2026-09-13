@@ -10,13 +10,18 @@ LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+luci-base +lua +luci-proto-ipv6 \
 	+kmod-ip6-tunnel \
 	+resolveip \
-	+jsonfilter
+	+jsonfilter \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_FLETHP:ip-full \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_FLETHP:conntrack \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_FLETHP:flock \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_FLETHP:firewall4
 
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_LUA_UI \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6H \
-	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6HP
+	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPIP6HP \
+	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_FLETHP
 
 define Package/$(PKG_NAME)/config
 	config PACKAGE_$(PKG_NAME)_INCLUDE_LUA_UI
@@ -39,6 +44,11 @@ define Package/$(PKG_NAME)/config
 		help
 		  Include custom IPv4 over IPv6 passthrough protocol support.
 		  This adds the ipip6hp protocol handler and LuCI interface.
+	config PACKAGE_$(PKG_NAME)_INCLUDE_FLETHP
+		bool "Include Flet'H IPoE passthrough"
+		default y
+		help
+		  Dedicated downstream MAP-E/DS-Lite passthrough using fw4.
 endef
 
 include $(TOPDIR)/feeds/luci/luci.mk
@@ -68,6 +78,15 @@ else
 	rm -f $(PKG_BUILD_DIR)/root/lib/netifd/proto/ipip6hp.sh
 	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/ipip6hp-hotplug.sh
 	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/firewall.include
+endif
+ifeq ($(CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_FLETHP),y)
+	# FLETHP support is included independently of IPIP6HP
+else
+	rm -f $(PKG_BUILD_DIR)/htdocs/luci-static/resources/protocol/flethp.js
+	rm -f $(PKG_BUILD_DIR)/root/lib/netifd/proto/flethp.sh
+	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/flethp-common.sh
+	rm -f $(PKG_BUILD_DIR)/root/usr/share/fleth/flethp-firewall.include
+	rm -f $(PKG_BUILD_DIR)/root/etc/hotplug.d/iface/75-flethp
 endif
 endef
 

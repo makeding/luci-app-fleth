@@ -126,27 +126,6 @@ fleth_ipip6_build_local_addr() {
 	return 1
 }
 
-fleth_ipip6_add_tunnel() {
-	local ip6addr="$1"
-	local peeraddr="$2"
-	local tunlink="$3"
-	local mtu="$4"
-	local ttl="$5"
-	local encaplimit="$6"
-
-	proto_add_tunnel
-	json_add_string mode ipip6
-	json_add_int mtu "${mtu:-1460}"
-	json_add_int ttl "${ttl:-64}"
-	json_add_string local "$ip6addr"
-	json_add_string remote "$peeraddr"
-	[ -n "$tunlink" ] && json_add_string link "$tunlink"
-	json_add_object "data"
-	  [ -n "$encaplimit" ] && json_add_string encaplimit "$encaplimit"
-	json_close_object
-	proto_close_tunnel
-}
-
 fleth_ipip6_schedule_activation() {
 	local cfg="$1"
 	local tag="$2"

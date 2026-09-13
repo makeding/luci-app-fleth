@@ -439,6 +439,7 @@ return view.extend({
         '<p>' + _("Open Network → Interfaces, edit the target interface, then choose one of these Flet'H family protocols:") + '</p>' +
         '<ul style="margin: 0.4em 0 0 1.5em;">' +
           '<li>' + _("Flet'H IPoE") + '</li>' +
+		  '<li>' + _("Flet'H IPoE (Passthrough)") + '</li>' +
           '<li>' + _("Flet'H Static IP") + '</li>' +
           '<li>' + _("Flet'H Static IP (Passthrough)") + '</li>' +
         '</ul>';
